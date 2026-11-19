@@ -96,88 +96,239 @@ H('SqrClick','  double x = Cur();\n  ShowNum(x * x);') +
 H('SqrtClick','  double x = Cur();\n  if (x < 0) { Error("Недопустимый ввод"); return; }\n  ShowNum(sqrt(x));                       // sqrt — из math.h') +
 H('PctClick','  double x = Cur();\n  if (op == 1 || op == 2) x = acc * x / 100;   // 200 + 10% → 200 + 20\n  else x = x / 100;                             // 50 × 10% → 50 × 0,1\n  ShowNum(x);');
 
-// автопроверки: нажимаем кнопки, как пользователь
-const k=s=>s.split(' ').map(n=>['click',n]);
+
+// автопроверки: нажимаем кнопки по их надписи (Caption), как пользователь. Имена и расположение кнопок — любые.
+const BTN={'+':'@+','-':'@−|-','*':'@×|*|x','/':'@÷|/|:','=':'@=',C:'@c',CE:'@ce',BS:'@<-|←|⌫|<|bs|back|backspace|del',
+  SQR:'@x²|x^2|x2|sqr|x*x',SQRT:'@√x|√|sqrt|sqrt(x)|корень',INV:'@1/x',NEG:'@+/-|±|-/+|+/−',PCT:'@%',',':'@,|.'};
+const k=s=>s.split(' ').map(n=>['click',BTN[n]||'@'+n]);
 const CHECKS=[
-  {name:'Цифры набираются: 1, 2, 3 → 123',act:k('B1 B2 B3'),exp:[['Label1','Caption','123']]},
-  {name:'12 + 7 = 19, сверху «12 + 7 =»',act:k('B1 B2 BPlus B7 BEq'),exp:[['Label1','Caption','19'],['Label2','Caption','12 + 7 =']]},
-  {name:'9 − 4 × 2 = 10 (считает по порядку, как Windows)',act:k('B9 BMinus B4 BMul B2 BEq'),exp:[['Label1','Caption','10']]},
-  {name:'7 ÷ 2 = 3,5',act:k('B7 BDiv B2 BEq'),exp:[['Label1','Caption',3.5]]},
-  {name:'5 ÷ 0 — «Деление на ноль невозможно», без вылета',act:k('B5 BDiv B0 BEq'),exp:[['Label1','Caption',{re:'[Дд]елени'}]]},
-  {name:'Запятая: 2,5 × 2 = 5',act:k('B2 BComma B5 BMul B2 BEq'),exp:[['Label1','Caption','5']]},
-  {name:'Стереть цифру: 1 2 3 ← → 12',act:k('B1 B2 B3 BBack'),exp:[['Label1','Caption','12']]},
-  {name:'C — сброс всего',act:k('B8 BPlus B2 BC'),exp:[['Label1','Caption','0'],['Label2','Caption','']]},
-  {name:'CE — стереть только текущее: 8 + 5 CE 1 = 9',act:k('B8 BPlus B5 BCE B1 BEq'),exp:[['Label1','Caption','9']]},
-  {name:'x²: 9 → 81',act:k('B9 BSqr'),exp:[['Label1','Caption','81']]},
-  {name:'√x: 1 6 → 4',act:k('B1 B6 BSqrt'),exp:[['Label1','Caption','4']]},
-  {name:'1/x: 4 → 0,25',act:k('B4 BInv'),exp:[['Label1','Caption',0.25]]},
-  {name:'+/−: 5 → −5',act:k('B5 BNeg'),exp:[['Label1','Caption','-5']]},
-  {name:'%: 200 + 10 % = 220',act:k('B2 B0 B0 BPlus B1 B0 BPct BEq'),exp:[['Label1','Caption','220']]},
-  {name:'√ из отрицательного — «Недопустимый ввод»',act:k('B9 BNeg BSqrt'),exp:[['Label1','Caption',{re:'[Нн]едопустим'}]]}];
+  {name:'Цифры набираются: 1, 2, 3 → 123',act:k('1 2 3'),exp:[['Label1','Caption','123']]},
+  {name:'12 + 7 = 19',act:k('1 2 + 7 ='),exp:[['Label1','Caption','19']]},
+  {name:'9 − 4 × 2 = 10 (считает по порядку, как Windows)',act:k('9 - 4 * 2 ='),exp:[['Label1','Caption','10']]},
+  {name:'7 ÷ 2 = 3,5',act:k('7 / 2 ='),exp:[['Label1','Caption',3.5]]},
+  {name:'5 ÷ 0 — «Деление на ноль невозможно», без вылета',act:k('5 / 0 ='),exp:[['Label1','Caption',{re:'[Дд]елени'}]]},
+  {name:'C — сброс всего: 8 + 2 C → 0',act:k('8 + 2 C'),exp:[['Label1','Caption','0']]},
+  {name:'CE — стереть только текущее: 8 + 5 CE 1 = 9',act:k('8 + 5 CE 1 ='),exp:[['Label1','Caption','9']]},
+  {name:'Стереть цифру: 1 2 3 ← → 12',act:k('1 2 3 BS'),exp:[['Label1','Caption','12']]},
+  {name:'x²: 9 → 81',act:k('9 SQR'),exp:[['Label1','Caption','81']]},
+  {name:'√x: 1 6 → 4',act:k('1 6 SQRT'),exp:[['Label1','Caption','4']]},
+  {name:'√ из отрицательного — «Недопустимый ввод»',act:k('9 NEG SQRT'),exp:[['Label1','Caption',{re:'[Нн]едопустим'}]]},
+  {name:'1/x: 4 → 0,25',act:k('4 INV'),exp:[['Label1','Caption',0.25]]},
+  {name:'+/−: 5 → −5',act:k('5 NEG'),exp:[['Label1','Caption','-5']]},
+  {name:'%: 200 + 10 % = 220',act:k('2 0 0 + 1 0 PCT ='),exp:[['Label1','Caption','220']]},
+  {name:'Запятая: 2,5 × 2 = 5',act:k('2 , 5 * 2 ='),exp:[['Label1','Caption','5']]}];
 
-// пустая заготовка: форма с кнопками уже разложена (раскладывать 24 кнопки — долго), обработчики пустые
-const EMPTY=['DigitClick','CommaClick','OpClick','EqClick','CClick','CEClick','BackClick','NegClick','InvClick','SqrClick','SqrtClick','PctClick'].map(n=>H(n,'')).join('');
-const START=SEP+R`
-#include <vcl.h>
-#include <math.h>
-#pragma hdrstop
-
-#include "Unit1.h"
-` + SEP + R`#pragma package(smart_init)
-#pragma resource "*.dfm"
-TForm1 *Form1;
-
-double acc = 0;        // первое число
-int op = 0;            // операция (1 +, 2 −, 3 ×, 4 ÷)
-bool newNum = true;    // следующая цифра начинает новое число
-` + SEP + R`__fastcall TForm1::TForm1(TComponent* Owner)
-  : TForm(Owner)
-{
-}
-` + SEP + EMPTY;
+// пошаговая обучалка в жёлтой панели (шаг отмечается ✓, когда условие выполнено)
+const STEPS=[
+  {t:'Форма: в Object Inspector у <b>Form1</b> поставь <b>Caption = Калькулятор</b>.',c:{prop:['Form1','Caption','Калькулятор']}},
+  {t:'Экран: положи <b>Label</b> (Label1) вверху формы, <b>Caption = 0</b>. Сделай шрифт крупным (Font → Size 20–26). Для красоты: AutoSize = false, растянуть на ширину формы, Alignment = taRightJustify (число справа, как в Windows).',c:{prop:['Label1','Caption','0']}},
+  {t:'Цифры: положи 10 кнопок <b>Button</b> и подпиши (Caption) <b>0 1 2 … 9</b>. Ровно — не обязательно, главное работа.',c:{comp:'TButton',count:10}},
+  {t:'В Unit1.cpp после <code>TForm1 *Form1;</code> объяви «память»: <code>double acc = 0;</code> <code>int op = 0;</code> <code>bool newNum = true;</code>',c:{code:'bool\\s+newNum'}},
+  {t:'Двойной щелчок по «7» → в обработчике <code>AnsiString d = ((TButton*)Sender)-&gt;Caption;</code> и дописывание цифры (см. «Разбор», шаг 3). Потом всем остальным цифрам во вкладке <b>Events → OnClick</b> выбери этот же обработчик.',c:{check:0}},
+  {t:'Кнопки <b>+ − × ÷</b> (Caption можно * и /) и <b>=</b>. У «+» Tag = 1, «−» = 2, «×» = 3, «÷» = 4. Общий обработчик операций и обработчик «=» — шаг 4–5 «Разбора». Проверь 12 + 7 = 19.',c:{check:1}},
+  {t:'Цепочка: 9 − 4 × 2 = должно дать 10 (сначала досчитать 9 − 4).',c:{check:2}},
+  {t:'Деление на ноль: перед делением <code>if (b == 0) …</code> — вывести «Деление на ноль невозможно».',c:{check:4}},
+  {t:'Кнопки <b>C</b>, <b>CE</b> и <b>&lt;-</b> (стереть цифру) — шаг 6.',c:{check:7}},
+  {t:'Кнопки <b>x²</b>, <b>√x</b>, <b>1/x</b> — шаг 7. Для sqrt допиши <code>#include &lt;math.h&gt;</code>.',c:{check:11}},
+  {t:'Кнопки <b>+/-</b>, <b>%</b> и <b>,</b> (запятая) — шаг 8.',c:{check:14}},
+  {t:'F9 — посчитай что-нибудь сам, потом «✓ Проверить» — все пункты должны стать зелёными.',c:{run:true}}];
 
 CPP.WINCALC={
-  form:FORM, comps:DISPLAY.concat(BTNS), unit:START,
+  form:{Caption:'Form1',Width:300,Height:420}, comps:[], code:'',
   ref:{form:FORM, comps:DISPLAY.concat(BTNS), unit:CODE},
-  checks:CHECKS,
-  palette:['TLabel','TButton','TEdit','TPanel']};
+  checks:CHECKS, steps:STEPS,
+  palette:['TLabel','TButton','TEdit','TPanel','TBitBtn']};
+
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const pre=s=>'<pre class="cpp-code">'+esc(s)+'</pre>';
+const EXAMPLE=String.raw`double acc = 0;        // первое число
+bool newNum = true;    // следующая цифра начинает новое число
+
+void __fastcall TForm1::Button1Click(TObject *Sender)   // кнопка «1»
+{
+  if (newNum) Label1->Caption = "1";             // начинаем новое число
+  else Label1->Caption = Label1->Caption + "1";  // дописываем справа
+  newNum = false;
+}
+
+void __fastcall TForm1::Button2Click(TObject *Sender)   // кнопка «2» — то же самое
+{
+  if (newNum) Label1->Caption = "2";
+  else Label1->Caption = Label1->Caption + "2";
+  newNum = false;
+}
+
+void __fastcall TForm1::Button3Click(TObject *Sender)   // кнопка «+»
+{
+  acc = StrToFloat(Label1->Caption);   // запомнили первое число
+  newNum = true;                       // дальше набираем второе
+}
+
+void __fastcall TForm1::Button4Click(TObject *Sender)   // кнопка «=»
+{
+  double b = StrToFloat(Label1->Caption);
+  Label1->Caption = FloatToStr(acc + b);
+  newNum = true;
+}`;
 
 CPP.WINCALC_TASK={id:'c10-wincalc',name:'Лаба. Полноценный калькулятор как в Windows',wtitle:'Калькулятор (как «Обычный» в Windows)',
- text:R`<p><b>Задание.</b> Сделать в C++Builder рабочий калькулятор, похожий на «Обычный» калькулятор Windows:</p>
-<ul><li>экран: крупное число справа (Label1) и над ним маленькая строка с выражением, например «12 +» (Label2);</li>
+ text:R`<p><b>Задание.</b> С чистого листа сделать в C++Builder рабочий калькулятор, похожий на «Обычный» калькулятор Windows:</p>
+<ul><li>экран — надпись <b>Label1</b> с числом (сначала «0»);</li>
 <li>кнопки цифр <b>0–9</b> и запятая <b>,</b>;</li>
 <li>операции <b>+ − × ÷</b> и <b>=</b>; цепочка «9 − 4 × 2 =» считается по порядку, как в Windows: (9 − 4) × 2 = 10;</li>
 <li><b>C</b> (Clear — стереть всё), <b>CE</b> (Clear Entry — стереть только текущее число), <b>&lt;-</b> (Backspace — стереть последнюю цифру);</li>
 <li><b>x²</b> (квадрат), <b>√x</b> (корень), <b>1/x</b> (дробь «единица делить на x»), <b>%</b> (процент), <b>+/-</b> (сменить знак);</li>
 <li>деление на ноль и корень из отрицательного числа не должны «ронять» программу — вывести сообщение, как Windows: «Деление на ноль невозможно», «Недопустимый ввод».</li></ul>
-<p>В окне ниже форма с 24 кнопками уже разложена (имена B0…B9, BPlus, BEq и т. д.), и события кнопок уже привязаны к обработчикам. Осталось написать код в Unit1.cpp. «✓ Проверить» нажимает кнопки сама и сверяет результат. Ход работы — в «Разборе» по шагам.</p>`,
+<p>Форма в окне ниже пустая — всё собираешь сам: кнопки, надписи, код. Расставить ровно не обязательно, главное — чтобы работало. Имена кнопок любые: «✓ Проверить» ищет кнопки по надписи (Caption) — «7», «+», «=», «C», «x²» (можно «sqr»), «√x» (можно «sqrt»), «&lt;-» и т. д. Число должно быть в <b>Label1</b>.</p>
+<p>Жёлтая панель в окне ведёт по шагам, полное объяснение с кодом — в «Разборе» ниже. Сначала попробуй сам, а «📋 Эталон» — чтобы свериться в конце.</p>`,
  vcl:CPP.WINCALC,
- note:R`<aside class="add"><span class="tag">как сделать в настоящем Builder</span>
-<ol><li>File → New → Application. У формы: Caption = «Калькулятор», BorderStyle = bsSingle (окно не растягивается), Width = 276, Height = 390.</li>
-<li><b>Экран.</b> Две Label. У обеих AutoSize = false, Alignment = taRightJustify (текст прижат вправо), Width = 252. Label2 (выражение) — сверху, Font: размер 10, серый (clGray), Caption пустой. Label1 (число) — под ней, Font: размер 26, жирный (fsBold), Caption = 0.</li>
-<li><b>Кнопки.</b> Положи одну Button, задай Width = 60, Height = 40, Font — размер 12. Потом выдели её, Ctrl+C и Ctrl+V — 24 раза, и расставь сеткой 4 × 6 как на картинке Windows. Каждой задай Name и Caption (см. таблицу ниже).</li>
-<li><b>Один обработчик на 10 цифр.</b> Двойной щелчок по «7» — Builder создаст B7Click; переименуй его в DigitClick (вкладка Events, поле OnClick). Теперь выдели остальные цифры (Shift+щелчок) и во вкладке <b>Events</b> у OnClick выбери из списка <b>DigitClick</b>. Так же один <b>OpClick</b> на четыре кнопки + − × ÷.</li>
-<li><b>Tag.</b> У кнопок операций задай свойство Tag: «+» = 1, «−» = 2, «×» = 3, «÷» = 4 — по нему OpClick узнаёт, какую операцию нажали.</li>
-<li>Остальным кнопкам — свой обработчик двойным щелчком (EqClick, CClick, CEClick, BackClick, NegClick, InvClick, SqrClick, SqrtClick, PctClick, CommaClick).</li>
-<li>В Unit1.cpp допиши <code>#include &lt;math.h&gt;</code> (для sqrt) и код из «Разбора». F9.</li></ol>
-<div class="tw"><table><tr><th>Ряд</th><th colspan="4">Кнопки: Caption (Name → обработчик OnClick)</th></tr>
-<tr><td>1</td><td>% (BPct → PctClick)</td><td>CE (BCE → CEClick)</td><td>C (BC → CClick)</td><td>&lt;- (BBack → BackClick)</td></tr>
-<tr><td>2</td><td>1/x (BInv → InvClick)</td><td>x² (BSqr → SqrClick)</td><td>√x (BSqrt → SqrtClick)</td><td>÷ (BDiv → OpClick, Tag 4)</td></tr>
-<tr><td>3</td><td>7 (B7 → DigitClick)</td><td>8 (B8)</td><td>9 (B9)</td><td>× (BMul → OpClick, Tag 3)</td></tr>
-<tr><td>4</td><td>4 (B4)</td><td>5 (B5)</td><td>6 (B6)</td><td>− (BMinus → OpClick, Tag 2)</td></tr>
-<tr><td>5</td><td>1 (B1)</td><td>2 (B2)</td><td>3 (B3)</td><td>+ (BPlus → OpClick, Tag 1)</td></tr>
-<tr><td>6</td><td>+/- (BNeg → NegClick)</td><td>0 (B0 → DigitClick)</td><td>, (BComma → CommaClick)</td><td>= (BEq → EqClick)</td></tr></table></div>
-<p>Символы × ÷ − √ ² можно вставить в Caption через «Таблицу символов» Windows (Win+R → charmap) или просто писать * / - sqrt — на работу это не влияет, операция берётся из Tag.</p></aside>`,
- steps:R`<p><b>Как думает калькулятор.</b> Ему нужно помнить три вещи, поэтому в начале Unit1.cpp — три глобальные переменные (вне функций, чтобы значение сохранялось между нажатиями):</p>
-<ul><li><code>double acc</code> — первое число (то, что набрали до знака операции);</li>
-<li><code>int op</code> — какая операция нажата (0 — никакой, 1 +, 2 −, 3 ×, 4 ÷);</li>
-<li><code>bool newNum</code> — «следующая цифра начинает новое число» (true после знака, после = и в самом начале).</li></ul>
-<p><b>Шаг 1. Цифры — DigitClick.</b> Один обработчик на 10 кнопок. Какую нажали — узнаём через <code>Sender</code> (это указатель на нажатую кнопку): <code>((TButton*)Sender)-&gt;Caption</code> — её надпись "7". Если начинаем новое число (или на экране «0») — заменяем, иначе дописываем справа: <code>Label1-&gt;Caption = Label1-&gt;Caption + d;</code></p>
-<p><b>Шаг 2. Операция — OpClick.</b> Запоминаем число с экрана в acc, а операцию — из <code>Tag</code> кнопки; в Label2 пишем «12 +»; <code>newNum = true</code>, чтобы следующая цифра начала второе число. Если операция уже была (набрали «9 − 4» и жмём «×»), сначала досчитываем 9 − 4 = 5 — так делает Windows.</p>
-<p><b>Шаг 3. Равно — EqClick.</b> b — число на экране, результат <code>Calc(acc, op, b)</code> — функция со <code>switch (op)</code>. Перед делением проверяем b == 0. Сверху пишем всё выражение «12 + 7 =».</p>
-<p><b>Шаг 4. Стирание.</b> C — <code>Reset()</code>: всё в ноль. CE — только <code>Label1-&gt;Caption = "0"</code>. &lt;- — у AnsiString есть <code>Delete(откуда, сколько)</code>: <code>s.Delete(s.Length(), 1)</code> убирает последний символ; если ничего не осталось — «0».</p>
-<p><b>Шаг 5. Функции одного числа.</b> x² — <code>x * x</code>; √x — <code>sqrt(x)</code> из math.h (для x &lt; 0 — «Недопустимый ввод»); 1/x — <code>1 / x</code> (для 0 — ошибка); +/- — <code>-x</code>; % — как в Windows: при + и − это процент от первого числа (200 + 10% = 200 + 20), при × и ÷ — просто x / 100.</p>
-<p><b>Шаг 6. Запятая.</b> Добавляем «,» только если её ещё нет: <code>Label1-&gt;Caption.Pos(",") == 0</code> (Pos возвращает номер символа или 0). StrToFloat понимает запятую (в русской Windows дробная часть отделяется запятой).</p>
-<p><b>Вспомогательные функции</b> (Calc, Reset, Error, ShowNum, Cur) написаны <b>вне класса</b>, поэтому к компонентам они обращаются через форму: <code>Form1-&gt;Label1-&gt;Caption</code>. Внутри обработчиков TForm1 можно писать просто <code>Label1</code>.</p>
-<p><b>Попробуй сам (доп.):</b> 1) кнопки памяти MC, MR, M+, M−, MS (ещё одна глобальная переменная <code>double mem</code>); 2) повторное «=» повторяет последнюю операцию (5 + 2 = = = → 11); 3) ввод с клавиатуры: у формы KeyPreview = true и обработчик OnKeyPress.</p>`};
+ note:R`<aside class="add"><span class="tag">в настоящем Builder</span> Всё то же самое: File → New → Application, компоненты с палитры Standard. 24 кнопки быстрее делать так: положи одну, задай размер (например 60 × 40), выдели её, Ctrl+C, щёлкни по форме, Ctrl+V — и так нужное число раз, потом растащи мышью. Символы × ÷ √ ² можно вставить из «Таблицы символов» Windows (Win+R → charmap) или писать * / sqrt x^2 — на работу не влияет. Чтобы окно не растягивалось — у формы BorderStyle = bsSingle.</aside>`,
+ steps:R`<h4>Шаг 0. Пример: калькулятор из четырёх кнопок</h4>
+<p>Сначала разберём маленький пример — кнопки «1», «2», «+», «=» и надпись Label1 («0»). Весь калькулятор строится на той же идее, просто кнопок больше.</p>
+${pre(EXAMPLE)}
+<p>Главная мысль: калькулятор <b>помнит</b> первое число (acc) и то, начали ли мы набирать новое число (newNum). Такие переменные объявляют <b>вне функций</b> (глобально), чтобы они не исчезали между нажатиями кнопок. Обработчики — это обычные функции: каждый раз, когда нажали кнопку, выполняется её функция.</p>
+<p>Попробуй: набери «12», «+», «2», «=» — будет 14. Дальше делаем по-взрослому.</p>
+
+<h4>Шаг 1. Форма и экран</h4>
+<p>У формы Caption = «Калькулятор». Положи <b>Label</b> вверху — это экран: Caption = 0, Font → Size 24, жирный. Чтобы число стояло справа, как в Windows: AutoSize = false, растяни надпись на ширину формы, Alignment = taRightJustify. (Можно положить вторую Label сверху мелким шрифтом — туда писать выражение «12 +», это по желанию.)</p>
+
+<h4>Шаг 2. Кнопки и «память»</h4>
+<p>Положи 10 кнопок и подпиши 0…9, потом + − × ÷ =, C, CE, &lt;-, x², √x, 1/x, %, +/-, «,». Удобно сеткой 4 × 6, как в Windows. В Unit1.cpp после строки <code>TForm1 *Form1;</code> добавь:</p>
+${pre(`#include <math.h>      // для sqrt (можно поставить вверху, рядом с vcl.h)
+
+double acc = 0;        // первое число (до знака операции)
+int op = 0;            // операция: 0 — нет, 1 +, 2 −, 3 ×, 4 ÷
+bool newNum = true;    // true — следующая цифра начинает новое число`)}
+
+<h4>Шаг 3. Один обработчик на все цифры</h4>
+<p>Писать 10 одинаковых функций скучно. Сделаем одну: двойной щелчок по «7» — Builder создаст функцию; во вкладке <b>Events</b> переименуй её в <b>DigitClick</b> (поле OnClick). Потом выдели остальные цифры (Shift + щелчок) и в Events → OnClick выбери из списка <b>DigitClick</b>. Какую кнопку нажали, функция узнаёт через <b>Sender</b> — это указатель на нажатую кнопку:</p>
+${pre(`void __fastcall TForm1::DigitClick(TObject *Sender)
+{
+  AnsiString d = ((TButton*)Sender)->Caption;   // надпись нажатой кнопки: "0"…"9"
+  if (newNum || Label1->Caption == "0")
+    Label1->Caption = d;                     // начинаем новое число
+  else
+    Label1->Caption = Label1->Caption + d;   // дописываем цифру справа
+  newNum = false;
+}`)}
+<p><code>(TButton*)Sender</code> — «считай, что Sender — кнопка», после этого можно взять её Caption.</p>
+
+<h4>Шаг 4. Операции + − × ÷</h4>
+<p>Тоже один обработчик <b>OpClick</b> на четыре кнопки. Чтобы знать, какая операция, у кнопок задай свойство <b>Tag</b>: «+» = 1, «−» = 2, «×» = 3, «÷» = 4. Вспомогательная функция Calc считает «a операция b» — её пишем <b>выше</b> обработчиков, вне класса:</p>
+${pre(`double Calc(double a, int o, double b)
+{
+  switch (o)
+  {
+    case 1: return a + b;
+    case 2: return a - b;
+    case 3: return a * b;
+    case 4: return a / b;
+  }
+  return b;
+}
+
+void __fastcall TForm1::OpClick(TObject *Sender)
+{
+  double x = StrToFloat(Label1->Caption);
+  if (op != 0 && !newNum)          // уже было «9 −» и набрали 4 — сначала досчитать 9 − 4
+  {
+    x = Calc(acc, op, x);
+    Label1->Caption = FloatToStr(x);
+  }
+  acc = x;                          // запомнили первое число
+  op = ((TButton*)Sender)->Tag;     // и операцию (1…4)
+  newNum = true;                    // дальше набирают второе число
+}`)}
+
+<h4>Шаг 5. Равно и деление на ноль</h4>
+${pre(`void __fastcall TForm1::EqClick(TObject *Sender)
+{
+  if (op == 0) return;                         // операции не было — нечего считать
+  double b = StrToFloat(Label1->Caption);
+  if (op == 4 && b == 0)
+  {
+    Label1->Caption = "Деление на ноль невозможно";
+    acc = 0; op = 0; newNum = true;
+    return;
+  }
+  Label1->Caption = FloatToStr(Calc(acc, op, b));
+  op = 0;
+  newNum = true;
+}`)}
+<p>Если ошибку деления на ноль нужно выводить из разных мест, удобно сделать функцию <code>void Error(AnsiString msg)</code> — как в эталоне. Вне класса к надписи обращаются через форму: <code>Form1-&gt;Label1-&gt;Caption</code>.</p>
+
+<h4>Шаг 6. Стирание: C, CE, &lt;-</h4>
+${pre(`void __fastcall TForm1::CClick(TObject *Sender)    // C — стереть всё
+{
+  acc = 0; op = 0; newNum = true;
+  Label1->Caption = "0";
+}
+
+void __fastcall TForm1::CEClick(TObject *Sender)   // CE — только текущее число
+{
+  Label1->Caption = "0";
+  newNum = true;
+}
+
+void __fastcall TForm1::BackClick(TObject *Sender) // <- — последняя цифра
+{
+  if (newNum) return;                 // результат по цифре не стирают
+  AnsiString s = Label1->Caption;
+  s.Delete(s.Length(), 1);            // Delete(с какого символа, сколько)
+  if (s == "" || s == "-") s = "0";
+  Label1->Caption = s;
+}`)}
+<p>У AnsiString символы нумеруются <b>с 1</b>, поэтому последний — <code>s.Length()</code>.</p>
+
+<h4>Шаг 7. x², √x, 1/x — действия с одним числом</h4>
+${pre(`void __fastcall TForm1::SqrClick(TObject *Sender)
+{
+  double x = StrToFloat(Label1->Caption);
+  Label1->Caption = FloatToStr(x * x);
+  newNum = true;
+}
+
+void __fastcall TForm1::SqrtClick(TObject *Sender)
+{
+  double x = StrToFloat(Label1->Caption);
+  if (x < 0) { Label1->Caption = "Недопустимый ввод"; acc = 0; op = 0; newNum = true; return; }
+  Label1->Caption = FloatToStr(sqrt(x));     // sqrt — из math.h
+  newNum = true;
+}
+
+void __fastcall TForm1::InvClick(TObject *Sender)
+{
+  double x = StrToFloat(Label1->Caption);
+  if (x == 0) { Label1->Caption = "Деление на ноль невозможно"; acc = 0; op = 0; newNum = true; return; }
+  Label1->Caption = FloatToStr(1 / x);
+  newNum = true;
+}`)}
+
+<h4>Шаг 8. +/-, % и запятая</h4>
+${pre(`void __fastcall TForm1::NegClick(TObject *Sender)      // сменить знак
+{
+  double x = StrToFloat(Label1->Caption);
+  if (x != 0) Label1->Caption = FloatToStr(-x);
+}
+
+void __fastcall TForm1::PctClick(TObject *Sender)      // процент, как в Windows
+{
+  double x = StrToFloat(Label1->Caption);
+  if (op == 1 || op == 2) x = acc * x / 100;   // 200 + 10% → 200 + 20
+  else x = x / 100;                             // 50 × 10% → 50 × 0,1
+  Label1->Caption = FloatToStr(x);
+  newNum = true;
+}
+
+void __fastcall TForm1::CommaClick(TObject *Sender)    // запятая
+{
+  if (newNum) { Label1->Caption = "0"; newNum = false; }
+  if (Label1->Caption.Pos(",") == 0)            // Pos — номер символа или 0, если нет
+    Label1->Caption = Label1->Caption + ",";
+}`)}
+<p>В русской Windows дробная часть пишется через запятую, и StrToFloat понимает «2,5».</p>
+
+<h4>Шаг 9. Проверка</h4>
+<p>F9 — посчитай сам: 12 + 7 =, 9 − 4 × 2 =, 5 ÷ 0 =, 9 x², 16 √x. Потом «✓ Проверить» — тренажёр сам понажимает кнопки. Красный пункт подскажет, что не так.</p>
+<p><b>Попробуй сам (доп.):</b> 1) вторая надпись сверху с выражением «12 + 7 =»; 2) кнопки памяти MC, MR, M+, M−, MS (ещё одна глобальная переменная <code>double mem</code>); 3) повторное «=» повторяет последнюю операцию (5 + 2 = = = → 11); 4) ввод с клавиатуры: у формы KeyPreview = true и обработчик OnKeyPress.</p>`};
 })();

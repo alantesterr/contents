@@ -366,7 +366,13 @@ function initVcl(el){
   function runCheck(p,ch){
     const {rt,rp,ui}=headless(p); const answers=[];
     const fire=(o,ev,ex)=>{ rt.answers=answers.slice(); rt.ai=0; rt.fire(o,ev,ex); answers.length=0; };
-    const need=n=>{ const o=rp.find(n); if(!o) throw new Error(`на форме нет компонента ${n} — назови компоненты как в задании`); return o; };
+    // "@7" или "@×|*" — кнопка с такой надписью (Caption), как бы её ни назвали
+    const capNorm=s=>String(s).replace(/&/g,'').trim().toLowerCase();
+    const need=n=>{
+      if(n[0]==='@'){ const alts=n.slice(1).split('|').map(capNorm);
+        const o=rp.comps.find(c=>(c.vcl==='TButton'||c.vcl==='TBitBtn'||c.vcl==='TSpeedButton')&&alts.includes(capNorm(c.p.Caption)));
+        if(!o) throw new Error(`на форме нет кнопки с надписью «${n.slice(1).split('|').join('» или «')}»`); return o; }
+      const o=rp.find(n); if(!o) throw new Error(`на форме нет компонента ${n} — назови компоненты как в задании`); return o; };
     for(const a of ch.act||[]){
       const [k,n,x,y]=a;
       if(k==='answer'){ answers.push(n); continue; }

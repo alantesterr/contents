@@ -1,4 +1,4 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Тренажёр архитектуры ЭВМ</title>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>body{margin:0;font:14px system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Учебный тренажёр</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -415,13 +415,250 @@ body.editing main{padding-bottom:140px}
   .brand small{display:none}
 }
 @media (prefers-reduced-motion:no-preference){.chg,.reveal tr.new td{transition:background .4s}}
+/* ===== предмет C++: переключатель, окно задания, консоль ===== */
+.subj{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:8px;border:1px solid var(--line)}
+.subj button{font:700 13px var(--f-body);border:0;background:transparent;color:var(--muted);padding:6px 12px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.subj button[aria-selected="true"]{background:var(--accent);color:var(--surface)}
+.subj button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.tabs button[hidden]{display:none}
+.tabs{flex-wrap:wrap}
+:root{--ed-bg:#ffffff;--ed-ink:#111;--ed-gut:#f0f0f0;--ed-gut-ink:#8a8a8a;--ed-k:#000;--ed-c:#000080;--ed-p:#008000;--ed-s:#0000c8;--ed-n:#0000c8;--ed-sel:#c8d8f8}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--ed-bg:#0b1118;--ed-ink:#d6e2f2;--ed-gut:#111a24;--ed-gut-ink:#5d6c80;--ed-k:#ffffff;--ed-c:#7fa7ff;--ed-p:#5fd394;--ed-s:#ffc66d;--ed-n:#ffc66d;--ed-sel:#264f78}}
+:root[data-theme="dark"]{--ed-bg:#0b1118;--ed-ink:#d6e2f2;--ed-gut:#111a24;--ed-gut-ink:#5d6c80;--ed-k:#ffffff;--ed-c:#7fa7ff;--ed-p:#5fd394;--ed-s:#ffc66d;--ed-n:#ffc66d;--ed-sel:#264f78}
+.cppw{background:var(--surface);border:1px solid var(--line);border-radius:10px;margin:10px 0 14px;overflow:hidden}
+.cppw.solved{border-color:color-mix(in srgb,var(--ok) 60%,var(--line))}
+.cw-head{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--line);background:var(--bg)}
+.cw-t{font:700 13px var(--f-body)}
+.cppw.solved .cw-t::after{content:" · решено ✓";color:var(--ok)}
+.cw-btns{display:flex;flex-wrap:wrap;gap:6px}
+.cw-btns .btn{padding:6px 12px;font-size:13.5px}
+.cw-btns kbd{font-size:11px;padding:0 4px;margin-left:4px;background:color-mix(in srgb,var(--surface) 25%,transparent);color:inherit}
+.ced{display:flex;background:var(--ed-bg);border-bottom:1px solid var(--line);font:13.5px/1.55 var(--f-mono);height:min(420px,60vh);min-height:180px;resize:vertical;overflow:hidden}
+.ced .cg{flex:0 0 auto;min-width:38px;padding:8px 6px 8px 4px;text-align:right;background:var(--ed-gut);color:var(--ed-gut-ink);overflow:hidden;user-select:none}
+.ced .cg .err{background:var(--bad);color:#fff;border-radius:3px}
+.ced .cw{position:relative;flex:1;min-width:0}
+.ced .chl,.ced .cta{position:absolute;inset:0;margin:0;padding:8px 10px;font:inherit;line-height:inherit;white-space:pre;tab-size:2;overflow:auto;border:0;border-radius:0;background:transparent;letter-spacing:0}
+.ced .chl{color:var(--ed-ink);pointer-events:none;overflow:hidden}
+.ced .cta{color:transparent;caret-color:var(--ed-ink);resize:none;outline:none}
+.ced .cta::selection{background:var(--ed-sel);color:transparent}
+.ced .cta:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
+.chl .hk,.cpp-code .hk{color:var(--ed-k);font-weight:700}
+.chl .hc,.cpp-code .hc{color:var(--ed-c);font-style:italic}
+.chl .hp,.cpp-code .hp{color:var(--ed-p);font-weight:400}
+.chl .hs,.cpp-code .hs{color:var(--ed-s);font-weight:400}
+.chl .hn,.cpp-code .hn{color:var(--ed-n);font-weight:400}
+pre.cpp-code{background:var(--ed-bg);color:var(--ed-ink);border:1px solid var(--line)}
+.cw-err{padding:9px 12px;font-size:14.5px;border-bottom:1px solid var(--line)}
+.cw-err.ce{background:var(--bad-bg)} .cw-err.re{background:var(--fix-bg)}
+.cw-err b{color:var(--bad)} .cw-err.re b{color:var(--fix)}
+.cw-in{padding:9px 12px;border-bottom:1px solid var(--line)}
+.cw-in label{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;font:600 13px var(--f-body);margin-bottom:5px}
+.cw-in label small{font-weight:400;color:var(--muted)}
+.cw-in textarea{width:100%;font:13.5px/1.5 var(--f-mono);background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:6px;padding:6px 8px;resize:vertical}
+.cw-tests{display:flex;flex-wrap:wrap;gap:4px}
+.chip{font:600 12px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:3px 10px;border-radius:999px;cursor:pointer}
+.chip.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.cw-outs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;padding:10px 12px}
+.cw-ot{font:600 13px var(--f-body);margin-bottom:4px} .cw-ot small{font-weight:400;color:var(--muted)}
+.con{background:#0c0c0c;color:#c0c0c0;font:13px/1.45 "Consolas","Lucida Console",var(--f-mono);padding:8px 10px;border-radius:6px;min-height:84px;max-height:360px;overflow:auto;white-space:pre}
+.con .cl{min-height:1.45em;padding-left:6px;margin-left:-6px;border-left:3px solid transparent}
+.con .cl.bad{border-left-color:#ff5f56;background:rgba(255,95,86,.13)}
+.con .cl.hint{color:#8a8a8a;white-space:normal;font-family:var(--f-body)}
+.ca0{color:#000}.ca1{color:#3b6fe0}.ca2{color:#13a10e}.ca3{color:#3a96dd}.ca4{color:#c50f1f}.ca5{color:#c239b3}.ca6{color:#c19c00}.ca7{color:#c0c0c0}
+.ca8{color:#767676}.ca9{color:#3b78ff}.ca10{color:#16c60c}.ca11{color:#61d6d6}.ca12{color:#e74856}.ca13{color:#b4009e}.ca14{color:#f9f1a5}.ca15{color:#f2f2f2;font-weight:600}
+.cb1{background:#0037da}.cb2{background:#13a10e}.cb3{background:#3a96dd}.cb4{background:#c50f1f}.cb5{background:#881798}.cb6{background:#c19c00}.cb7{background:#cccccc}
+.cw-res,.cw-sum{margin:0 12px 10px;padding:8px 12px;border-radius:6px;font-size:14.5px}
+.cw-res.ok,.cw-sum.ok{background:var(--ok-bg);color:var(--ok)} .cw-res.bad,.cw-sum.bad{background:var(--bad-bg);color:var(--ink)}
+.cw-sum ul{margin:.3em 0 0;padding-left:1.1em} .cw-sum li.ok{color:var(--ok)} .cw-sum li.bad{color:var(--bad)}
+.cw-warn{margin:0 12px 10px;padding:7px 12px;border-radius:6px;background:var(--fix-bg);font-size:14px}
+.cw-warn div+div{margin-top:3px}
+details.sol .ref pre{margin:.4em 0}
+.cpp-shot{background:#d4d0c8;color:#000;border:1px solid #808080;border-radius:2px;font:12px Tahoma,"Segoe UI",sans-serif;padding:0;max-width:520px;margin:.8em 0}
+.flow{display:flex;flex-direction:column;align-items:center;gap:0;min-width:300px;font-size:13.5px}
+.flow .fb{border:1.5px solid var(--ink);padding:6px 14px;background:var(--bg);text-align:center;min-width:170px}
+.flow .fb.term{border-radius:999px}.flow .fb.io{transform:skewX(-14deg)}.flow .fb.io>span{display:inline-block;transform:skewX(14deg)}
+.flow .fb.dec{border:0;background:none;position:relative;padding:18px 26px}
+.flow .fb.dec::before{content:"";position:absolute;inset:0;border:1.5px solid var(--ink);transform:rotate(0) scaleY(.9);clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);background:var(--bg)}
+.flow .fb.dec>span{position:relative}
+.flow .ar{width:1.5px;height:18px;background:var(--ink);position:relative}
+.flow .ar::after{content:"";position:absolute;bottom:-1px;left:-4px;border:4.5px solid transparent;border-top:6px solid var(--ink);border-bottom:0}
+/* ===== эмулятор C++Builder 6 (классический вид Windows 2000) ===== */
+.vclw{margin:10px 0 14px}
+.vclw.solved .bcb-title .tt::after{content:" · решено ✓";color:#7CFC9A}
+.bcb{position:relative;background:#d4d0c8;color:#000;font:12px Tahoma,"MS Sans Serif",Arial,sans-serif;border:1px solid #808080;box-shadow:inset 1px 1px #fff;border-radius:2px;overflow:hidden}
+.bcb-title{background:linear-gradient(90deg,#0a246a,#a6caf0);color:#fff;font-weight:700;padding:4px 6px;display:flex;gap:6px;align-items:center}
+.bcb-title .ico{background:#fff;color:#c00;border-radius:2px;padding:0 3px;font-size:11px}
+.bcb-title .tt{font-weight:400;opacity:.9;margin-left:auto;font-size:12px}
+.bcb-menu{display:flex;gap:2px;padding:2px 4px;border-bottom:1px solid #808080}
+.bcb-menu span{padding:1px 6px}
+.bcb-tools{display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding:4px;border-bottom:1px solid #808080;box-shadow:0 1px #fff}
+.bcb .tb{font:12px Tahoma,sans-serif;background:#d4d0c8;color:#000;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset -1px -1px #808080;padding:3px 9px;cursor:pointer;border-radius:0}
+.bcb .tb:active{border-color:#404040 #fff #fff #404040;box-shadow:inset 1px 1px #808080}
+.bcb .tb.run{font-weight:700;color:#006400}
+.bcb .tb kbd{background:none;color:#555;font-size:10px;padding:0}
+.pal-tabs{display:flex;gap:0;margin-left:10px}
+.ptab{font:12px Tahoma,sans-serif;border:1px solid #808080;border-bottom:0;background:#c8c4bc;padding:2px 8px;cursor:pointer;color:#000}
+.ptab.on{background:#d4d0c8;font-weight:700;position:relative;top:1px}
+.bcb-pal{display:flex;flex-wrap:wrap;gap:2px;padding:4px;border-bottom:1px solid #808080;min-height:40px}
+.bcb-pal .pi{width:44px;height:36px;font:11px Tahoma,sans-serif;background:#d4d0c8;border:1px solid transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#000;line-height:1.1}
+.bcb-pal .pi small{font-size:8.5px;color:#333;white-space:nowrap;overflow:hidden;max-width:42px}
+.bcb-pal .pi[hidden]{display:none}
+.bcb-pal .pi:hover{border-color:#fff #808080 #808080 #fff}
+.bcb-pal .pi.on{border-color:#808080 #fff #fff #808080;background:#e8e6e0}
+.bcb-steps{background:#ffffe1;border-bottom:1px solid #808080;padding:6px 10px;font:13px var(--f-body)}
+.bcb-steps ol{margin:4px 0 0;padding-left:22px}
+.bcb-steps li{margin:2px 0;color:#555}
+.bcb-steps li.next{color:#000;font-weight:600}
+.bcb-steps li.done{color:#0a6b2d}
+.bcb-steps li.done::marker{content:"✓ "}
+.bcb-main{display:grid;grid-template-columns:230px minmax(0,1fr);min-height:330px}
+.oi{border-right:1px solid #808080;display:flex;flex-direction:column;min-width:0}
+.oi-h{background:#808080;color:#fff;font-weight:700;padding:2px 6px}
+.oi-sel{margin:3px;font:12px Tahoma,sans-serif}
+.oi-tabs{display:flex;padding:0 3px}
+.oi-tabs button{flex:1;font:12px Tahoma,sans-serif;border:1px solid #808080;background:#c8c4bc;cursor:pointer;padding:2px;color:#000}
+.oi-tabs button.on{background:#fff;font-weight:700}
+.oi-grid{flex:1;overflow:auto;background:#fff;margin:0 3px 3px;border:1px solid #808080;max-height:420px}
+.oi-grid .row{display:grid;grid-template-columns:96px minmax(0,1fr);border-bottom:1px solid #d4d0c8;min-height:18px}
+.oi-grid .row>span{padding:1px 4px;border-right:1px solid #d4d0c8;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.oi-grid .row.ind>span{padding-left:14px}
+.oi-grid .row.sub>span{font-weight:700}
+.oi-grid input,.oi-grid select{border:0;font:12px Tahoma,sans-serif;padding:1px 3px;width:100%;min-width:0;background:#fff;color:#000080}
+.oi-grid input[data-ev]{cursor:pointer;color:#000}
+.oi-grid .dots{font:11px Tahoma,sans-serif;border:0;background:#fff;color:#000080;text-align:left;cursor:pointer}
+.oi-grid em{color:#808080;padding:0 4px}
+.dz{background:#808080;display:flex;flex-direction:column;min-width:0}
+.dz-scroll{overflow:auto;padding:14px;flex:1}
+.dz-hint{font:11.5px var(--f-body);color:#fff;padding:3px 8px;background:#6b6b6b}
+.frm{position:relative;background:#d4d0c8;border:2px solid;border-color:#d4d0c8 #404040 #404040 #d4d0c8;box-shadow:1px 1px #000;display:flex;flex-direction:column;user-select:none}
+.frm .wt,.rw .wt,.dlg .wt,.strdlg .wt{background:linear-gradient(90deg,#0a246a,#a6caf0);color:#fff;font:700 12px Tahoma,sans-serif;height:19px;display:flex;align-items:center;gap:4px;padding:0 3px;flex:none}
+.frm .wt .wc,.rw .wt .wc{flex:1;white-space:nowrap;overflow:hidden}
+.frm .wb i,.rw .wb i{display:inline-block;width:16px;height:14px;background:#d4d0c8;color:#000;font-style:normal;text-align:center;line-height:13px;border:1px solid;border-color:#fff #404040 #404040 #fff;margin-left:2px;font-size:11px}
+.rw .wb i.x{cursor:pointer}
+.frm .client{position:relative;flex:1;background-image:radial-gradient(#000 .6px,transparent .7px);background-size:8px 8px;overflow:hidden}
+.frm.placing .client{cursor:crosshair}
+.frm.fsel{outline:1px dashed #000080}
+.vc{position:absolute;box-sizing:border-box;font:11px Tahoma,"MS Sans Serif",sans-serif;color:#000;margin:0}
+.design .vc{cursor:move}
+.vc.selc{outline:1px dashed #000080;outline-offset:1px}
+.vc .rh{position:absolute;right:-4px;bottom:-4px;width:6px;height:6px;background:#000080;cursor:nwse-resize}
+.vc.nv{width:28px;height:28px;background:#d4d0c8;border:1px solid;border-color:#fff #404040 #404040 #fff;display:flex;align-items:center;justify-content:center;font-size:12px}
+.v-TButton,.v-TBitBtn{background:#d4d0c8;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:inset -1px -1px #808080;padding:0 4px;text-align:center;white-space:nowrap;overflow:hidden}
+.v-TButton:active,.v-TBitBtn:active{border-color:#404040 #fff #fff #404040}
+.v-TButton:disabled,.v-TBitBtn:disabled,.vc.dis{color:#808080}
+.v-TBitBtn .gl{color:#060}
+.v-TEdit,.v-TMemo,.v-TListBox,.v-TComboBox,.v-TDateTimePicker{border:2px solid;border-color:#808080 #fff #fff #808080;box-shadow:inset 1px 1px #404040;padding:1px 3px;resize:none;outline:none}
+.v-TListBox{overflow:auto;padding:0}
+.v-TListBox .li{padding:0 3px;white-space:nowrap;cursor:default}
+.v-TListBox .li.sel{background:#0a246a;color:#fff}
+.v-TListBox .li.ghost{color:#808080}
+.v-TDateTimePicker{display:flex;justify-content:space-between;align-items:center;background:#fff}
+.v-TCheckBox,.v-TRadioButton{display:flex;align-items:center;gap:3px;white-space:nowrap}
+.v-TCheckBox input,.v-TRadioButton input,.rgi input{margin:0}
+.v-TGroupBox,.v-TRadioGroup{border:1px solid;border-color:#808080 #fff #fff #808080;box-shadow:1px 1px #fff inset;padding:0}
+.v-TGroupBox legend,.v-TRadioGroup legend{padding:0 2px;margin-left:6px;font:inherit}
+.v-TRadioGroup .rg{padding:2px 8px}
+.rgi{display:block;margin:2px 0;white-space:nowrap}
+.v-TPanel{border-width:1px;display:flex;align-items:center;justify-content:center}
+.v-TPanel .pcap{pointer-events:none}
+.v-TStatusBar{display:flex;gap:2px;padding:1px 2px;border-top:1px solid #fff}
+.v-TStatusBar .sp{border:1px solid;border-color:#808080 #fff #fff #808080;padding:0 3px;white-space:nowrap;overflow:hidden}
+.v-TImage .img{width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:1px dashed #808080;font-size:11px}
+.v-TImage .img.ghost{color:#808080}
+.vmenu{display:flex;gap:2px;padding:1px 4px;background:#d4d0c8;border-bottom:1px solid #fff;flex:none}
+.vmenu .mi{padding:1px 6px;cursor:default}
+.vmenu .mi:hover{background:#0a246a;color:#fff}
+.bcb-code{border-top:1px solid #808080}
+.bcb-code .ct{display:flex;gap:0;padding:3px 4px 0;background:#d4d0c8}
+.bcb-code .ct span{border:1px solid #808080;border-bottom:0;padding:1px 10px;background:#c8c4bc;cursor:pointer}
+.bcb-code .ct span.on{background:#fff;font-weight:700}
+.bcb-code .ced{height:min(360px,55vh);font-size:13px;--ed-bg:#fff;--ed-ink:#000;--ed-gut:#f4f4f4;--ed-k:#000;--ed-c:#000080;--ed-p:#008000;--ed-s:#0000ff;--ed-n:#0000ff}
+.bcb-code .ch{margin:0;border-radius:0;max-height:360px;overflow:auto;background:#fff;color:#000;--ed-k:#000;--ed-c:#000080;--ed-p:#008000;--ed-s:#0000ff;--ed-n:#0000ff}
+.bcb .cw-err{font:13px var(--f-body);margin:0;border-radius:0}
+.vres{padding:8px 12px;font:14px var(--f-body)}
+.vres.ok{background:#e2f5ea;color:#17804a} .vres.bad{background:#fbe6e3;color:#152132}
+.vres ul{margin:.3em 0 0;padding-left:1.1em} .vres li.ok{color:#17804a} .vres li.bad{color:#b8352a}
+.runwin{position:absolute;inset:0;background:rgba(58,110,165,.55);display:flex;align-items:flex-start;justify-content:center;padding:40px 10px;overflow:auto;z-index:5}
+.runwin[hidden]{display:none}
+.rw{background:#d4d0c8;border:2px solid;border-color:#d4d0c8 #404040 #404040 #d4d0c8;box-shadow:2px 2px 8px rgba(0,0,0,.5);display:flex;flex-direction:column;max-width:100%}
+.rw .client{position:relative;overflow:hidden}
+.rw .rwbar{font:11px var(--f-body);background:#ffffe1;color:#333;padding:2px 6px;border-top:1px solid #808080}
+.runwin .ovl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.15)}
+.runwin .ovl[hidden]{display:none}
+.dlg,.strdlg{background:#d4d0c8;border:2px solid;border-color:#d4d0c8 #404040 #404040 #d4d0c8;box-shadow:2px 2px 6px rgba(0,0,0,.5);min-width:280px;max-width:min(460px,92%)}
+.dlg .db{padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.dlg .db p{margin:0;white-space:pre-wrap}
+.dlg.ex .det{font-size:11px;color:#333}
+.dlg .btns,.strdlg .btns{display:flex;gap:6px;justify-content:flex-end;padding-top:4px}
+.dlg .fl{background:#fff;border:2px solid;border-color:#808080 #fff #fff #808080;height:110px;overflow:auto;padding:2px}
+.dlg .fi{padding:1px 3px;cursor:pointer} .dlg .fi:hover{background:#0a246a;color:#fff}
+.dlg label{display:flex;gap:6px;align-items:center}
+.dlg input,.dlg select{font:12px Tahoma,sans-serif;flex:1}
+.dlg .cgrid{display:grid;grid-template-columns:repeat(8,24px);gap:4px}
+.dlg .sw{width:24px;height:20px;border:1px solid #404040;cursor:pointer}
+.dlg .cgrid .btns{grid-column:1/-1}
+.strdlg{position:absolute;left:50%;top:60px;transform:translateX(-50%);z-index:6;padding-bottom:6px}
+.strdlg textarea{display:block;width:calc(100% - 12px);margin:6px;height:160px;font:12px Consolas,monospace}
+.strdlg .btns{padding:0 6px}
+.vpop{position:absolute;z-index:7;background:#d4d0c8;border:1px solid;border-color:#fff #404040 #404040 #fff;box-shadow:2px 2px 4px rgba(0,0,0,.4);padding:2px;font:11px Tahoma,sans-serif;min-width:120px}
+.vpop .pm{padding:2px 16px;cursor:default;white-space:nowrap} .vpop .pm:hover{background:#0a246a;color:#fff} .vpop .pm.dis{color:#808080}
+.vpop hr{border:0;border-top:1px solid #808080;border-bottom:1px solid #fff;margin:2px 0}
+@media (max-width:760px){ .bcb-main{grid-template-columns:minmax(0,1fr)} .oi{border-right:0;border-bottom:1px solid #808080} .oi-grid{max-height:200px} }
+/* ===== тесты-листалка и «показать ещё задание» ===== */
+.tcar{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;outline:none}
+.tcar:focus-visible{box-shadow:0 0 0 2px var(--accent)}
+.tc-top{display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline;font-size:13px;color:var(--muted)}
+.tc-n{font:700 14px var(--f-body);color:var(--ink)} .tc-sc{margin-left:auto}
+.tc-bar{height:4px;background:var(--bg);border-radius:4px;margin:8px 0 12px;overflow:hidden} .tc-bar i{display:block;height:100%;background:var(--accent);transition:width .2s}
+.tc-q{border:0;padding:0;background:none}
+.tc-ask{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.tc-ask .btn{text-decoration:none;font-size:13.5px}
+.tc-nav{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.tc-nav .btn{min-width:120px}
+.tc-pos{font:600 14px var(--f-mono);color:var(--muted)}
+.tc-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.tc-foot .btn{font-size:13px;padding:5px 10px;color:var(--muted)}
+.tc-help{font-size:14px;color:var(--muted)}
+.titem.th{display:none} body.editing .titem.th{display:block}
+.tmore{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:10px 0 18px}
+.tmore[hidden]{display:none}
+.tmore .btn{font-size:14px}
+.tmore span{color:var(--muted);font-size:13.5px}
+/* ===== формулы ===== */
+.fx{font:italic 18px/1.4 "Times New Roman",Times,serif;overflow-x:auto;padding:4px 0}
+.fr{display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 2px;font-size:.95em}
+.fr>span:first-child{padding:0 4px 2px}
+.fr>span:last-child{border-top:1px solid currentColor;padding:2px 4px 0}
+.rt{white-space:nowrap} .rt .ov{border-top:1px solid currentColor;padding:0 2px 0 1px}
+.rt>sup{font-size:.6em;margin-right:-3px;vertical-align:.9em}
+td .fr{font:italic 15px "Times New Roman",serif}
+@media (max-width:760px){ .cw-outs{grid-template-columns:minmax(0,1fr)} .ced{height:min(360px,55vh)} }
 </style>
 
 <header class="top">
   <div class="wrap">
-    <div class="brand">Архитектура ЭВМ<small>Лекции · лабы с разбором · тесты</small></div>
+    <div class="brand"><span id="brandName">Архитектура ЭВМ</span><small id="brandSub">Лекции · лабы с разбором · тесты</small></div>
+    <div class="subj" role="tablist" aria-label="Предмет">
+      <button role="tab" data-s="arch" aria-selected="true">Архитектура</button>
+      <button role="tab" data-s="cpp" aria-selected="false">C++</button>
+    </div>
     <div class="tabs" role="tablist">
       <span class="tabl">Тема</span>
+      <button role="tab" id="tab-c1" aria-selected="false" data-t="c1" title="C++ · Тема 1. Алгоритм, синтаксис C++, типы данных" hidden>1</button>
+      <button role="tab" id="tab-c2" aria-selected="false" data-t="c2" title="C++ · Тема 2. Операции и выражения, библиотеки, указатели" hidden>2</button>
+      <button role="tab" id="tab-c3" aria-selected="false" data-t="c3" title="C++ · Тема 3. if, switch, goto, цикл for" hidden>3</button>
+      <button role="tab" id="tab-c4" aria-selected="false" data-t="c4" title="C++ · Тема 4. while, do-while, массивы" hidden>4</button>
+      <button role="tab" id="tab-c5" aria-selected="false" data-t="c5" title="C++ · Тема 5. Функции" hidden>5</button>
+      <button role="tab" id="tab-c6" aria-selected="false" data-t="c6" title="C++ · Тема 6. char и строки" hidden>6</button>
+      <button role="tab" id="tab-c7" aria-selected="false" data-t="c7" title="C++ · Тема 7. Принципы ООП" hidden>7</button>
+      <button role="tab" id="tab-c8" aria-selected="false" data-t="c8" title="C++ · Тема 8. Классы и объекты" hidden>8</button>
+      <button role="tab" id="tab-c9" aria-selected="false" data-t="c9" title="C++ · Тема 9. Среда C++Builder" hidden>9</button>
+      <button role="tab" id="tab-c10" aria-selected="false" data-t="c10" title="C++ · Тема 10. Проект, формы, дизайнер форм" hidden>10</button>
+      <button role="tab" id="tab-c11" aria-selected="false" data-t="c11" title="C++ · Тема 11. Свойства, методы, события" hidden>11</button>
+      <button role="tab" id="tab-c12" aria-selected="false" data-t="c12" title="C++ · Тема 12. Иерархия классов" hidden>12</button>
+      <button role="tab" id="tab-c13" aria-selected="false" data-t="c13" title="C++ · Тема 13. Конструктор и деструктор" hidden>13</button>
+      <button role="tab" id="tab-c14" aria-selected="false" data-t="c14" title="C++ · Тема 14. Свойства класса" hidden>14</button>
+      <button role="tab" id="tab-c15" aria-selected="false" data-t="c15" title="C++ · Тема 15. Свой компонент" hidden>15</button>
       <button role="tab" id="tab-t1" aria-selected="false" data-t="t1" title="Тема 1">1</button>
       <button role="tab" id="tab-t2" aria-selected="false" data-t="t2" title="Тема 2">2</button>
       <button role="tab" id="tab-t3" aria-selected="false" data-t="t3" title="Тема 3">3</button>
@@ -2495,8 +2732,53 @@ end start</pre>
   <p class="foot">Источники: лекции «Основные принципы работы компьютера» и № 9, лабы «Система команд», «CISC и RISC», «Вывод переменной», «Иерархия памяти и регистры», УМКД и силабус, база из 150 вопросов. Дополнения отмечены бледным пунктиром и скрываются переключателем вверху.</p>
 </div>
 </section>
+
+<!-- ===================================================== C++: темы собираются из cpp/topics/cN.js -->
+<section id="c1" class="topic" hidden></section>
+<section id="c2" class="topic" hidden></section>
+<section id="c3" class="topic" hidden></section>
+<section id="c4" class="topic" hidden></section>
+<section id="c5" class="topic" hidden></section>
+<section id="c6" class="topic" hidden></section>
+<section id="c7" class="topic" hidden></section>
+<section id="c8" class="topic" hidden></section>
+<section id="c9" class="topic" hidden></section>
+<section id="c10" class="topic" hidden></section>
+<section id="c11" class="topic" hidden></section>
+<section id="c12" class="topic" hidden></section>
+<section id="c13" class="topic" hidden></section>
+<section id="c14" class="topic" hidden></section>
+<section id="c15" class="topic" hidden></section>
+
 </main>
 
+<script src="cpp/cpp-parse.js"></script>
+<script src="cpp/cpp-lib.js"></script>
+<script src="cpp/cpp-run.js"></script>
+<script src="cpp/cpp-stdlib.js"></script>
+<script src="cpp/cpp-ui.js"></script>
+<script src="cpp/vcl.js"></script>
+<script src="cpp/vcl-ui.js"></script>
+<script src="cpp/cpp-tests-base.js"></script>
+<script src="cpp/cpp-tests-pool.js"></script>
+<script src="cpp/cpp-tests-oop.js"></script>
+<script src="cpp/cpp-topics.js"></script>
+<script src="cpp/topics/c1.js"></script>
+<script src="cpp/topics/c2.js"></script>
+<script src="cpp/topics/c3.js"></script>
+<script src="cpp/topics/c4.js"></script>
+<script src="cpp/topics/c5.js"></script>
+<script src="cpp/topics/c6.js"></script>
+<script src="cpp/topics/c7.js"></script>
+<script src="cpp/topics/c8.js"></script>
+<script src="cpp/topics/c9.js"></script>
+<script src="cpp/topics/c10.js"></script>
+<script src="cpp/topics/c11.js"></script>
+<script src="cpp/topics/c12.js"></script>
+<script src="cpp/topics/c13.js"></script>
+<script src="cpp/topics/c14.js"></script>
+<script src="cpp/topics/c15.js"></script>
+<script src="cpp/cpp-boot.js"></script>
 <script>
 /* ======================= Программы для симулятора ======================= */
 const PROGS = {
@@ -3473,7 +3755,14 @@ t9:{ base:[
 ]}};
 
 /* ======================= Темы 1–7: инструменты ======================= */
-const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9'];
+const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15'];
+Object.assign(DEFAULT_TESTS, window.CPP_TESTS||{});
+TOPICS.forEach(k=>{ if(!DEFAULT_TESTS[k]) DEFAULT_TESTS[k]={base:[],pool:[]}; });
+// вопрос с кодом: ```cpp … ``` — блок, `…` — в строке
+function qfmt(s){
+  const parts=String(s).split(/```(?:cpp)?\n?([\s\S]*?)```/);
+  return parts.map((p,i)=> i%2 ? `<pre class="cpp-code qcode">${window.CPP&&CPP.highlight?CPP.highlight(p.replace(/\n$/,'')):esc(p)}</pre>` : esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/^\n+|\n+$/g,'')).join('');
+}
 const ovl = s => `<span class="ov">${s}</span>`;
 const grp4 = s => s.replace(/(.{4})(?=.)/g,'$1 ');
 function parseIntLoose(s){ s=String(s).trim().replace(/\s+/g,''); let neg=false; if(s[0]==='-'||s[0]==='−'){neg=true;s=s.slice(1);} s=s.replace(/^\+/,'');
@@ -4394,8 +4683,51 @@ function parseQuestions(text){
 const toFormat = it => `<question>${it.q}\n<variantright>${it.a[0]}\n`+it.a.slice(1).map(v=>`<variant>${v}`).join('\n');
 function saveTests(key,data){ ED.tests[key]=data; store.setTests(key,data); renderTests(key); }
 
+/* Тесты-листалка: один вопрос на экране, стрелки ← →, кнопки «Загуглить» и «Спросить ИИ». Сначала база, потом доп. вопросы в случайном порядке. */
+function plainQ(s){ return String(s).replace(/```(?:cpp)?\n?/g,'\n').replace(/`/g,'').replace(/\n{2,}/g,'\n').trim(); }
+function renderCarousel(root,key,T){
+  const BN=T.baseName||'Из базы'; const seq=[...T.base.map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
+  if(!seq.length){ root.innerHTML='<p style="color:var(--muted)">Тестов к этой теме пока нет.</p>'; return; }
+  const st=seq.map(()=>null); let cur=0, ok=0, all=0;
+  root.innerHTML=`<div class="tcar" tabindex="0" aria-label="Тесты: стрелки влево и вправо листают вопросы">
+    <div class="tc-top"><span class="tc-n"></span><span class="tc-src"></span><span class="tc-sc">Верно: <b>0 из 0</b></span></div>
+    <div class="tc-bar" aria-hidden="true"><i></i></div>
+    <div class="q tc-q"></div>
+    <div class="tc-ask"><a class="btn tc-g" target="_blank" rel="noopener">🔎 Загуглить вопрос</a><a class="btn tc-ai" target="_blank" rel="noopener">✨ Спросить ИИ (Google)</a></div>
+    <div class="tc-nav"><button class="btn" data-n="-1">← Назад</button><span class="tc-pos"></span><button class="btn pri" data-n="1">Вперёд →</button></div>
+    <div class="tc-foot"><button class="btn tc-next-un">К следующему без ответа</button><button class="btn tc-reset">Начать заново</button></div></div>`;
+  const q=root.querySelector('.tc-q'), sc=root.querySelector('.tc-sc b'), bar=root.querySelector('.tc-bar i');
+  const show=()=>{
+    const {it,src}=seq[cur]; let s=st[cur];
+    if(!s){ s=st[cur]={opts:shuffle(it.a.map((t,i)=>({t,ok:i===0}))),pick:null}; }
+    root.querySelector('.tc-n').textContent=`Вопрос ${cur+1} из ${seq.length}`;
+    root.querySelector('.tc-src').textContent=src+(src===BN&&cur===T.base.length-1&&T.pool.length?' · дальше — доп. вопросы':'');
+    root.querySelector('.tc-pos').textContent=`${cur+1} / ${seq.length}`;
+    bar.style.width=((cur+1)/seq.length*100)+'%';
+    q.innerHTML=`<div class="qt">${qfmt(it.q)}</div><div class="opts">${s.opts.map((o,i)=>`<button class="opt" data-i="${i}">${qfmt(o.t)}</button>`).join('')}</div>`;
+    if(s.pick!=null) mark(s);
+    const txt=plainQ(it.q)+'\nВарианты ответа:\n'+s.opts.map((o,i)=>(i+1)+') '+plainQ(o.t)).join('\n');
+    root.querySelector('.tc-g').href='https://www.google.com/search?q='+encodeURIComponent(txt);
+    root.querySelector('.tc-ai').href='https://www.google.com/search?udm=50&q='+encodeURIComponent(txt+'\nКакой вариант правильный? Объясни простыми словами, почему.');
+    root.querySelectorAll('.tc-nav button')[0].disabled=cur===0; root.querySelectorAll('.tc-nav button')[1].disabled=cur===seq.length-1;
+  };
+  const mark=(s)=>{ const it=seq[cur].it;
+    q.querySelectorAll('.opt').forEach((x,i)=>{ x.disabled=true; if(s.opts[i].ok) x.classList.add('right'); if(i===s.pick&&!s.opts[i].ok) x.classList.add('wrong'); });
+    const o=s.opts[s.pick]; const ex=document.createElement('div'); ex.className='ex'; ex.innerHTML=qfmt((o.ok?'Верно. ':'Неверно. ')+(it.e||('Правильный ответ: '+it.a[0]))); q.appendChild(ex); };
+  q.addEventListener('click',e=>{ const b=e.target.closest('.opt'); if(!b) return; const s=st[cur]; if(s.pick!=null) return; s.pick=+b.dataset.i; all++; if(s.opts[s.pick].ok) ok++; sc.textContent=`${ok} из ${all}`; mark(s); });
+  const go=d=>{ const n=cur+d; if(n<0||n>=seq.length) return; cur=n; show(); };
+  root.querySelector('.tc-nav').addEventListener('click',e=>{ const b=e.target.closest('[data-n]'); if(b) go(+b.dataset.n); });
+  root.querySelector('.tc-next-un').addEventListener('click',()=>{ for(let k=1;k<=seq.length;k++){ const n=(cur+k)%seq.length; if(!st[n]||st[n].pick==null){ cur=n; show(); return; } } toast('На все вопросы уже есть ответ'); });
+  root.querySelector('.tc-reset').addEventListener('click',()=>renderTests(key));
+  root.querySelector('.tcar').addEventListener('keydown',e=>{ if(e.target.closest('input,textarea')) return;
+    if(e.key==='ArrowRight'){ e.preventDefault(); go(1); } else if(e.key==='ArrowLeft'){ e.preventDefault(); go(-1); }
+    else if(/^[1-9]$/.test(e.key)){ const b=q.querySelectorAll('.opt')[+e.key-1]; if(b&&!b.disabled) b.click(); } });
+  show();
+}
 function renderTests(key){
   const root=document.getElementById('tests-'+key), T=getTests(key), ed=ED.editing;
+  if(!root) return;
+  if(!ed) return renderCarousel(root,key,T);
   let score={ok:0,all:0}; let pool=shuffle(T.pool.map((_,i)=>i)), pi=0;
   root.innerHTML=`${ed?`<div class="tedbar">
       <b style="margin-right:4px">Тесты:</b>
@@ -4435,13 +4767,13 @@ function renderTests(key){
   const mk=(item,n,box,sec,idx)=>{
     const d=document.createElement('div'); d.className='q';
     const opts=shuffle(item.a.map((t,i)=>({t,ok:i===0})));
-    d.innerHTML=`<div class="qn">${n}</div><div class="qt">${esc(item.q)}</div><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${esc(o.t)}</button>`).join('')}</div>
+    d.innerHTML=`<div class="qn">${n}</div><div class="qt">${qfmt(item.q)}</div><div class="opts">${opts.map((o,i)=>`<button class="opt" data-i="${i}">${qfmt(o.t)}</button>`).join('')}</div>
       ${ed?`<div class="qctl"><button class="btn" data-c="edit">Изменить</button><button class="btn" data-c="del">Удалить</button></div>`:''}`;
     d.querySelector('.opts').addEventListener('click',e=>{ const b=e.target.closest('.opt'); if(!b) return; const o=opts[+b.dataset.i];
       d.querySelectorAll('.opt').forEach((x,i)=>{ x.disabled=true; if(opts[i].ok) x.classList.add('right'); });
       if(!o.ok) b.classList.add('wrong');
       score.all++; if(o.ok) score.ok++; sc.textContent=`${score.ok} из ${score.all}`;
-      const ex=document.createElement('div'); ex.className='ex'; ex.textContent=(o.ok?'Верно. ':'Неверно. ')+(item.e||('Правильный ответ: '+item.a[0])); d.insertBefore(ex,d.querySelector('.qctl')); });
+      const ex=document.createElement('div'); ex.className='ex'; ex.innerHTML=qfmt((o.ok?'Верно. ':'Неверно. ')+(item.e||('Правильный ответ: '+item.a[0]))); d.insertBefore(ex,d.querySelector('.qctl')); });
     if(ed) d.querySelector('.qctl').addEventListener('click',e=>{ const b=e.target.closest('[data-c]'); if(!b) return;
       if(b.dataset.c==='edit') openForm(d,sec,idx);
       if(b.dataset.c==='del'){ if(b.dataset.sure){ const data=clone(T); data[sec].splice(idx,1); saveTests(key,data); } else { b.dataset.sure='1'; b.textContent='Точно удалить?'; b.classList.add('pri'); } } });
@@ -4479,7 +4811,7 @@ const units={};
 const LS_KEY='arch-edits-v1';
 function hashStr(s){let h=5381;for(let i=0;i<s.length;i++)h=((h*33)^s.charCodeAt(i))>>>0;return h.toString(36);}
 function initUnits(){ const seen={};
-  document.querySelectorAll(UNIT_SEL).forEach(el=>{ if(el.closest('.sim,.widget,.reveal,[id^="tests-"]')) return;
+  document.querySelectorAll(UNIT_SEL).forEach(el=>{ if(el.closest('.sim,.widget,.reveal,.cppw,.vclw,[id^="tests-"]')) return;
     let id=el.closest('.topic').id+'-'+hashStr(el.tagName+'|'+el.textContent.replace(/\s+/g,' ').trim());
     if(seen[id]){ seen[id]++; id+='-'+seen[id]; } else seen[id]=1;
     el.dataset.eid=id; el.classList.add('eunit'); units[id]={el,orig:el.innerHTML}; });
@@ -4618,15 +4950,25 @@ async function initEditor(){
 }
 
 /* ======================= Вкладки, переключатель, запуск ======================= */
+const SUBJ={arch:{name:'Архитектура ЭВМ',sub:'Лекции · лабы с разбором · тесты',title:'Тренажёр архитектуры ЭВМ'},
+  cpp:{name:'Программирование C++',sub:'Borland C++Builder 6 · лекции · лабы с онлайн-проверкой · тесты',title:'Тренажёр C++'}};
+const subjOf=t=>/^c\d/.test(t)?'cpp':'arch';
 function showTopic(t){
-  document.querySelectorAll('.topic').forEach(s=>s.hidden = s.id!==t);
-  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected', b.dataset.t===t ? 'true':'false'));
+  const s=subjOf(t);
+  document.querySelectorAll('.topic').forEach(x=>x.hidden = x.id!==t);
+  document.querySelectorAll('.tabs button').forEach(b=>{ b.hidden=subjOf(b.dataset.t)!==s; b.setAttribute('aria-selected', b.dataset.t===t ? 'true':'false'); });
+  document.querySelectorAll('.subj button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===s?'true':'false'));
+  document.getElementById('brandName').textContent=SUBJ[s].name; document.getElementById('brandSub').textContent=SUBJ[s].sub;
+  document.title=SUBJ[s].title;
+  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); }
+  try{ localStorage.setItem('last-'+s,t); }catch(_){}
 }
 document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; showTopic(b.dataset.t); try{localStorage.setItem('arch-topic',b.dataset.t);}catch(_){} window.scrollTo({top:0});});
+document.querySelector('.subj').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; let t=b.dataset.s==='cpp'?'c1':'t1'; try{ const l=localStorage.getItem('last-'+b.dataset.s); if(l&&TOPICS.includes(l)) t=l; }catch(_){} showTopic(t); try{localStorage.setItem('arch-topic',t);}catch(_){} window.scrollTo({top:0});});
 document.querySelectorAll('.subnav a').forEach(a=>a.addEventListener('click',e=>{e.preventDefault(); const el=document.getElementById(a.getAttribute('href').slice(1)); if(el){ if(el.tagName==='DETAILS') el.open=true; const d=el.parentElement&&el.parentElement.closest('details'); if(d) d.open=true; el.scrollIntoView({behavior:'smooth',block:'start'}); }}));
 let start='t1';
 const h=(location.hash||'').slice(1);
-const hm=h.match(/^(t\d)(?:-|$)/); if(hm&&TOPICS.includes(hm[1])) start=hm[1]; else if(!h){ try{ const s=localStorage.getItem('arch-topic'); if(TOPICS.includes(s)) start=s; }catch(_){} }
+const hm=h.match(/^([tc]\d+)(?:-|$)/); if(hm&&TOPICS.includes(hm[1])) start=hm[1]; else if(!h){ try{ const s=localStorage.getItem('arch-topic'); if(TOPICS.includes(s)) start=s; }catch(_){} }
 showTopic(start);
 initUnits();
 initTools17();

@@ -144,7 +144,7 @@ class Interp{
   prepare(){ // разбор имён и глобальные переменные (без вызова main) — нужно и для обработчиков событий VCL
     this.setup();
     this.checkProgram();
-    this.globalScope={vars:new Map(),parent:null,objs:[],isGlobal:true};
+    this.globalScope={vars:new Map(),parent:null,objs:[],isGlobal:true}; this.gInit=new Set();
     for(const d of this.prog.decls){
       if(d.k!=="var") continue;
       if(d.cls){ const ci=this.classes.get(d.cls); const st=ci&&ci.statics.get(d.name); if(!st) throw cerr(`В классе ${d.cls} нет static-поля ${d.name}`,d.line,"E2316");
@@ -376,6 +376,8 @@ class Interp{
     let t=d.t;
     if(isVoid(t)) throw cerr(`Переменная не может иметь тип void`,d.line,'E2xxx');
     if(sc.vars.has(d.name)&&!isGlobal) throw cerr(`Переменная «${d.name}» уже объявлена в этом блоке (Multiple declaration)`,d.line,'E2238');
+    // глобальная: повторное объявление без значения допустимо (как extern TForm1 *Form1 + TForm1 *Form1), а два «= значение» — ошибка
+    if(isGlobal&&d.init){ this.gInit=this.gInit||new Set(); if(this.gInit.has(d.name)) throw cerr(`Глобальная переменная «${d.name}» объявлена дважды (Multiple declaration for '${d.name}'). Оставь одно объявление — например, удали повтор из вставленного кода`,d.line,'E2238'); this.gInit.add(d.name); }
     if(d.static&&!isGlobal){ // static-локальная: живёт между вызовами
       let st=this.statics.get(d);
       if(!st){ st={t:this.fixArr(t,d),cell:null}; st.cell=this.makeCell(st.t,d.line,{data:true},sc); if(d.init) this.initCell(st.cell,st.t,d,sc); this.statics.set(d,st); }

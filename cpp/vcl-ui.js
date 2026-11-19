@@ -4,7 +4,7 @@
 const CPP=G.CPP, V=CPP.VCL;
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const store={ get(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }, set(k,v){ try{ if(v==null) localStorage.removeItem(k); else localStorage.setItem(k,v); }catch(e){} } };
-const fontCss=f=>{ const p=f.p; return `font-family:${p.Name==='MS Sans Serif'?'Tahoma,"MS Sans Serif",Arial,sans-serif':'"'+p.Name+'",Tahoma,sans-serif'};font-size:${Math.round(p.Size*4/3)}px;color:${V.colorCss(p.Color)};${p.Style&1?'font-weight:bold;':''}${p.Style&2?'font-style:italic;':''}${p.Style&4?'text-decoration:underline;':''}`; };
+const fontCss=f=>{ const p=f.p; return `font-family:${p.Name==='MS Sans Serif'?"Tahoma,'MS Sans Serif',Arial,sans-serif":"'"+p.Name+"',Tahoma,sans-serif"};font-size:${Math.round(p.Size*4/3)}px;color:${V.colorCss(p.Color)};${p.Style&1?'font-weight:bold;':''}${p.Style&2?'font-style:italic;':''}${p.Style&4?'text-decoration:underline;':''}`; };
 const KIND_CAP={1:'OK',2:'Cancel',3:'&Help',4:'&Yes',5:'&No',6:'&Close',7:'Abort',8:'&Retry',9:'&Ignore',10:'&All'};
 const KIND_GLYPH={1:'✔',2:'✖',3:'?',4:'✔',5:'⊘',6:'🚪',7:'✖',8:'↻',9:'→',10:'✔✔'};
 const amp=s=>esc(String(s)).replace(/&amp;(.)/,'<u>$1</u>');

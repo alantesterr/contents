@@ -84,7 +84,7 @@ const LECTURE=R`<div class="read">
 </div>
 <div class="read">
   <h2 id="c2-mem">Работа с памятью. Указатели (лекция 6 преподавателя)</h2>
-  <details class="lab-orig"><summary>Оригинал слайдов (English)</summary><div class="body">
+  <details class="lab-orig"><summary>Оригинал слайдов (на английском — перевод ниже)</summary><div class="body">
     <p><b>6.1 Subject: Pointers in C++.</b> The purpose of a lesson is to learn the basic principles of using pointers in C++.</p>
     <p>Every variable is a memory location and every memory location has its address defined. A <b>pointer</b> is a variable whose value is the address of another variable. Like any variable or constant, a pointer must be declared before using it in a program. The general form of a pointer variable declaration: <code>type *var-name;</code> Where, <b>type</b> is the pointer's base type (the type of a value that is stored in a cell); <b>var-name</b> is the name of the pointer variable.</p>
     <p>Some valid pointer declarations: <code>int *ip; double *dp; float *fp; char *ch;</code> The actual data type of the value of all pointers (whether integer, float, character, or otherwise) is the same, a long hexadecimal number that represents a memory address. The only difference between pointers of different data types is the data type of the variable or constant that the pointer points to.</p>
@@ -349,7 +349,7 @@ int main()
 ];
 CPP.topic('c2',{n:2,
  title:'Выражения и операции. Присваивание в стиле C. Дополнительные библиотеки. Работа с памятью',
- intro:R`<aside class="fix"><span class="tag">о лабе</span> Отдельного файла лабы по теме 2 нет. Задания ниже составлены по плану лабы УМКД («Expressions and operators. Additional libraries. Memory routine») и задачам из лекции 6 преподавателя про указатели.</aside>`,
+ intro:R`<aside class="fix"><span class="tag">о лабе</span> Отдельного файла лабы по теме 2 нет. Задания ниже составлены по плану лабы УМКД («Expressions and operators. Additional libraries. Memory routine» — выражения и операции, дополнительные библиотеки, работа с памятью) и задачам из лекции 6 преподавателя про указатели.</aside>`,
  lecSub:'Все операции C++, приоритет, преобразование типов, библиотеки (math, stdio, conio, stdlib), указатели — лекция 6 преподавателя.',
  lecture:LECTURE,
  labs:[{id:'c2-lab',short:'Лаба',title:'Лабораторная работа (по УМКД). Выражения и операции. Дополнительные библиотеки. Работа с памятью',show:3,

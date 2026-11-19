@@ -370,7 +370,7 @@ const LECTURE=R`<div class="read">
     <li>Массивы и множества данных (multiplicity).</li>
     <li>Указатели и адреса памяти.</li>
   </ul>
-  <details class="lab-orig"><summary>Оригинал УМКД (English)</summary><div class="body">
+  <details class="lab-orig"><summary>Оригинал УМКД (на английском; перевод — выше)</summary><div class="body">
     <p>1. Programming paradigms. Classification of programming languages. Algorithm. Specifying algorithms. A graphical presentation of types of algorithms. The syntax of a C++ programming language: an alphabet, an identifier, a keyword, a constant, esc-sequences, a comment. Structure of program in the BORLAND C ++ programming language. Sequence structure. Data types: simple data types, enumerated type, multiplicity, pointers.</p>
     <p>Goal: To introduce students to the basic concepts of programming, algorithms, programming language classification, and the syntax and structure of C++ programs.</p>
     <p>Main points of the lecture: Concept of programming and programming paradigms. Classification of programming languages. Concept and properties of an algorithm. Methods of specifying algorithms: verbal description, pseudocode, flowcharts, and program code. Graphical representation of algorithms using flowcharts. C++ alphabet and lexical elements. Identifiers, keywords, constants, and special symbols. Escape sequences and comments. General structure of a C++ program. Structure of a program in Borland C++. Sequence structure of an algorithm. Basic data types in C++. Enumerated data type. Arrays and multiplicity of data. Pointers and memory addresses.</p>
@@ -567,7 +567,7 @@ int main()                 // 3. главная функция — с неё н�
       <tr><td><code>bool</code></td><td class="n">1</td><td class="n">true / false (1 / 0)</td><td>логический: <code>bool ok = true;</code></td></tr>
       <tr><td><code>void</code></td><td class="n">—</td><td>«нет значения»</td><td>функция ничего не возвращает</td></tr></table></div>
     <p><b>Модификаторы</b> меняют размер и знак: <code>signed</code> / <code>unsigned</code> (со знаком / без знака), <code>short</code> / <code>long</code>. В C++ <code>true</code> — это 1, <code>false</code> — 0, а любое ненулевое число в условии считается истиной.</p>
-    <p><b>Переполнение.</b> Если значение выходит за диапазон, оно «перескакивает» на другой конец: <code>short s = 32767; s++;</code> → −32768. Ошибки нет — программа молча считает неправильно. Это задание СРС «Check what happens when a variable overflows» — запусти пример ниже.</p>
+    <p><b>Переполнение.</b> Если значение выходит за диапазон, оно «перескакивает» на другой конец: <code>short s = 32767; s++;</code> → −32768. Ошибки нет — программа молча считает неправильно. Это задание СРС «Check what happens when a variable overflows» («проверь, что будет при переполнении переменной») — запусти пример ниже.</p>
   </aside>
 </div>
 <div class="cppw" data-id="c1-demo-overflow" data-cmp="none" data-title="Пример: переполнение (СРС) — просто запусти">

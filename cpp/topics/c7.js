@@ -1,33 +1,60 @@
 /* C++ · Тема 7. Основные понятия и принципы ООП */
 (function(){ const R=String.raw;
-CPP.DEFS_ORIG=R`<details class="lab-orig"><summary>Определения преподавателя («Полезная инфа», оригинал на английском)</summary><div class="body">
+CPP.DEFS_ORIG=R`<details class="lab-orig"><summary>Определения преподавателя («Полезная инфа», оригинал на английском, под каждым — перевод)</summary><div class="body">
 <p>Some definitions of OOP</p>
+<p class="ru">Некоторые определения ООП</p>
 <p>In Object-oriented programming, Class is a set of data and methods to manipulate the data.</p>
+<p class="ru">В ООП класс (Class) — это набор данных и методов (methods) для работы с этими данными.</p>
 <p>In Object-oriented programming: class is the definitions for the data format and available functions for a given type.</p>
+<p class="ru">В ООП класс — это описание формата данных и доступных функций для данного типа.</p>
 <p>Classes in C++ are the abstractions that describes methods, properties of objects that do not exist yet. A class is a blueprint for creating objects that have similar attributes and behaviors.</p>
+<p class="ru">Классы в C++ — это абстракции, описывающие методы и свойства ещё не существующих объектов. Класс — это «чертёж» (blueprint) для создания объектов с похожими атрибутами (attributes) и поведением (behaviors).</p>
 <p>With the help of one class you can create objects as many as needed.</p>
+<p class="ru">С помощью одного класса можно создать сколько угодно объектов.</p>
 <p>A class defines the properties and behaviors of objects, whereas an object is an instance of a class.</p>
+<p class="ru">Класс задаёт свойства (properties) и поведение (behaviors) объектов, а объект — это экземпляр (instance) класса.</p>
 <p>Object is an instance of a class in a memory and it is created with the help of concrete class.</p>
+<p class="ru">Объект (Object) — это экземпляр класса в памяти; он создаётся по конкретному классу.</p>
 <p>Objects are the instances of classes or a variable of the data type defined by the class.</p>
+<p class="ru">Объекты — это экземпляры классов, то есть переменные того типа, который задан классом.</p>
 <p>In OOP, Object is an instance of a class in a memory.</p>
+<p class="ru">В ООП объект — экземпляр класса в памяти.</p>
 <p>Abstraction is the major principle of an OOP that denotes a model, a view, or some other focused representation for an actual item.</p>
+<p class="ru">Абстракция (Abstraction) — главный принцип ООП: модель, вид или иное упрощённое представление реального предмета (берём только существенное).</p>
 <p>Encapsulation is a principle of OOP, a mechanism that links together the code and the data it manipulates. Encapsulation is a principle of OOP, a special mechanism that protects data from arbitrary access of other external codes. Encapsulation is the major principle of OOP which means that the internal representation of an object is generally hidden from view outside of the object’s definition.</p>
+<p class="ru">Инкапсуляция (Encapsulation) — принцип ООП, механизм, который связывает вместе код и данные, с которыми он работает. Это особый механизм, защищающий данные от произвольного доступа внешнего кода. Инкапсуляция означает, что внутреннее устройство объекта скрыто от всего, что находится вне описания объекта.</p>
 <p>Encapsulation is the process of hiding the implementation details of a class and only exposing the necessary interfaces to the outside world.</p>
+<p class="ru">Инкапсуляция — это скрытие деталей реализации класса и открытие наружу только нужного интерфейса (interface).</p>
 <p>Polymorphism is a principle of OOP, a mechanism that allows to use the same interface for a common class of actions. In polymorphism principle: selecting of needed method (for specific object) is performed by compiler. Polymorphism is the major principle of an OOP that allows using same names of identifiers for the different functionality.</p>
+<p class="ru">Полиморфизм (Polymorphism) — принцип ООП, механизм, позволяющий использовать один интерфейс для общего класса действий. При полиморфизме выбор нужного метода (для конкретного объекта) выполняет компилятор (compiler). Полиморфизм позволяет использовать одинаковые имена для разной функциональности.</p>
 <p>Inheritance is a principle of OOP, a mechanism by which one object (of a derived class) acquires the properties of another object (parent, base class). Inheritance is the major principle of an OOP that allows using attributes and behavior from pre-existing classes.</p>
+<p class="ru">Наследование (Inheritance) — принцип ООП, механизм, при котором один объект (производного класса, derived class) получает свойства другого объекта (родителя, базового класса — parent, base class). Наследование позволяет использовать атрибуты и поведение уже существующих классов.</p>
 <p>Method is a special function of a class that specifies operations on objects data (specifies its behavior). Methods are the actions performed by the component (what a component can do).</p>
+<p class="ru">Метод (Method) — специальная функция класса, задающая операции над данными объекта (его поведение). Методы — это действия, которые выполняет компонент (что он умеет).</p>
 <p>In object-oriented programming: method is a function associated with a class.</p>
+<p class="ru">В ООП метод — функция, связанная с классом.</p>
 <p>Method is an action that an object is able to perform.</p>
+<p class="ru">Метод — действие, которое объект умеет выполнять.</p>
 <p>Constructor is a special method that is called once when a class’ instance is created. The initialization of all elements of a class (common for all class instances) is made in constructor.</p>
+<p class="ru">Конструктор (Constructor) — специальный метод, который вызывается один раз при создании экземпляра класса. Инициализация всех элементов класса (общая для всех экземпляров) делается в конструкторе.</p>
 <p>In OOP, property is a variable of some type that characterizes internal status of an object. Properties are the component attributes which determine how a component displayed on the screen and how it operates.</p>
+<p class="ru">В ООП свойство (property) — переменная какого-то типа, описывающая внутреннее состояние объекта. Свойства — это атрибуты компонента, определяющие, как он выглядит на экране и как работает.</p>
 <p>OOP: Event is a message from the operating system to an application that if occurs when some external actions are made. Event is a message which occurs at various points in the executable code when certain conditions are performed.</p>
+<p class="ru">Событие (Event) — сообщение от операционной системы приложению, возникающее при каких-то внешних действиях. Событие — сообщение, возникающее в разных местах выполняемого кода при выполнении определённых условий.</p>
 <p>Event handler is a special procedure/function that is used to react at some actions (usually made by user).</p>
+<p class="ru">Обработчик события (Event handler) — специальная процедура/функция для реакции на какие-то действия (обычно пользователя).</p>
 <p>Form is the main element of any application; the container that hosts all other visual and non-visual components.</p>
+<p class="ru">Форма (Form) — главный элемент любого приложения; контейнер, в котором находятся все остальные визуальные и невизуальные компоненты.</p>
 <p>Object Inspector is a part of C++ Builder IDE that is used to examine and edit the properties and events for the currently selected object. A component’s properties are set in Object Inspector</p>
+<p class="ru">Object Inspector (инспектор объектов) — часть среды C++ Builder (IDE — среда разработки) для просмотра и изменения свойств и событий выбранного объекта. Свойства компонента задаются в Object Inspector.</p>
 <p>Code Editor is a part of a C++ Builder IDE that holds the set of a program commands.</p>
+<p class="ru">Code Editor (редактор кода) — часть среды C++ Builder, где хранится набор команд программы.</p>
 <p>Components are the self-contained building blocks that are carried on the form to create your applications.</p>
+<p class="ru">Компоненты (Components) — самостоятельные «кирпичики», которые кладут на форму, чтобы собрать приложение.</p>
 <p>The components that look the same at the design stage and during the application execution are called the Visual components. Visual components are also called Controls.</p>
+<p class="ru">Компоненты, которые выглядят одинаково при проектировании (design stage) и во время работы программы, называются визуальными (Visual components). Их ещё называют элементами управления (Controls).</p>
 <p>The components that invisible during the application execution are called Non-visual.</p>
+<p class="ru">Компоненты, невидимые во время работы программы, называются невизуальными (Non-visual).</p>
 </div></details>`;
 const LECTURE=R`<div class="read">
   <aside class="fix"><span class="tag">о материалах</span> План лекции 7 из УМКД (перевод) + определения преподавателя из файла «Полезная инфа» — их формулировки почти дословно бывают в тестах, учи их. Остальное — мои пояснения.</aside>
@@ -78,7 +105,7 @@ rex.name = "Rex"; rex.bark();</pre>
   </aside>
 </div>`;
 const T=[
- {id:'c7-z1',name:'Задание 1 (СРС УМКД)',cmp:'exact',text:R`<p>Create a Dog class with properties like name and breed, and methods like bark(). Instantiate multiple Dog objects (e.g., my_dog = Dog("Buddy", "Golden Retriever")) to see how they are distinct instances of the same class.</p><p><i>Создать класс Dog со свойствами name и breed и методом bark(). Создать несколько объектов и убедиться, что это разные экземпляры одного класса.</i></p>`,
+ {id:'c7-z1',name:'Задание 1 (СРС УМКД)',cmp:'exact',text:R`<p>Создайте класс Dog со свойствами (properties) name (кличка) и breed (порода) и методом bark() (лаять). Создайте несколько объектов Dog (например, my_dog = Dog("Buddy", "Golden Retriever")) и убедитесь, что это разные экземпляры (instances) одного класса.</p><details class="en"><summary>Оригинал (англ.)</summary><p>Create a Dog class with properties like name and breed, and methods like bark(). Instantiate multiple Dog objects (e.g., my_dog = Dog("Buddy", "Golden Retriever")) to see how they are distinct instances of the same class.</p></details>`,
   ref:R`#include <iostream.h>
 #include <conio.h>
 #include <string>
@@ -105,7 +132,7 @@ int main()
   return 0;
 }`, ins:[['Без ввода','']],
   steps:R`<ol><li>Класс объявляется словом <code>class</code>, внутри — поля и методы, после <code>}</code> — точка с запятой.</li><li><code>public:</code> — члены доступны снаружи.</li><li>Конструктор <code>Dog(string n, string b)</code> заполняет поля при создании: <code>Dog my_dog("Buddy", "Golden Retriever");</code></li><li>У каждого объекта свои поля: изменили имя у other — my_dog не изменился.</li></ol>`},
- {id:'c7-z2',name:'Задание 2 (инкапсуляция, СРС УМКД)',cmp:'exact',text:R`<p>In your Dog class, make the name attribute private. Create a get_name() method to retrieve the name and a set_name() method to change it, preventing direct modification of the name.</p><p><i>Сделать name закрытым (private), доступ — через get_name() и set_name(). set_name не должен принимать пустое имя.</i></p>`,
+ {id:'c7-z2',name:'Задание 2 (инкапсуляция, СРС УМКД)',cmp:'exact',text:R`<p>В классе Dog сделайте атрибут name закрытым (private). Создайте метод get_name() (получить имя) и метод set_name() (изменить имя), чтобы имя нельзя было менять напрямую. От себя: set_name не должен принимать пустое имя.</p><details class="en"><summary>Оригинал (англ.)</summary><p>In your Dog class, make the name attribute private. Create a get_name() method to retrieve the name and a set_name() method to change it, preventing direct modification of the name.</p></details>`,
   ref:R`#include <iostream.h>
 #include <conio.h>
 #include <string>
@@ -138,8 +165,8 @@ int main()
   getch();
   return 0;
 }`, ins:[['Без ввода','']],
-  steps:R`<p>Это и есть инкапсуляция: поле закрыто, а методы-«ворота» проверяют данные. Раскомментируй строку <code>d.name = "X";</code> и запусти — Builder выдаст E2247 «is not accessible».</p>`},
- {id:'c7-z3',name:'Задание 3 (абстракция, СРС УМКД)',cmp:'exact',text:R`<p>In the Dog class, create a perform_action() method that calls other private methods like walk() or fetch(). Users only need to call perform_action() without knowing the details of the underlying methods.</p><p><i>Метод perform_action() вызывает закрытые методы walk() и fetch(); пользователю класса их детали не нужны.</i></p>`,
+  steps:R`<p>Это и есть инкапсуляция: поле закрыто, а методы-«ворота» проверяют данные. Раскомментируй строку <code>d.name = "X";</code> и запусти — Builder выдаст E2247 «is not accessible» («недоступен»).</p>`},
+ {id:'c7-z3',name:'Задание 3 (абстракция, СРС УМКД)',cmp:'exact',text:R`<p>В классе Dog создайте метод perform_action() (выполнить действие), который вызывает другие закрытые (private) методы, например walk() (гулять) или fetch() (принести палку). Пользователю достаточно вызвать perform_action(), не зная, как устроены методы внутри.</p><details class="en"><summary>Оригинал (англ.)</summary><p>In the Dog class, create a perform_action() method that calls other private methods like walk() or fetch(). Users only need to call perform_action() without knowing the details of the underlying methods.</p></details>`,
   ref:R`#include <iostream.h>
 #include <conio.h>
 #include <string>
@@ -169,7 +196,7 @@ int main()
   return 0;
 }`, ins:[['Без ввода','']],
   steps:R`<p>Снаружи видна только простая «кнопка» perform_action(), а как она работает — скрыто. Это абстракция: пользователь видит главное, детали спрятаны.</p>`},
- {id:'c7-z4',name:'Задание 4 (наследование, СРС УМКД)',cmp:'exact',text:R`<p>Create a Poodle class that inherits from Dog. Give Poodle its own unique attributes (like coat_type) and behaviors (like does_grooming()), while also getting all the properties and methods of the Dog class.</p><p><i>Класс Poodle наследует Dog, добавляет coat_type и does_grooming().</i></p>`,
+ {id:'c7-z4',name:'Задание 4 (наследование, СРС УМКД)',cmp:'exact',text:R`<p>Создайте класс Poodle (пудель), который наследует (inherits) Dog. Дайте ему свои атрибуты (например, coat_type — тип шерсти) и поведение (например, does_grooming() — стрижётся ли), при этом он получает все свойства и методы класса Dog.</p><details class="en"><summary>Оригинал (англ.)</summary><p>Create a Poodle class that inherits from Dog. Give Poodle its own unique attributes (like coat_type) and behaviors (like does_grooming()), while also getting all the properties and methods of the Dog class.</p></details>`,
   ref:R`#include <iostream.h>
 #include <conio.h>
 #include <string>
@@ -201,7 +228,7 @@ int main()
   return 0;
 }`, ins:[['Без ввода','']],
   steps:R`<ol><li><code>class Poodle : public Dog</code> — Poodle получает всё открытое из Dog.</li><li>Конструктор наследника вызывает конструктор базового в списке инициализации: <code>: Dog(n, "Poodle")</code>.</li><li>Объекту Poodle доступны и <code>bark()</code> (из Dog), и <code>does_grooming()</code> (свой).</li></ol>`},
- {id:'c7-z5',name:'Задание 5 (полиморфизм, СРС УМКД)',cmp:'exact',text:R`<p>In the Dog class, create a make_sound() method. In a Cat class (also an Animal), create its own make_sound() method. When you call make_sound() on a Dog object, it should "bark," and on a Cat object, it should "meow".</p><p><i>Базовый класс Animal с виртуальным make_sound(); Dog и Cat переопределяют его. Вызов через указатель на Animal выбирает нужный метод.</i></p>`,
+ {id:'c7-z5',name:'Задание 5 (полиморфизм, СРС УМКД)',cmp:'exact',text:R`<p>В классе Dog создайте метод make_sound() (издать звук). В классе Cat (тоже Animal — животное) создайте свой метод make_sound(). При вызове make_sound() у объекта Dog должно быть "bark" (гав), а у объекта Cat — "meow" (мяу). Как сделать: базовый класс Animal с виртуальным (virtual) make_sound(), Dog и Cat его переопределяют; вызов через указатель на Animal сам выбирает нужный метод.</p><details class="en"><summary>Оригинал (англ.)</summary><p>In the Dog class, create a make_sound() method. In a Cat class (also an Animal), create its own make_sound() method. When you call make_sound() on a Dog object, it should "bark," and on a Cat object, it should "meow".</p></details>`,
   ref:R`#include <iostream.h>
 #include <conio.h>
 #include <string>

@@ -60,6 +60,27 @@ namespace Mylabel
 }</pre>
     <p><b>Свойства</b> компонента — __property с read/write (тема 14). <b>Методы</b> — обычные функции класса. <b>События компонента</b> — свойства-указатели на обработчики (TNotifyEvent); компонент «вызывает» событие, когда что-то произошло, а обработчик пишет пользователь компонента. Повторное использование: установленный компонент доступен в любом проекте с палитры.</p>
   </aside>
+  <aside class="add"><span class="tag">дополнение · текст между компонентами (для теста)</span>
+    <div class="tw"><table><tr><th>Задача</th><th>Код</th></tr>
+      <tr><td>Edit → Label</td><td><code>Label1-&gt;Caption = Edit1-&gt;Text;</code></td></tr>
+      <tr><td>переместить (вырезать) из Edit</td><td><code>Button1-&gt;Caption = Edit1-&gt;Text; Edit1-&gt;Text = "";</code></td></tr>
+      <tr><td>добавить строку в конец Memo</td><td><code>Memo1-&gt;Lines-&gt;Add(Edit1-&gt;Text);</code></td></tr>
+      <tr><td>склеить и добавить</td><td><code>Memo1-&gt;Lines-&gt;Add(Label1-&gt;Caption + Edit1-&gt;Text);</code></td></tr>
+      <tr><td>вставить строку в начало</td><td><code>Memo1-&gt;Lines-&gt;Insert(0, "Первая");</code></td></tr>
+      <tr><td>первая строка Memo → Edit</td><td><code>Edit1-&gt;Text = Memo1-&gt;Lines-&gt;Strings[0];</code> (нумерация с 0: третья строка — Strings[2])</td></tr>
+      <tr><td>количество строк</td><td><code>Memo1-&gt;Lines-&gt;Count</code></td></tr>
+      <tr><td>удалить последнюю строку</td><td><code>Memo1-&gt;Lines-&gt;Delete(Memo1-&gt;Lines-&gt;Count - 1);</code></td></tr>
+      <tr><td>очистить Memo</td><td><code>Memo1-&gt;Lines-&gt;Clear();</code></td></tr>
+      <tr><td>скопировать Memo в Memo</td><td><code>Memo2-&gt;Lines-&gt;Assign(Memo1-&gt;Lines);</code></td></tr>
+      <tr><td>весь текст Memo одной строкой</td><td><code>Edit1-&gt;Text = Memo1-&gt;Lines-&gt;Text;</code> (в Edit видна только одна строка)</td></tr></table></div>
+    <p><b>Выделение и буфер обмена (Clipboard)</b> — у Edit и Memo:</p>
+    <ul>
+      <li><code>SelectAll()</code> — выделить всё; <code>SelStart</code> — с какого символа выделение; <code>SelLength</code> — длина выделения; <code>SelText</code> — сам выделенный текст. Выделить первые 5 символов: <code>Edit1-&gt;SelStart = 0; Edit1-&gt;SelLength = 5;</code></li>
+      <li><code>CopyToClipboard()</code> — копировать, <code>CutToClipboard()</code> — вырезать, <code>PasteFromClipboard()</code> — вставить. Перед вырезанием проверь, что что-то выделено: <code>if (Edit1-&gt;SelLength &gt; 0)</code>.</li>
+      <li>Весь Memo в буфер: <code>Memo1-&gt;SelectAll(); Memo1-&gt;CopyToClipboard();</code></li>
+      <li><code>ReadOnly = true</code> у Memo — пользователь не печатает, но из кода текст менять можно.</li>
+    </ul>
+  </aside>
 </div>`;
 const ED_COMPS=[
   {type:'TMemo',Name:'Memo1',Left:8,Top:8,Width:300,Height:230,Lines:[],ScrollBars:'ssBoth',PopupMenu:'PopupMenu1'},

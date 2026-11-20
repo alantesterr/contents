@@ -43,6 +43,15 @@ Rect arr[3] = { Rect(1,1), Rect(2,2), Rect(3,3) };   // массив объек�
       <li><b>Передача объекта в функцию:</b> по значению (копия), по ссылке <code>void f(Rect &amp;r)</code> (можно менять), по константной ссылке <code>void f(const Rect &amp;r)</code> (без копии и без изменений — тогда вызывать можно только const-методы).</li>
       <li><b>Взаимодействие объектов:</b> метод одного объекта получает другой объект как параметр: <code>a.transfer(b, 100)</code>.</li></ul>
   </aside>
+  <aside class="add"><span class="tag">дополнение · для теста на английском</span>
+    <ul>
+      <li><b>A class is a blueprint for creating objects</b> (класс — «чертёж» для создания объектов) с похожими атрибутами и поведением. Ещё одна формулировка из теста: <i>abstractions that describe methods, properties of objects that do not exist yet</i> (абстракции, описывающие методы и свойства ещё не существующих объектов).</li>
+      <li><b>An object is an instance of a class</b> (объект — экземпляр класса) в памяти. С помощью конкретного класса создаётся <b>object</b>.</li>
+      <li><b>Difference between a class and an object:</b> класс задаёт свойства и поведение (properties and behaviors), объект — конкретный экземпляр (instance) этого класса.</li>
+      <li><b>How many objects can be created from one class?</b> — <b>as many as needed</b> (сколько нужно): <code>TDog a, b, c;</code> — три объекта одного класса.</li>
+      <li><b>Encapsulation</b> в классах — <i>hiding the implementation details of a class and only exposing the necessary interfaces</i> (скрыть детали реализации, наружу открыть только нужное): поля в <code>private</code>, методы для работы с ними в <code>public</code>.</li>
+    </ul>
+  </aside>
 </div>`;
 const T=[
  {id:'c8-z1',name:'Задание 1',cmp:'exact',text:R`<p>Описать класс «Прямоугольник» с закрытыми полями ширина и высота и открытыми методами: задать размеры (с проверкой &gt; 0), площадь, периметр, вывод. Создать два объекта, вывести их данные и сравнить площади.</p>`,

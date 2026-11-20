@@ -34,6 +34,64 @@ const LECTURE=R`<div class="read">
       <tr><td>OnChange</td><td>у Edit/Memo изменился текст, у ScrollBar — позиция</td></tr></table></div>
     <p><b>Обработка действий пользователя:</b> программа «ничего не делает», пока не произойдёт событие; весь код — в обработчиках. Так строится <b>событийно-управляемое</b> интерактивное приложение.</p>
   </aside>
+  <aside class="add"><span class="tag">дополнение · определения для теста (англ.)</span>
+    <ul>
+      <li><b>Properties</b> (свойства) — <i>attributes which determine how a component is displayed and how it operates</i> (как выглядит и как работает).</li>
+      <li><b>Methods</b> (методы) — <i>the actions performed by the component</i> (что компонент умеет делать).</li>
+      <li><b>Event</b> (событие) — <i>a message which occurs when certain conditions are performed</i>. <b>Event handler</b> (обработчик) — <i>a special procedure used to react to some actions</i>.</li>
+      <li><b>Name</b> — главное свойство: имя компонента в коде. <b>Name и Tag</b> есть абсолютно у всех компонентов (Tag — любое целое число для своих целей).</li>
+      <li><b>Width, Height, Left, Top</b> — тип <code>int</code>, в пикселях (pixels). Left — расстояние от левого края формы (координата X), Top — от верха (Y). Эти свойства все визуальные компоненты получают от класса <b>TControl</b>. <b>ClientWidth/ClientHeight</b> — полезная область внутри рамок.</li>
+      <li>Размер текста — <code>Font-&gt;Size</code>, цвет текста — <code>Font-&gt;Color</code>.</li>
+    </ul>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · свойства Button, Edit, Label</span>
+    <div class="tw"><table><tr><th>Свойство</th><th>У кого</th><th>Что делает</th></tr>
+      <tr><td>Caption</td><td>Button, Label, Form</td><td>текст на кнопке / надписи / в заголовке окна. Caption = "" — текста нет.</td></tr>
+      <tr><td>Text</td><td>Edit</td><td>текст в поле ввода (у Button и Label вместо Text — Caption)</td></tr>
+      <tr><td>Enabled</td><td>все</td><td>false — элемент серый и не нажимается</td></tr>
+      <tr><td>Visible</td><td>все</td><td>показан ли на форме</td></tr>
+      <tr><td>Font</td><td>все</td><td>шрифт, размер, начертание (fsBold, fsItalic)</td></tr>
+      <tr><td>ParentFont</td><td>все</td><td>true — взять шрифт от родителя (формы или панели)</td></tr>
+      <tr><td>Cancel / Default</td><td>Button</td><td>кнопка срабатывает по Esc / по Enter</td></tr>
+      <tr><td>ReadOnly</td><td>Edit, Memo</td><td>true — смотреть можно, печатать нельзя (из кода менять Text можно всегда)</td></tr>
+      <tr><td>MaxLength</td><td>Edit</td><td>максимум символов</td></tr>
+      <tr><td>PasswordChar</td><td>Edit</td><td>символ вместо букв, например '*' для пароля</td></tr>
+      <tr><td>TabOrder</td><td>Edit, Button</td><td>порядок перехода фокуса по Tab (важен для Edit и Button, у Label фокуса нет)</td></tr>
+      <tr><td>Transparent</td><td>Label</td><td>прозрачный фон надписи</td></tr>
+      <tr><td>Alignment</td><td>Label, StaticText</td><td>выравнивание текста: taLeftJustify, taCenter, taRightJustify</td></tr>
+      <tr><td>AutoSize</td><td>Label, Edit</td><td>true — размер по тексту: заданные вручную Width/Height не учитываются. У Edit высота зависит от шрифта.</td></tr>
+      <tr><td>Hint + ShowHint</td><td>все</td><td>всплывающая подсказка (ShowHint = true)</td></tr>
+      <tr><td>Cursor</td><td>все</td><td>вид курсора над элементом: crHandPoint (рука), crIBeam (текстовый), crDefault</td></tr></table></div>
+    <p><b>События Edit:</b> <code>OnChange</code> — при каждом изменении текста; <code>OnKeyPress</code> — каждая нажатая клавиша (можно запретить цифры: <code>if (Key &gt;= '0' &amp;&amp; Key &lt;= '9') Key = 0;</code>).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · мышь и клавиатура</span>
+    <div class="tw"><table><tr><th>Событие</th><th>Когда</th></tr>
+      <tr><td>OnMouseDown</td><td>кнопку мыши нажали (ещё не отпустили) над элементом</td></tr>
+      <tr><td>OnMouseUp</td><td>кнопку мыши отпустили</td></tr>
+      <tr><td>OnMouseMove</td><td>мышь двигается над элементом (вызывается много раз подряд)</td></tr>
+      <tr><td>OnMouseLeave</td><td>мышь ушла с элемента (вернуть обычный цвет)</td></tr>
+      <tr><td>OnKeyDown</td><td>клавишу нажали (ещё не отпустили)</td></tr>
+      <tr><td>OnKeyUp</td><td>клавишу отпустили</td></tr>
+      <tr><td>OnKeyPress</td><td>клавишу нажали и отпустили (символ)</td></tr>
+      <tr><td>OnCreate / OnActivate / OnDeactivate</td><td>форма создана в памяти / стала активной / потеряла фокус</td></tr></table></div>
+    <pre class="cpp-code">void __fastcall TForm1::Button1MouseMove(TObject *Sender, TShiftState Shift, int X, int Y)
+{
+  // X, Y — координаты мыши ОТ ЛЕВОГО ВЕРХНЕГО УГЛА самого компонента (при Width = 100 X бывает 0…99)
+  if (Shift.Contains(ssShift)) Caption = "Зажат Shift";    // ssShift, ssAlt, ssCtrl — клавиши
+  if (Shift.Contains(ssLeft))  Caption = "Зажата левая кнопка мыши";
+  Button1-&gt;Font-&gt;Color = clRed;       // цвет текста
+  Label1-&gt;Font-&gt;Color = clRed;        // у надписи цвет текста — тоже через Font
+  Button1-&gt;Cursor = crHandPoint;
+  TControl *c = dynamic_cast&lt;TControl*&gt;(Sender);    // общий обработчик: кто вызвал?
+  if (dynamic_cast&lt;TEdit*&gt;(Sender)) { /* это Edit */ }
+}</pre>
+    <ul>
+      <li>Цвет фона: <code>Button1-&gt;Color = clYellow;</code> (в C++ всегда через <code>-&gt;</code>, не через точку).</li>
+      <li><code>Repaint()</code> — сразу перерисовать элемент. От мерцания в VCL помогает <code>DoubleBuffered = true</code>.</li>
+      <li>Перетаскивание: <code>Button1-&gt;Left = Button1-&gt;Left + X; Button1-&gt;Top = Button1-&gt;Top + Y;</code> (точнее — разница с точкой, где нажали мышь).</li>
+      <li>В тестах заголовки событий иногда записаны на языке Delphi: <code>OnMouseMove(Sender: TObject; Shift: TShiftState; X, Y: Integer)</code> — это то же самое.</li>
+    </ul>
+  </aside>
 </div>`;
 const GRAM_COMPS=[{type:'TPanel',Name:'Panel1',Align:'alBottom',Height:150,Caption:''},{type:'TPanel',Name:'Panel2',Align:'alLeft',Width:220,Caption:''},
   {type:'TMemo',Name:'Memo1',Align:'alClient',Lines:[]},

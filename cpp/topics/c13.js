@@ -31,6 +31,12 @@ Book *p = new Book("X", 2000);  …  delete p;   // деструктор при 
     <p><b>Когда вызывается:</b> локальный объект — при выходе из блока <code>{ }</code> (в обратном порядке создания); глобальный — после завершения main; динамический — при <code>delete</code>; параметр по значению — при выходе из функции.</p>
     <p><b>Жизненный цикл объекта:</b> выделение памяти → конструктор → использование (вызов методов) → деструктор → освобождение памяти.</p>
   </aside>
+  <aside class="add"><span class="tag">дополнение · для теста на английском</span>
+    <ul>
+      <li><b>Constructor</b> (конструктор) — <i>a special method that is called once when a class' instance is created</i> (вызывается один раз при создании объекта). <i>The initialization of all elements of a class is made in the constructor</i> — начальные значения полей задают в конструкторе.</li>
+      <li><b>Destructor</b> (деструктор) — вызывается при уничтожении объекта, имя с тильдой: <code>~TBook()</code>. У формы: <code>__fastcall ~TForm1();</code></li>
+    </ul>
+  </aside>
 </div>`;
 const BOOK=R`#include <iostream.h>
 #include <conio.h>

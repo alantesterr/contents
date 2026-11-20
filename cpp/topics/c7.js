@@ -103,6 +103,21 @@ rex.name = "Rex"; rex.bark();</pre>
     <p><b>Инкапсуляция и абстракция — в чём разница:</b> абстракция решает, <b>что</b> показать (какие свойства и действия есть у модели); инкапсуляция — <b>как спрятать</b> всё остальное и защитить данные.</p>
     <p><b>Преимущества ООП:</b> программа ближе к реальному миру; код переиспользуется через наследование; данные защищены; легко расширять (новый класс-наследник), командная разработка. <b>Где применяется:</b> программы с окнами (C++Builder: форма, кнопки — это объекты), игры, базы данных, моделирование.</p>
   </aside>
+  <aside class="add"><span class="tag">дополнение · для теста на английском</span>
+    <p>На экзамене эти определения дают <b>на английском</b>. Узнавай их по ключевым словам:</p>
+    <div class="tw"><table><tr><th>Как звучит в тесте</th><th>Ответ</th></tr>
+      <tr><td>a set of data and methods to manipulate the data; the definitions for the data format and available functions for a given type (набор данных и методов; описание формата данных и функций для типа)</td><td><b>Class</b> (класс)</td></tr>
+      <tr><td>an instance of a class in a memory; a variable of the data type defined by the class (экземпляр класса в памяти)</td><td><b>Object</b> (объект)</td></tr>
+      <tr><td>a function associated with a class; an action that an object is able to perform; specifies its behavior (функция класса, действие объекта)</td><td><b>Method</b> (метод)</td></tr>
+      <tr><td>a variable that characterizes internal status of an object (переменная, описывающая состояние объекта)</td><td><b>Property</b> (свойство)</td></tr>
+      <tr><td>a message from the operating system to an application (сообщение ОС приложению)</td><td><b>Event</b> (событие)</td></tr>
+      <tr><td>links together the code and the data; protects data from arbitrary access; internal representation is hidden (связывает код и данные; защищает данные; скрывает устройство)</td><td><b>Encapsulation</b> (инкапсуляция)</td></tr>
+      <tr><td>one object acquires the properties of another (parent, base class); using attributes and behavior from pre-existing classes (берёт свойства базового класса)</td><td><b>Inheritance</b> (наследование)</td></tr>
+      <tr><td>the same interface for a common class of actions; same names for different functionality (один интерфейс — разные действия; одно имя — разная работа)</td><td><b>Polymorphism</b> (полиморфизм)</td></tr>
+      <tr><td>a model, a view, or some other focused representation for an actual item (упрощённая модель реального предмета)</td><td><b>Abstraction</b> (абстракция)</td></tr></table></div>
+    <p><b>Кто выбирает нужный метод при полиморфизме?</b> В тесте ответ — <b>compiler</b> (компилятор). Точнее: для перегруженных функций (одно имя, разные параметры) выбирает компилятор при компиляции; для <code>virtual</code>-функций выбор делается во время работы программы (позднее связывание, тема 12).</p>
+    <p><b>Методы Show и Hide</b> есть у класса <b>TControl</b> (от него происходят все визуальные компоненты): <code>Button1-&gt;Hide();</code> делает элемент невидимым (Visible = false), <code>Button1-&gt;Show();</code> — видимым (Visible = true).</p>
+  </aside>
 </div>`;
 const T=[
  {id:'c7-z1',name:'Задание 1 (СРС УМКД)',cmp:'exact',text:R`<p>Создайте класс Dog со свойствами (properties) name (кличка) и breed (порода) и методом bark() (лаять). Создайте несколько объектов Dog (например, my_dog = Dog("Buddy", "Golden Retriever")) и убедитесь, что это разные экземпляры (instances) одного класса.</p><details class="en"><summary>Оригинал (англ.)</summary><p>Create a Dog class with properties like name and breed, and methods like bark(). Instantiate multiple Dog objects (e.g., my_dog = Dog("Buddy", "Golden Retriever")) to see how they are distinct instances of the same class.</p></details>`,

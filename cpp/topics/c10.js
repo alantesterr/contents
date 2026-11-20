@@ -21,6 +21,52 @@ const LECTURE=R`<div class="read">
       <li><b>Этапы создания простого приложения:</b> 1) новый проект; 2) разместить компоненты; 3) настроить свойства; 4) написать обработчики событий; 5) сохранить; 6) запустить и проверить (F9).</li>
       <li><b>Несколько форм:</b> File → New → Form добавляет Form2; в Unit1.cpp подключить <code>#include "Unit2.h"</code>; открыть — <code>Form2-&gt;Show();</code> (можно работать с обеими) или <code>Form2-&gt;ShowModal();</code> (пока Form2 открыта, первая недоступна); закрыть — <code>Close();</code>. Без стандартного метода: <code>Form2-&gt;Visible = true;</code></li></ul>
   </aside>
+  <aside class="add"><span class="tag">дополнение · форма и таймер (для теста)</span>
+    <ul>
+      <li><b>Form</b> (форма) — <i>the main element of any application; the container that hosts all other visual and non-visual components</i> (главный элемент приложения, контейнер для всех компонентов).</li>
+      <li><b>Timer</b> (вкладка System) — <i>to periodically perform certain actions</i> (периодически выполнять действия). Единственное событие — <b>OnTimer</b>. <code>Interval = 1000</code> — раз в секунду (в миллисекундах). <code>Enabled = false</code> — таймер остановлен.</li>
+      <li><b>Запретить менять размер окна:</b> <code>BorderStyle = bsDialog</code> (или bsSingle). Из кода Width всё равно можно менять: при bsSingle ширина изменится, но мышкой её поменять нельзя.</li>
+      <li><b>WindowState</b>: wsNormal (обычное), wsMaximized (на весь экран), wsMinimized. Вернуть развёрнутую форму: <code>Form1-&gt;WindowState = wsNormal;</code></li>
+      <li><b>Align</b>: alBottom — компонент прижат к низу и растянут по ширине родителя (высота своя); alTop, alLeft, alRight, alClient — на всё свободное место.</li>
+      <li><b>Anchors</b> (якоря): чтобы компонент растягивался вместе с формой по горизонтали и вертикали — [akLeft, akTop, akRight, akBottom].</li>
+      <li><b>OnResize</b> — сразу после изменения размера формы или панели.</li>
+    </ul>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · файл Unit1.h — класс формы</span>
+    <pre class="cpp-code">#ifndef Unit1H                 // «подключить один раз» (в новых версиях — #pragma once)
+#define Unit1H
+#include &lt;Classes.hpp&gt;
+#include &lt;Controls.hpp&gt;
+#include &lt;StdCtrls.hpp&gt;          // TEdit, TButton, TLabel, TMemo (в новых версиях — VCL.StdCtrls.hpp)
+#include &lt;Forms.hpp&gt;             // TForm (в новых версиях — VCL.Forms.hpp)
+class TForm1 : public TForm      // класс формы: ключевое слово class, наследник TForm, имя с буквы T
+{
+__published:   // IDE-managed Components — сюда IDE сама пишет компоненты с формы
+        TButton *Button1;        // компонент — это УКАЗАТЕЛЬ на объект класса
+        TEdit *Edit1;
+        void __fastcall Button1Click(TObject *Sender);   // обработчик: void __fastcall, параметр TObject *Sender
+private:       // User declarations — свои поля и вспомогательные методы только для этой формы
+        int counter;
+public:        // User declarations — то, что можно вызывать снаружи (из других форм)
+        __fastcall TForm1(TComponent* Owner);   // конструктор: обязательный параметр TComponent* Owner
+};
+extern PACKAGE TForm1 *Form1;    // extern: переменная Form1 определена в Unit1.cpp и видна в других файлах
+#endif</pre>
+    <div class="tw"><table><tr><th>Секция</th><th>Кто видит</th></tr>
+      <tr><td><b>__published</b></td><td>как public + видно в Object Inspector. Здесь компоненты с формы и обработчики событий.</td></tr>
+      <tr><td><b>private</b></td><td>только сама форма (свои вспомогательные методы и поля).</td></tr>
+      <tr><td><b>protected</b></td><td>сама форма и классы-наследники (derived classes).</td></tr>
+      <tr><td><b>public</b></td><td>все: конструктор, методы для вызова из других форм.</td></tr></table></div>
+    <ul>
+      <li><b>__fastcall</b> — соглашение о вызове, обязательное для обработчиков VCL. Деструктор: <code>__fastcall ~TForm1();</code></li>
+      <li><b>Sender</b> — компонент, который вызвал событие.</li>
+      <li>Методы объявляют в .h, чтобы компилятор знал их заголовок (signature) и видимость, а код пишут в .cpp.</li>
+      <li>Объявление обработчика вручную — бери точно тот заголовок, который создаёт IDE двойным щелчком в Object Inspector.</li>
+      <li>Если удалить из .h строку <code>TEdit *Edit1;</code>, компиляция не пройдёт: в Builder 6 будет ошибка <i>Undefined symbol 'Edit1'</i> (в новых — <i>Undeclared identifier</i>).</li>
+      <li><b>__property</b> — своё свойство класса с чтением/записью закрытого поля (тема 14).</li>
+      <li>В тестах встречается <b>FireMonkey (FMX)</b> — другая библиотека новых версий C++Builder (там форма — TForm из FMX, свойства Fill-&gt;Color, Opacity). В Builder 6 её нет.</li>
+    </ul>
+  </aside>
 </div>`;
 const BG={form:{Caption:'Мигалка',Width:320,Height:200},comps:[],code:'',
   ref:{form:{Caption:'Мигалка',Width:320,Height:200},comps:[{type:'TTimer',Name:'Timer1',Left:16,Top:16,Interval:500,events:{OnTimer:'Timer1Timer'}}],

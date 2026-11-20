@@ -33,6 +33,24 @@ const LECTURE=R`<div class="read">
       <li><b>Логическая</b> — программа собирается и работает, но результат неверный (не та формула, 1/3 вместо 1/3.). Компилятор не находит — ищут тестированием и отладкой.</li>
       <li><b>Отладка (debugging)</b> — поиск и исправление ошибок: точка останова (щелчок на поле слева от строки или F5), пошаговое выполнение F8 (Step Over) и F7 (Trace Into), просмотр переменных (Ctrl+F7 Evaluate/Modify, Watch), Run to Cursor (F4).</li></ul>
   </aside>
+  <aside class="add"><span class="tag">дополнение · для теста на английском</span>
+    <div class="tw"><table><tr><th>Термин</th><th>Что это</th></tr>
+      <tr><td><b>Borland C++ Builder 6</b></td><td>Integrated Development Environment, IDE (интегрированная среда разработки): редактор, дизайнер форм, компилятор и отладчик вместе.</td></tr>
+      <tr><td><b>Object Inspector</b> (инспектор объектов)</td><td>Здесь смотрят и меняют <i>properties and events</i> (свойства и события) выделенного объекта. Свойства компонента задают именно здесь.</td></tr>
+      <tr><td><b>Code Editor</b> (редактор кода)</td><td>Хранит набор команд программы (текст Unit1.cpp).</td></tr>
+      <tr><td><b>Component Palette</b> (палитра компонентов)</td><td>Вкладки Standard, Additional, System… с компонентами.</td></tr>
+      <tr><td><b>Components</b> (компоненты)</td><td><i>Self-contained building blocks</i> (самостоятельные «кирпичики»), которые кладут на форму.</td></tr>
+      <tr><td><b>Visual components = Controls</b> (визуальные компоненты = элементы управления)</td><td>Выглядят одинаково при проектировании и во время работы: Button, Edit, Label.</td></tr>
+      <tr><td><b>Non-visual components</b> (невизуальные)</td><td>Не видны во время работы: Timer, MainMenu, OpenDialog. У них нет Width и Height.</td></tr>
+      <tr><td><b>.bpr</b></td><td>Файл проекта в Builder 6 (Project1.bpr). Unit1.cpp — код, Unit1.h — объявление класса формы, Unit1.dfm — вид формы.</td></tr></table></div>
+    <p><b>Компоненты из лабы с часами:</b></p>
+    <ul>
+      <li><b>StaticText</b>: <code>Alignment</code> — выравнивание текста; <code>BorderStyle = sbsSunken</code> — вдавленная рамка (sbsNone — без рамки, sbsSingle — линия); <code>AutoSize = true</code> — размер подгоняется под текст.</li>
+      <li><b>BitBtn</b> (кнопка с картинкой, вкладка Additional): <code>Kind</code> — готовый вид кнопки (bkOK, bkCancel, bkClose…); <code>Glyph</code> — картинка на кнопке.</li>
+      <li>Текущее время: <code>Now().TimeString()</code>, дата — <code>Date().DateString()</code>.</li>
+      <li><code>FormStyle = fsStayOnTop</code> — форма всегда поверх других окон.</li>
+    </ul>
+  </aside>
 </div>`;
 const FIRST={
   form:{Caption:'Form1',Width:320,Height:200},comps:[],code:'',

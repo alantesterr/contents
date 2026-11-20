@@ -88,15 +88,28 @@ const isClocked=c=>['jk','d','t','cnt4','cnt10','reg4'].includes(c.type);
 
 /* ---------------- панели деталей (как «Parts Bin» в EWB) ---------------- */
 const g2=k=>({type:'gate',p:{k,n:2}});
+const NA='Аналоговые детали в лабах по архитектуре не используются: моделирование здесь логическое (0/1).';
 const BINS=[
+  {k:'fav',t:'Favorites',items:[{type:'sw',p:{key:'A',label:'A'}},{type:'lamp',p:{}},{type:'gate',p:{k:'and',n:2}},{type:'gate',p:{k:'or',n:2}},{type:'gate',p:{k:'not'}},{type:'jk',p:{edge:'fall'}},{type:'clk',p:{f:'1 Hz',fv:1}},{type:'vcc'}]},
   {k:'sources',t:'Sources',items:[{type:'gnd'},{type:'vcc'},{type:'clk',p:{f:'1 Hz',fv:1}}]},
   {k:'basic',t:'Basic',items:[{type:'sw',p:{key:'A',label:'A'}},{type:'conn'},{type:'txt',p:{text:'Текст'}}]},
+  {k:'diodes',t:'Diodes',items:[],note:NA},{k:'trans',t:'Transistors',items:[],note:NA},{k:'analog',t:'Analog ICs',items:[],note:NA},{k:'mixed',t:'Mixed ICs',items:[],note:NA},
   {k:'ind',t:'Indicators',items:[{type:'lamp',p:{}},{type:'lamp',p:{col:'green'}},{type:'hex',p:{}},{type:'seg7',p:{}}]},
   {k:'gates',t:'Logic Gates',items:['and','or','not','nand','nor','xor','xnor','buf'].map(k=>k==='not'||k==='buf'?{type:'gate',p:{k}}:g2(k))},
   {k:'digital',t:'Digital',items:[{type:'ha'},{type:'fa'},{type:'add4'},{type:'rs'},{type:'d',p:{edge:'rise'}},{type:'d',p:{edge:'rise',async:1}},{type:'jk',p:{edge:'fall'}},{type:'jk',p:{edge:'fall',async:1}},{type:'t',p:{edge:'rise'}},{type:'cnt4'},{type:'cnt10'},{type:'reg4'}]},
-  {k:'coders',t:'Mux / Coders',items:[{type:'mux2'},{type:'mux4'},{type:'mux8'},{type:'demux4'},{type:'dec24'},{type:'dec38'},{type:'enc42'},{type:'enc83'},{type:'cmp1'}]},
+  {k:'coders',t:'Digital ICs',items:[{type:'mux2'},{type:'mux4'},{type:'mux8'},{type:'demux4'},{type:'dec24'},{type:'dec38'},{type:'enc42'},{type:'enc83'},{type:'cmp1'}]},
+  {k:'controls',t:'Controls',items:[],note:NA},{k:'misc',t:'Miscellaneous',items:[{type:'txt',p:{text:'Текст'}},{type:'conn'}]},
   {k:'inst',t:'Instruments',items:[{type:'lc'},{type:'wg',p:{n:8,words:[0,1,2,3,4,5,6,7]}},{type:'la'}]}];
+{ const ORD=['fav','sources','basic','diodes','trans','analog','mixed','coders','gates','digital','ind','controls','misc','inst']; BINS.sort((a,b)=>ORD.indexOf(a.k)-ORD.indexOf(b.k)); }
 const BIN_ICON={}; (typeof EWB_BINS!=='undefined'?EWB_BINS:[]).forEach(b=>BIN_ICON[b.k]=b.i);
+const SV=b=>'<svg viewBox="0 0 26 18">'+b+'</svg>';
+BIN_ICON.fav=SV('<path d="M13 2l3 6 6 .8-4.5 4 1.2 6-5.7-3-5.7 3 1.2-6L4 8.8l6-.8z" fill="#f4c542" stroke="#8a6d00"/>');
+BIN_ICON.diodes=SV('<path d="M2 9h7M17 9h7M9 3v12l8-6z" stroke="#000" fill="#fff"/><path d="M17 3v12" stroke="#000"/>');
+BIN_ICON.trans=SV('<circle cx="13" cy="9" r="7" fill="#fff" stroke="#000"/><path d="M4 9h6M10 4v10M10 7l6-4M10 11l6 4" stroke="#000"/>');
+BIN_ICON.analog=SV('<path d="M7 2v14l13-7z" fill="#fff" stroke="#000"/><text x="8" y="8" style="font:7px Arial">-</text><text x="8" y="14" style="font:7px Arial">+</text>');
+BIN_ICON.mixed=SV('<rect x="5" y="2" width="16" height="14" fill="#fff" stroke="#000"/><text x="7" y="12" style="font:bold 7px Arial">A/D</text>');
+BIN_ICON.controls=SV('<rect x="4" y="3" width="18" height="12" fill="#fff" stroke="#000"/><path d="M7 12l4-6 4 6 4-6" fill="none" stroke="#000"/>');
+BIN_ICON.misc=SV('<rect x="4" y="2" width="18" height="14" fill="#fff" stroke="#000"/><path d="M7 6h12M7 9h12M7 12h8" stroke="#000"/>');
 BIN_ICON.coders='<svg viewBox="0 0 26 18"><rect x="6" y="1" width="14" height="16" fill="#fff" stroke="#000"/><text x="8.5" y="12" style="font:bold 7px Arial">DC</text><path d="M0 5h6M0 13h6M20 4h6M20 9h6M20 14h6" stroke="#000"/></svg>';
 function itemName(it){ if(it.type==='gate') return GATE_RU[it.p.k]; if(it.type==='lamp') return 'Probe'+(it.p&&it.p.col==='green'?' (зелёный)':' (красный)');
   if(it.type==='d'||it.type==='jk') return NAME[it.type]+(it.p&&it.p.async?' + PR/CLR':''); return NAME[it.type]||it.type; }
@@ -509,7 +522,7 @@ class Studio{
   /* ---------- панель деталей ---------- */
   openBin(k){ const open=this.pal.dataset.bin===k&&!this.pal.hidden; this.el.querySelectorAll('.binb').forEach(b=>b.classList.toggle('open',!open&&b.dataset.bin===k));
     if(open){ this.pal.hidden=true; this.placing=null; return; } const bin=BINS.find(b=>b.k===k); this.pal.dataset.bin=k; this.pal.hidden=false;
-    this.pal.innerHTML=bin.items.map((it,i)=>{ const c=this.norm(Object.assign({id:'p',x:0,y:0},it)); const g=geom(c); return `<div class="pit" data-i="${i}" title="${esc(itemName(it))} — перетащи на поле или щёлкни, потом щёлкни по полю"><svg class="ewbsvg" viewBox="-6 -14 ${g.w+12} ${g.h+22}">${draw(c)}</svg><span>${esc(itemName(it))}</span></div>`; }).join(''); }
+    this.pal.innerHTML=(bin.note?`<div style="padding:6px 8px;font-size:11px">${bin.note}</div>`:'')+bin.items.map((it,i)=>{ const c=this.norm(Object.assign({id:'p',x:0,y:0},it)); const g=geom(c); return `<div class="pit" data-i="${i}" title="${esc(itemName(it))} — перетащи на поле или щёлкни, потом щёлкни по полю"><svg class="ewbsvg" viewBox="-6 -14 ${g.w+12} ${g.h+22}">${draw(c)}</svg><span>${esc(itemName(it))}</span></div>`; }).join(''); }
   palDown(e){ const it=e.target.closest('.pit'); if(!it) return; e.preventDefault(); const bin=BINS.find(b=>b.k===this.pal.dataset.bin); const item=bin.items[+it.dataset.i];
     this.pal.querySelectorAll('.pit').forEach(x=>x.classList.toggle('on',x===it)); this.placing=item; this.cv.classList.add('placing');
     const sx=e.clientX, sy=e.clientY; let moved=false;

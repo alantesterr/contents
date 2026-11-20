@@ -239,7 +239,8 @@ const CSS=`
 .bcbx .bx-ftabs{display:flex;gap:0;padding:2px 4px 0;flex:none;flex-wrap:wrap}
 .bcbx .bx-ftabs span{border:1px solid #808080;border-bottom:0;padding:1px 10px;background:#c8c4bc;cursor:pointer;margin-right:1px}
 .bcbx .bx-ftabs span.on{background:#fff;font-weight:700}
-.bcbx .bx-ftabs span .x{margin-left:6px;color:#666}
+.bcbx .bx-ftabs span .x,.bcbx .bx-fsw .x{margin-left:6px;color:#666;font-weight:700;padding:0 3px;border-radius:2px;cursor:pointer}
+.bcbx .bx-ftabs span .x:hover,.bcbx .bx-fsw .x:hover{background:#c00;color:#fff}
 .bcbx .bx-edw{flex:1;min-height:0;position:relative;border:1px solid #808080;background:#fff}
 .bcbx .bx-edw .ced{position:absolute;inset:0;height:auto;border-radius:0;font-size:13px;--ed-bg:#fff;--ed-ink:#000;--ed-gut:#f4f4f4;--ed-k:#000;--ed-c:#000080;--ed-p:#008000;--ed-s:#0000ff;--ed-n:#0000ff}
 .bcbx .bx-edw .ro{position:absolute;inset:0;margin:0;overflow:auto;background:#fff;color:#000;border-radius:0;padding:8px 10px;font:13px Consolas,"Courier New",monospace;--ed-k:#000;--ed-c:#000080;--ed-p:#008000;--ed-s:#0000ff;--ed-n:#0000ff}
@@ -402,7 +403,8 @@ function makeIDE(){
   function allUnits(){ return [...prj.forms.map(p=>({un:p.un,form:p})),...prj.units.map(u=>({un:u.un,unit:u}))]; }
   function drawTabs(){
     const t=$('.bx-ftabs');
-    t.innerHTML=allUnits().map(u=>`<span data-un="${u.un}" class="${file&&file.un===u.un?'on':''}">${u.un}${u.form?'':' '}</span>`).join('')+`<span data-un="#prj" class="${file&&file.un==='#prj'?'on':''}">${prj.name}</span>`;
+    const canDel=u=>allUnits().length>1&&!(u.form&&prj.forms.length<=1);
+    t.innerHTML=allUnits().map(u=>`<span data-un="${u.un}" class="${file&&file.un===u.un?'on':''}">${u.un}${canDel(u)?`<b class="x" data-del="${u.un}" title="Удалить ${u.form?u.form.fn+' и ':''}${u.un} из проекта">×</b>`:''}</span>`).join('')+`<span data-un="#prj" class="${file&&file.un==='#prj'?'on':''}">${prj.name}</span>`;
     const b=$('.bx-btabs');
     if(file.un==='#prj') b.innerHTML=`<span class="on">${prj.name}.cpp</span><em>генерирует Builder (только чтение)</em>`;
     else { const u=allUnits().find(x=>x.un===file.un); const hasH=u&&(u.form||u.unit.h!=null);
@@ -445,7 +447,7 @@ function makeIDE(){
   $('.edh').addEventListener('codechange',()=>{ syncEditorOut(); save(); if(file.ext==='cpp'){ const p=prj.forms.find(x=>x.un===file.un); if(p&&p===P&&oiTab==='e') drawOI(); } pos(); });
   const pos=()=>{ const ta=edTa(); if(!ta||$('.edh').hidden) { $('.st-pos').textContent=' '; return; } const s=ta.value.slice(0,ta.selectionStart).split('\n'); $('.st-pos').textContent=`${s.length}: ${s[s.length-1].length+1}`; };
   $('.edh').addEventListener('keyup',pos); $('.edh').addEventListener('click',pos);
-  $('.bx-ftabs').addEventListener('click',e=>{ const s=e.target.closest('[data-un]'); if(s) openFile(s.dataset.un,'cpp'); });
+  $('.bx-ftabs').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ e.stopPropagation(); if(R){ status('Сначала останови программу (Ctrl+F2)'); return; } askRemove(d.dataset.del); return; } const s=e.target.closest('[data-un]'); if(s) openFile(s.dataset.un,'cpp'); });
   $('.bx-btabs').addEventListener('click',e=>{ const s=e.target.closest('[data-ext]'); if(s) openFile(file.un,s.dataset.ext); });
   function syncEvents(p){ const hs=new Set(p.handlers().map(h=>h.name)); for(const c of [p.form,...p.comps]) for(const ev in c.events) if(!hs.has(c.events[ev])) delete c.events[ev]; }
 
@@ -460,9 +462,10 @@ function makeIDE(){
   function drawFsw(){
     const w=$('.bx-fsw');
     if(prj.kind==='console'){ w.innerHTML='Консольное приложение — форм нет. Пиши код в Unit1.cpp и жми F9.'; return; }
-    w.innerHTML='Формы: '+prj.forms.map(p=>`<button data-f="${p.fn}" class="${p===P?'on':''}" title="${p.un}.cpp">${p.fn}${p.fn===prj.main?' ★':''}</button>`).join('')+`<button data-a="newForm" title="File → New → Form">+ Form</button>`;
+    const many=prj.forms.length>1;
+    w.innerHTML='Формы: '+prj.forms.map(p=>`<button data-f="${p.fn}" class="${p===P?'on':''}" title="${p.un}.cpp">${p.fn}${p.fn===prj.main?' ★':''}${many?`<b class="x" data-del="${p.un}" title="Удалить ${p.fn} из проекта">×</b>`:''}</button>`).join('')+`<button data-a="newForm" title="File → New → Form">+ Form</button>`;
   }
-  $('.bx-fsw').addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; if(b.dataset.f) selectForm(prj.forms.find(p=>p.fn===b.dataset.f)); else if(b.dataset.a) act(b.dataset.a); });
+  $('.bx-fsw').addEventListener('click',e=>{ const d=e.target.closest('[data-del]'); if(d){ e.stopPropagation(); askRemove(d.dataset.del); return; } const b=e.target.closest('button'); if(!b) return; if(b.dataset.f) selectForm(prj.forms.find(p=>p.fn===b.dataset.f)); else if(b.dataset.a) act(b.dataset.a); });
   function drawForm(){
     if(!P){ frm.hidden=true; return; } frm.hidden=false;
     const f=P.form.p; const menu=P.comps.find(c=>c.vcl==='TMainMenu');
@@ -621,14 +624,28 @@ function makeIDE(){
   }
   function removeDlg(){
     const items=allUnits().map(u=>[`${u.un}.cpp${u.form?' ('+u.form.fn+')':''}`,u.un]);
-    pickList('Remove From Project',items,un=>{
-      if(allUnits().length<=1){ status('В проекте должен остаться хотя бы один модуль'); return; }
-      const p=prj.forms.find(x=>x.un===un);
-      if(p){ if(prj.kind==='vcl'&&prj.forms.length<=1){ status('У приложения должна остаться хотя бы одна форма'); return; } prj.forms=prj.forms.filter(x=>x!==p); prj.auto=prj.auto.filter(f=>f!==p.fn); if(prj.main===p.fn) prj.main=prj.forms[0].fn; if(P===p){ P=prj.forms.find(f=>f.fn===prj.main); cur=P.form; } }
-      else prj.units=prj.units.filter(x=>x.un!==un);
-      if(file.un===un) file={un:allUnits()[0].un,ext:'cpp'};
-      save(); redrawAll(); status(un+' удалён из проекта');
-    },'Какой модуль убрать из проекта?');
+    pickList('Remove From Project',items,un=>askRemove(un),'Какой модуль убрать из проекта?');
+  }
+  // удалить форму или модуль: сначала спросить
+  function askRemove(un){
+    const p=prj.forms.find(x=>x.un===un);
+    if(allUnits().length<=1){ status('В проекте должен остаться хотя бы один модуль'); return; }
+    if(p&&prj.kind==='vcl'&&prj.forms.length<=1){ status('У приложения должна остаться хотя бы одна форма'); return; }
+    const what=p?`форму <b>${p.fn}</b> и её модуль <b>${un}.cpp / ${un}.h</b>`:`модуль <b>${un}.cpp${prj.units.find(x=>x.un===un).h!=null?' / '+un+'.h':''}</b>`;
+    dialog('Remove From Project',`<p>Удалить ${what} из проекта?</p><p style="font-size:11px">Код этого модуля пропадёт. Строки <code>#include "${un}.h"</code> в других модулях тоже уберутся.</p>`,
+      [['Yes',()=>{ doRemove(un); return true; }],['No']]);
+  }
+  function doRemove(un){
+    syncEditorOut();
+    const p=prj.forms.find(x=>x.un===un);
+    if(p){ prj.forms=prj.forms.filter(x=>x!==p); prj.auto=prj.auto.filter(f=>f!==p.fn); if(prj.main===p.fn) prj.main=prj.forms[0].fn; if(P===p){ P=prj.forms.find(f=>f.fn===prj.main)||prj.forms[0]; cur=P.form; } }
+    else prj.units=prj.units.filter(x=>x.un!==un);
+    const inc=new RegExp(`^[ \\t]*#include\\s*"${un}\\.h"[^\\n]*\\n?`,'gm');
+    for(const f of prj.forms) f.code=f.code.replace(inc,'');
+    for(const u of prj.units){ u.cpp=u.cpp.replace(inc,''); if(u.h) u.h=u.h.replace(inc,''); }
+    const keep=file&&file.un!==un?file:{un:P?P.un:allUnits()[0].un,ext:'cpp'};
+    file=null; save(); drawFsw(); drawForm(); drawOI(); openFile(keep.un,keep.ext);
+    status(`${p?p.fn+' и '+un:un} удалены из проекта`);
   }
   function newOther(){
     const b=dialog('New Items',`<div class="icons">
@@ -1044,6 +1061,7 @@ function makeIDE(){
     // дизайнер: Del, стрелки, Ctrl+C/V
     if(!P||!cur) return;
     if(k==='Delete'&&cur!==P.form){ e.preventDefault(); act('del'); return; }
+    if(k==='Delete'&&cur===P.form&&prj.forms.length>1){ e.preventDefault(); askRemove(P.un); return; }
     if(c&&(k==='c'||k==='с')&&cur!==P.form){ e.preventDefault(); act('copy'); return; }
     if(c&&(k==='v'||k==='м')){ e.preventDefault(); act('paste'); return; }
     if(k.startsWith('Arrow')&&cur!==P.form){ e.preventDefault(); const st=c?1:8; const dx=k==='ArrowLeft'?-st:k==='ArrowRight'?st:0, dy=k==='ArrowUp'?-st:k==='ArrowDown'?st:0;

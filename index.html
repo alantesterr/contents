@@ -255,6 +255,7 @@ details.sol>.solve{margin:.4em 0 1em}
 .ewbw .e-wb{padding:5px;background:#d4d0c8;overflow:auto}
 .ewbw .e-status{border-top:1px solid #fff;padding:2px 6px;font-size:11px;background:#d4d0c8;box-shadow:inset 0 1px 0 #808080}
 .ewbsvg{display:block;font-family:Arial,sans-serif;max-width:100%;height:auto}
+.qen{font-size:13.5px;color:var(--muted);margin:-4px 0 10px;font-style:italic}
 .ewbsvg .ld{stroke:#000;stroke-width:1.2}
 .ewbsvg .bd{fill:#fff;stroke:#000;stroke-width:1.3}
 .ewbsvg .ln{fill:none;stroke:#000;stroke-width:1.3}
@@ -706,6 +707,13 @@ td .fr{font:italic 15px "Times New Roman",serif}
       <button role="tab" id="tab-t7" aria-selected="false" data-t="t7" title="Тема 7">7</button>
       <button role="tab" id="tab-t8" aria-selected="false" data-t="t8" title="Тема 8">8</button>
       <button role="tab" id="tab-t9" aria-selected="false" data-t="t9" title="Тема 9">9</button>
+      <button role="tab" id="tab-t10" aria-selected="false" data-t="t10" title="Тема 10. Кэш-память, ROM, BIOS">10</button>
+      <button role="tab" id="tab-t11" aria-selected="false" data-t="t11" title="Тема 11. DRAM, SRAM, модули памяти">11</button>
+      <button role="tab" id="tab-t12" aria-selected="false" data-t="t12" title="Тема 12. Характеристики процессора, режимы, адресация">12</button>
+      <button role="tab" id="tab-t13" aria-selected="false" data-t="t13" title="Тема 13. Адресное пространство, код Хэмминга">13</button>
+      <button role="tab" id="tab-t14" aria-selected="false" data-t="t14" title="Тема 14. Шины">14</button>
+      <button role="tab" id="tab-t15" aria-selected="false" data-t="t15" title="Тема 15. Прерывания, приоритет, арбитраж">15</button>
+      <button role="tab" id="tab-t16" aria-selected="false" data-t="t16" title="Electronics Workbench — свободная сборка схем и задания с автопроверкой">EWB</button>
     </div>
     <button class="btn" id="solAll">Открыть все решения</button>
     <button class="btn" id="edBtn" hidden>✎ Редактор</button>
@@ -815,7 +823,10 @@ td .fr{font:italic 15px "Times New Roman",serif}
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Number of combinations with N bits</td><td>2ᴺ (16 bits → 65 536)</td></tr><tr><td>8-bit unsigned range</td><td>0 … 255</td></tr><tr><td>8-bit signed range</td><td>−128 … +127</td></tr><tr><td>16-bit unsigned</td><td>0 … 65 535; signed = −32 768 … +32 767</td></tr><tr><td>Two's complement</td><td>invert all bits and add 1</td></tr><tr><td>Double word</td><td>32 bits; word = 16 bits; byte = 8 bits</td></tr><tr><td>Carry vs overflow</td><td>carry: unsigned result does not fit; overflow (OF): signed result has the wrong sign</td></tr><tr><td>Hexadecimal digit</td><td>4 bits (B3h = 1011 0011)</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t1-lab">Лаба 1. Представление данных в памяти компьютера</h2>
@@ -934,7 +945,10 @@ td .fr{font:italic 15px "Times New Roman",serif}
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>IEEE 754 single precision</td><td>32 bits: sign 1, exponent 8, mantissa 23</td></tr><tr><td>Double precision</td><td>64 bits: 1 + 11 + 52</td></tr><tr><td>Half precision</td><td>16 bits: 1 + 5 + 10</td></tr><tr><td>Exponent bias</td><td>127 (single), 1023 (double), 15 (half)</td></tr><tr><td>The most significant bit</td><td>sign of the number</td></tr><tr><td>Hidden (implicit) bit</td><td>the leading 1 of a normalized mantissa is not stored</td></tr><tr><td>Infinity</td><td>exponent all 1s, mantissa 0; NaN = exponent all 1s, mantissa ≠ 0</td></tr><tr><td>Why 0.1 is not exact</td><td>it is an infinite binary fraction</td></tr><tr><td>Coprocessor (FPU) is used for</td><td>floating-point operations</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t2-lab">Лабораторная работа №2. Представление вещественных чисел в памяти компьютера</h2>
@@ -1120,7 +1134,10 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Logic elements AND, OR, NAND, NOR, XOR are called</td><td>gates</td></tr><tr><td>Disjunction</td><td>OR; conjunction = AND</td></tr><tr><td>Modulo-2 addition</td><td>XOR (exclusive OR)</td></tr><tr><td>Universal gates</td><td>NAND and NOR (any function can be built from them)</td></tr><tr><td>De Morgan's law</td><td>(A·B)' = A' + B';  (A + B)' = A'·B'</td></tr><tr><td>Majority function (2 of 3)</td><td>AB + AC + BC</td></tr><tr><td>Truth table for n inputs</td><td>2ⁿ rows</td></tr><tr><td>NOR with A</td><td>0, B = 0 = 1</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t3-lab">Лабораторная работа №3. Работа с Electronics Workbench. Проектирование простейших логических схем</h2>
@@ -1287,7 +1304,10 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>DNF / SOP</td><td>sum of products (OR of ANDs)</td></tr><tr><td>CNF / POS</td><td>product of sums (AND of ORs)</td></tr><tr><td>Minterm</td><td>AND of all variables, equals 1 on exactly one row</td></tr><tr><td>Maxterm</td><td>OR of all variables, equals 0 on exactly one row</td></tr><tr><td>Karnaugh map order</td><td>Gray code: 00, 01, 11, 10</td></tr><tr><td>Allowed groups</td><td>1, 2, 4, 8… adjacent cells, wrapping around the edges</td></tr><tr><td>Σ(1,3,5,7) for F(A,B,C)</td><td>C</td></tr><tr><td>Σ(1,3,5,7,10,11,14,15) for 4 variables</td><td>A'D + AC</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t4-lab4">Лаба. Синтез комбинационных логических схем на основе таблиц истинности и логических выражений в EWB</h2>
@@ -1538,7 +1558,10 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
 <div class="widget" id="muxSim"></div>
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Combinational circuit</td><td>outputs depend only on current inputs (no memory)</td></tr><tr><td>Half adder</td><td>Sum = A ⊕ B, Carry = A·B</td></tr><tr><td>Full adder</td><td>S = A ⊕ B ⊕ Cin, Cout = AB + Cin(A ⊕ B)</td></tr><tr><td>Full adder from half adders</td><td>2 half adders + 1 OR gate</td></tr><tr><td>Decoder</td><td>n inputs → 2ⁿ outputs (binary → one-hot)</td></tr><tr><td>2-to-4 decoder needs</td><td>2 NOT and 4 AND gates</td></tr><tr><td>Encoder</td><td>2ⁿ inputs → n outputs; 4-to-2: A1 = I2 + I3, A0 = I1 + I3</td></tr><tr><td>Multiplexer</td><td>selects one of several inputs (parallel → serial)</td></tr><tr><td>Demultiplexer</td><td>routes one input to one of several outputs</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t5-lab">Лабораторная работа. Арифметические сумматоры</h2>
@@ -1605,6 +1628,45 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
     <p><b>Дешифратор:</b> D0 = Ā1Ā0, D1 = Ā1A0, D2 = A1Ā0, D3 = A1A0 — <b>2 NOT + 4 AND</b>. При любом коде горит ровно одна лампочка.</p>
     <div class="ewb" data-c="dec24"></div>
     <p><b>Шифратор 4→2:</b> I0 → 00, I1 → 01, I2 → 10, I3 → 11. <b>A1 = I2 + I3, A0 = I1 + I3</b> — два элемента OR (I0 никуда не подключается). Если активны два входа — ответ неоднозначен (I1 + I2 дадут 11, как I3).</p>
+  </div></details>
+
+  <div class="lab-task" id="t5-z5"><span class="tl">Дополнительно · дешифратор 3→8, шифраторы 4→2 и 8→3, приоритетный шифратор</span>
+    <p>Соберите в EWB: дешифратор 3→8 только из элементов NOT и AND; шифратор 4→2 и шифратор 8→3 из элементов OR; приоритетный шифратор 4→2 с выходом V («есть запрос»). Для каждой схемы составьте таблицу истинности и проверьте все допустимые комбинации входов.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение + 4 схемы в окнах EWB + сборка с автопроверкой</summary><div class="solve">
+    <p><b>Дешифратор n → 2ⁿ</b> («decoder»): n входов, 2ⁿ выходов, при любом коде активен <b>ровно один</b> выход — тот, чей номер записан на входах. Каждый выход — это <b>минтерм</b> входных переменных, поэтому схема всегда одинаковая: <b>n элементов NOT</b> (получить инверсии) и <b>2ⁿ элементов AND</b> на n входов.</p>
+    <div class="tw"><table><tr><th>A2 A1 A0</th><th>активный выход</th><th>его формула</th></tr><tr><td>000</td><td>Y0</td><td>Ā2·Ā1·Ā0</td></tr><tr><td>001</td><td>Y1</td><td>Ā2·Ā1·A0</td></tr><tr><td>010</td><td>Y2</td><td>Ā2·A1·Ā0</td></tr><tr><td>011</td><td>Y3</td><td>Ā2·A1·A0</td></tr><tr><td>100</td><td>Y4</td><td>A2·Ā1·Ā0</td></tr><tr><td>101</td><td>Y5</td><td>A2·Ā1·A0</td></tr><tr><td>110</td><td>Y6</td><td>A2·A1·Ā0</td></tr><tr><td>111</td><td>Y7</td><td>A2·A1·A0</td></tr></table></div>
+    <p>Итого для 3→8: <span class="answer">3 NOT + 8 AND (по 3 входа)</span>. Для 2→4 — 2 NOT + 4 AND (этот вопрос дважды есть в базе тестов).</p>
+    <div class="ewb" data-c="dec38"></div>
+    <div class="ewb-go"><button class="btn pri" data-ewbtask="t5_dec38">🛠 Собрать 3→8 самому (автопроверка)</button><button class="btn" data-ewbtask="t5_dec24">🛠 Собрать 2→4 самому</button><button class="btn" data-ewbopen="dec38">Открыть схему во вкладке EWB</button></div>
+    <p><b>Шифратор 2ⁿ → n</b> («encoder») — обратное устройство: на входе <b>унитарный</b> код (одна единица), на выходе — номер этой единицы в двоичном виде. Каждый выходной бит = <b>OR</b> тех входов, у чьих номеров этот бит равен 1:</p>
+<pre>4→2:  A1 = I2 + I3          A0 = I1 + I3
+8→3:  A2 = I4 + I5 + I6 + I7
+      A1 = I2 + I3 + I6 + I7
+      A0 = I1 + I3 + I5 + I7     (I0 ни к чему не подключается: код 000 получается сам)</pre>
+    <div class="ewb" data-c="enc42"></div>
+    <div class="ewb" data-c="enc83"></div>
+    <div class="trap"><b>Ограничение простого шифратора:</b> если включить сразу I1 и I2, выйдет 11 — как будто I3. Поэтому в условии всегда «активен только один вход». Ещё одна проблема — код 00 и при I0 = 1, и когда не нажато ничего.</div>
+    <p><b>Приоритетный шифратор</b> решает обе проблемы: при нескольких запросах выдаёт номер <b>старшего</b>, а отдельный выход <b>V</b> (Valid) = 1, если есть хоть один запрос. Для 4→2: <b>A1 = I3 + I2, A0 = I3 + I1·Ī2, V = I0 + I1 + I2 + I3</b>. Именно так контроллер прерываний (тема 15) выбирает, чей запрос обслужить первым.</p>
+    <div class="ewb" data-c="enc42p"></div>
+    <div class="ewb-go"><button class="btn pri" data-ewbtask="t5_enc42">🛠 Шифратор 4→2 (автопроверка)</button><button class="btn" data-ewbtask="t5_enc83">🛠 Шифратор 8→3</button><button class="btn" data-ewbtask="t5_enc42p">🛠 Приоритетный 4→2 + V</button></div>
+    <p><b>Где это в компьютере:</b> дешифратор адреса выбирает микросхему памяти или порт по старшим битам адреса (тема 13) и регистр по полю команды; шифратор кодирует нажатую клавишу и номер запроса прерывания.</p>
+  </div></details>
+
+  <div class="lab-task" id="t5-z6"><span class="tl">Дополнительно · сумматоры только из вентилей</span>
+    <p>Соберите полный сумматор из логических элементов (без готового Full-Adder): 2 XOR, 2 AND и 1 OR. На его основе соберите 4-разрядный сумматор с последовательным переносом и проверьте примеры 7 + 5 и 15 + 1.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение + схемы из вентилей в окнах EWB + автопроверка</summary><div class="solve">
+    <p>Полный сумматор — это два полусумматора и OR, только «раскрытые» до вентилей: <b>S = A ⊕ B ⊕ Ci</b>, <b>Co = A·B + Ci·(A ⊕ B)</b>. Первый XOR и первый AND — первый полусумматор, второй XOR и AND — второй, OR объединяет переносы.</p>
+    <div class="ewb" data-c="fa_gates"></div>
+    <p><b>4 разряда:</b> 4 таких блока (20 вентилей), перенос Co разряда i идёт на вход Ci разряда i+1. Это сумматор <b>с последовательным (сквозным) переносом</b>, ripple carry: старший бит суммы правильный только после того, как перенос «пробежит» через все младшие разряды. Задержка растёт пропорционально числу разрядов — поэтому в настоящих АЛУ ставят схему <b>ускоренного переноса</b> (carry look-ahead), которая вычисляет все переносы сразу.</p>
+<pre>  0111  (7)          1111  (15)
++ 0101  (5)        + 0001  (1)
+  ────               ────
+ 01100  (12 = Ch)   10000  (16: S = 0000, Co = 1 — переполнение 4 бит)</pre>
+    <div class="ewb" data-c="add4g"></div>
+    <div class="ewb-go"><button class="btn pri" data-ewbtask="t5_fa">🛠 Полный сумматор из вентилей (автопроверка)</button><button class="btn" data-ewbtask="t5_add4">🛠 4-разрядный сумматор (512 комбинаций)</button><button class="btn" data-ewbtask="t5_ha">🛠 Полусумматор</button></div>
+    <div class="trap"><b>Частые ошибки:</b> подать на второй XOR не выход первого XOR, а A; забыть OR и соединить переносы проводом (два выхода нельзя соединять); не подключить Ci младшего разряда — он должен быть 0.</div>
   </div></details>
 
   <h2 class="testshead" id="t5-test">Тесты темы 5</h2>
@@ -1715,7 +1777,10 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Flip-flop / latch</td><td>stores one bit (sequential element)</td></tr><tr><td>RS on NOR forbidden input</td><td>S = R = 1</td></tr><tr><td>RS on NAND forbidden input</td><td>S' = R' = 0</td></tr><tr><td>Delay flip-flop</td><td>D flip-flop</td></tr><tr><td>Toggle mode</td><td>T flip-flop (or JK with J = K = 1)</td></tr><tr><td>JK with J</td><td>K = 1 = output toggles on every clock edge</td></tr><tr><td>Edge-triggered vs level-triggered</td><td>changes only at the clock edge vs whenever clock = 1</td></tr><tr><td>Sequential circuits include</td><td>memory devices, registers, counters</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t6-lab">Лабораторная работа. Триггеры</h2>
@@ -1773,6 +1838,46 @@ E = 4 + 127 = 131 = 1000 0011,  S = 0,  M = 0101101 000…
     <p>Слова J K: 00 (хранение), 10 (Q = 1), 01 (Q = 0), 11 (toggle — Q меняется на каждом такте). В режиме 11 Q — меандр с частотой в 2 раза ниже C: деление частоты, основа счётчиков (тема 7). JK в EWB срабатывает по <b>заднему фронту</b> (1 → 0) — кружок у входа C.</p>
     <div class="ewb" data-c="jk_wg"></div>
     <div class="trap"><b>Частые ошибки:</b> Q не меняется — тактовый вход не подключён или PR/CLR висят в активном уровне; перепутаны биты в поле Binary (правый символ — выход 0).</div>
+  </div></details>
+
+  <aside class="add"><span class="tag">дополнение · суть триггеров и чем они отличаются</span>
+    <p><b>Триггер</b> — схема, которая <b>помнит один бит</b>. У комбинационной схемы (сумматор, шифратор) выход зависит только от входов «сейчас»; у триггера — ещё и от того, что было раньше. Память получается из <b>обратной связи</b>: выход элемента заведён обратно на вход другого, и пара NAND (или NOR) «держит» сама себя в одном из двух устойчивых состояний.</p>
+    <p>Все триггеры отличаются двумя вещами: <b>какие входы</b> (что можно приказать) и <b>когда</b> они слушают входы (всегда, пока такт = 1, или только в момент фронта).</p>
+  </aside>
+  <div class="tw"><table>
+    <tr><th>Триггер</th><th>Входы</th><th>Режимы (что делает)</th><th>Когда реагирует</th><th>Запрещено</th><th>Из чего собрать</th><th>Где применяют</th></tr>
+    <tr><td><b>RS на NOR</b></td><td>S, R (активны 1)</td><td>S=1 → Q=1; R=1 → Q=0; 00 — хранение</td><td>сразу (асинхронный)</td><td>S=R=1 (Q=Q′=0)</td><td>2 NOR накрест</td><td>защёлка кнопки, основа всех остальных</td></tr>
+    <tr><td><b>RS на NAND</b> (S′R′)</td><td>S′, R′ (активны 0)</td><td>S′=0 → Q=1; R′=0 → Q=0; 11 — хранение</td><td>сразу</td><td>S′=R′=0 (Q=Q′=1)</td><td>2 NAND накрест</td><td>то же; так устроены PR/CLR других триггеров</td></tr>
+    <tr><td><b>Синхронный RS</b></td><td>S, R, C</td><td>как RS, но только при C=1</td><td>по <b>уровню</b> C=1</td><td>S=R=1 при C=1</td><td>2 NAND на входе + RS на NAND</td><td>переход к D-триггеру</td></tr>
+    <tr><td><b>D-защёлка</b> (latch)</td><td>D, C</td><td>C=1: Q=D («прозрачна»); C=0: хранит</td><td>по <b>уровню</b></td><td>нет — R=D′ получается через NOT</td><td>NOT + синхронный RS</td><td>буферы, регистры-защёлки</td></tr>
+    <tr><td><b>D-триггер</b> (flip-flop)</td><td>D, C (+PR, CLR)</td><td>Q := D</td><td>по <b>фронту</b> C 0→1</td><td>нет</td><td>2 D-защёлки (master–slave)</td><td><b>регистры</b>, конвейер, память</td></tr>
+    <tr><td><b>JK-триггер</b></td><td>J, K, C (+PR, CLR)</td><td>10 — Q=1; 01 — Q=0; 00 — хранит; <b>11 — переключает</b></td><td>по фронту/спаду C</td><td><b>нет</b> — 11 стало полезным</td><td>RS master–slave + обратная связь Q, Q′ на входы (9 вентилей)</td><td><b>счётчики</b>, делители частоты</td></tr>
+    <tr><td><b>T-триггер</b></td><td>T, C</td><td>T=1 — переключает; T=0 — хранит</td><td>по фронту/спаду</td><td>нет</td><td>JK с J=K=T (или D с D=Q′⊕T)</td><td>счётчики (каждый делит частоту на 2)</td></tr>
+  </table></div>
+  <aside class="add"><span class="tag">дополнение · как они вырастают друг из друга</span>
+    <p><b>RS</b> → добавили вход разрешения C → <b>синхронный RS</b> → подали R = S′ через инвертор, чтобы не было запрета → <b>D-защёлка</b> → поставили две защёлки друг за другом с противоположным C (ведущая и ведомая) → <b>D-триггер по фронту</b>. Если в синхронный RS master–slave завести обратную связь с выходов (Q′ на вход установки, Q на вход сброса), запрещённая комбинация 11 превращается в «переключение» → <b>JK</b>. Соединили J и K → <b>T</b>.</p>
+    <p><b>Уровень или фронт?</b> Защёлка по уровню при C = 1 пропускает все изменения D насквозь — если её выход через логику вернётся на вход, схема «побежит». Триггер по фронту берёт D в одно мгновение, поэтому на нём строят регистры и счётчики: за один такт каждый разряд меняется ровно один раз.</p>
+  </aside>
+  <div class="lab-task" id="t6-z4"><span class="tl">Дополнительно · сборка всех триггеров из логических элементов</span>
+    <p>Соберите в EWB из логических элементов (без готовых Flip-Flop): RS-триггер на NOR и на NAND, синхронный RS-триггер, D-защёлку, D-триггер по фронту (master–slave), JK-триггер (master–slave) и T-триггер. Для каждого снимите временную диаграмму Logic Analyzer и проверьте все режимы.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение + 7 схем из вентилей в окнах EWB + автопроверка</summary><div class="solve">
+    <p><b>1. RS на NOR.</b> Q = (R + Q′)′, Q′ = (S + Q)′. Щёлкай S и R: отпустил S — Q остаётся 1. S = R = 1 гасит обе лампы — это и есть запрет (после снятия обоих входов состояние непредсказуемо).</p>
+    <div class="ewb" data-c="rs_nor"></div>
+    <p><b>2. RS на NAND.</b> То же, но входы инверсные: команда подаётся нулём. Хранение — 11, запрет — 00.</p>
+    <div class="ewb" data-c="rs_nand_sw"></div>
+    <p><b>3. Синхронный RS.</b> Два входных NAND пропускают S и R только при C = 1.</p>
+    <div class="ewb" data-c="rs_sync"></div>
+    <p><b>4. D-защёлка.</b> Синхронный RS, у которого R = D′ (инвертор) — запрещённой комбинации больше нет.</p>
+    <div class="ewb" data-c="d_latch"></div>
+    <p><b>5. D-триггер по фронту.</b> Две D-защёлки: ведущая открыта при C = 0, ведомая — при C = 1. Зелёная лампа — выход ведущей: видно, что она следит за D, а Q меняется только в момент 0→1.</p>
+    <div class="ewb" data-c="d_ms"></div>
+    <p><b>6. JK-триггер master–slave</b> (9 вентилей: 2 NAND на 3 входа, 6 NAND на 2 входа, 1 NOT). Длинные провода сверху и снизу — обратная связь Q′ → m1 и Q → m2: из-за неё при J = K = 1 триггер не может одновременно и установиться, и сброситься, поэтому переключается.</p>
+    <div class="ewb" data-c="jk_ms"></div>
+    <p><b>7. T-триггер</b> — тот же JK, у которого J и K соединены в один вход T.</p>
+    <div class="ewb" data-c="t_ms"></div>
+    <div class="ewb-go"><button class="btn pri" data-ewbtask="t6_rsnor">🛠 RS на NOR (автопроверка)</button><button class="btn" data-ewbtask="t6_dlatch">🛠 D-защёлка</button><button class="btn" data-ewbtask="t6_dff">🛠 D-триггер по фронту</button><button class="btn" data-ewbtask="t6_jk">🛠 JK master–slave</button><button class="btn" data-ewbtask="t6_t">🛠 T-триггер</button></div>
+    <div class="trap"><b>Частые ошибки:</b> забыть перекрёстную связь (без неё нет памяти); подать на NAND-защёлку единицы как «команду» (у NAND команда — ноль); в JK забыть, что срабатывание по <b>спаду</b> — импульс C = нажать C два раза.</div>
   </div></details>
 
   <h2 class="testshead" id="t6-test">Тесты темы 6</h2>
@@ -1863,7 +1968,10 @@ Q2   ___________┌───────────┐__     период ×8 (
 
 
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Counter</td><td>sequential circuit that counts clock pulses</td></tr><tr><td>Modulus (MOD)</td><td>number of states; n flip-flops → up to 2ⁿ</td></tr><tr><td>3-bit counter has</td><td>8 states (0…7)</td></tr><tr><td>Asynchronous (ripple) counter</td><td>each flip-flop is clocked by the previous one</td></tr><tr><td>Synchronous counter</td><td>all flip-flops share one clock</td></tr><tr><td>Ripple counter drawback</td><td>accumulated propagation delay, glitches</td></tr><tr><td>Decade (MOD-10) counter</td><td>4 flip-flops, reset at 1010 by NAND(Q3, Q1)</td></tr><tr><td>Down counter (ripple)</td><td>clock the next stage from Q' instead of Q</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t7-lab">Лабораторная работа. Счётчики</h2>
@@ -1934,6 +2042,25 @@ Q2   ___________┌───────────┐__     f/8
      0  1  2  3  4  5  6  7  0</pre>
     <p><b>Недостаток:</b> задержки складываются (n × t_зад), при переходе 3 → 4 на выходах кратко мелькают 2 и 0 (ложные коды).</p>
     <p><b>MOD-10:</b> таблица 0000 … 1001, на 1010 — NAND(Q3, Q1) = 0 → CLR → 0000. Схема — в примере 3 выше. Код 1010 живёт несколько наносекунд — «иголка» на диаграмме.</p>
+  </div></details>
+
+  <div class="lab-task" id="t7-z5"><span class="tl">Дополнительно · все три задания лабы в окнах EWB и с автопроверкой</span>
+    <p>Соберите в EWB схемы заданий 1–3 (вычитающий 5-разрядный асинхронный, синхронный 6-разрядный, по модулю M) и снимите временные диаграммы Logic Analyzer. Сравните диаграммы асинхронного и синхронного счётчиков.</p>
+  </div>
+  <details class="sol"><summary>Готовые схемы заданий 1–3 в окнах EWB (кнопка «Такт» или «Авто») + сборка с автопроверкой</summary><div class="solve">
+    <p><b>Задание 1.</b> Вычитающий: такт следующему триггеру берётся с <b>Q′</b>. Лампы на прямых выходах: 0 → 31 → 30 → …</p>
+    <div class="ewb" data-c="cnt_down5"></div>
+    <p><b>Задание 2.</b> Синхронный: общий CLK, Jk = Kk = Q0·Q1·…·Q(k−1) — цепочка из 4 AND. В Logic Analyzer все переключения стоят ровно под фронтом такта.</p>
+    <div class="ewb" data-c="cnt_sync6"></div>
+    <p><b>Задание 3.</b> По модулю M — выбери свой M в списке над схемой (M = номер по списку + 3). Схема сама подберёт число триггеров и входы NAND.</p>
+    <div class="ewb" data-c="cnt_modM"></div>
+    <div class="ewb-go"><button class="btn pri" data-ewbtask="t7_down5">🛠 Задание 1: вычитающий (автопроверка)</button><button class="btn" data-ewbtask="t7_sync6">🛠 Задание 2: синхронный 6-разрядный</button><button class="btn" data-ewbtask="t7_mod10">🛠 Задание 3: MOD-10</button><button class="btn" data-ewbtask="t7_up3">🛠 Пример: 3-разрядный суммирующий</button></div>
+    <div class="tw"><table><tr><th></th><th>Асинхронный (ripple)</th><th>Синхронный</th></tr>
+      <tr><td>Такт</td><td>только на первый триггер, дальше Q → C следующего</td><td>на все триггеры одновременно</td></tr>
+      <tr><td>Логика</td><td>не нужна (J = K = 1)</td><td>AND-цепочка: Jk = Kk = Q0·…·Q(k−1)</td></tr>
+      <tr><td>Задержка</td><td>складывается: n × t<sub>зад</sub>, мелькают ложные коды</td><td>одна t<sub>зад</sub> триггера + AND</td></tr>
+      <tr><td>Скорость</td><td>ниже</td><td>выше — поэтому в процессоре синхронные</td></tr>
+      <tr><td>Сложность</td><td>проще</td><td>больше элементов</td></tr></table></div>
   </div></details>
 
   <h2 class="testshead" id="t7-test">Тесты темы 7</h2>
@@ -2162,7 +2289,10 @@ STORE [200], R1   ; Память[200] ← R1</pre>
 
 <!-- ============ ЛАБЫ 8 -->
 <div class="read">
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>CPU main blocks</td><td>ALU, control unit, registers</td></tr><tr><td>Instruction cycle</td><td>fetch → decode → execute</td></tr><tr><td>Program counter (IP)</td><td>holds the address of the next instruction</td></tr><tr><td>ISA</td><td>instruction set architecture</td></tr><tr><td>RISC</td><td>reduced instruction set: simple, fixed-length instructions, load/store</td></tr><tr><td>CISC</td><td>complex instruction set: many instructions, variable length</td></tr><tr><td>Superscalar</td><td>one pipeline with many functional units (several instructions per clock)</td></tr><tr><td>LOAD / STORE</td><td>move data from memory to a register / from a register to memory</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t8-start">Лабы темы 8</h2>
@@ -2614,7 +2744,10 @@ END main</pre>
   <p style="color:var(--muted);font-size:14px"><b>Литература:</b> Intel SDM Vol. 1, гл. 3 (§3.3, 3.4, 3.4.1, 3.4.3, 3.5), гл. 7; Patterson &amp; Hennessy, гл. 2 и 5; Stallings — «Internal Memory», «Instruction Sets», «Processor Structure and Function». <b>Дополнение к словарю:</b> TLB — буфер трансляции адресов; MMU — блок управления памятью; TLB Hit / Miss — попадание / промах TLB; Page Tables — таблицы страниц; Page Fault — исключение при обращении к странице, когда отображение отсутствует либо нарушены условия доступа; не равнозначно промаху TLB.</p>
 
   <!-- ЛАБА 9 -->
-  </div></div></details>
+    <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Memory hierarchy</td><td>registers → cache → RAM → disk (faster ↔ larger)</td></tr><tr><td>Why hierarchy</td><td>speed, capacity and cost trade-off</td></tr><tr><td>General-purpose registers</td><td>AX, BX, CX, DX (EAX…)</td></tr><tr><td>Stack pointer</td><td>SP — top of the stack</td></tr><tr><td>Flags register</td><td>status flags CF, ZF, SF, OF…</td></tr><tr><td>Instruction pointer</td><td>IP — next instruction</td></tr><tr><td>State of an interrupted program is saved in</td><td>the stack</td></tr><tr><td>Smallest addressable unit</td><td>byte</td></tr><tr><td>Cache is usually built from</td><td>SRAM</td></tr></table></div>
+  </aside>
+</div></div></details>
 <div class="read">
 
   <h2 class="labhead" id="t9-lab">Лаба темы 9. Иерархия памяти и регистры процессора</h2>
@@ -2788,6 +2921,691 @@ end start</pre>
 <section id="c14" class="topic" hidden></section>
 <section id="c15" class="topic" hidden></section>
 <section id="c16" class="topic" hidden></section>
+<!-- ===================================================== ТЕМА 10 -->
+<section id="t10" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 10 · лекция, лаба, тесты (13 из базы + 20)</div>
+    <h1>Кэш-память. Многоуровневая кэш-память. Типы основной памяти. ROM-память. BIOS</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t10-lab">Лаба</a><a href="#t10-q">Вопросы УМКД</a><a href="#t10-test">Тесты</a><a href="#t10-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t10-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД (цель и тезисы) + подробные дополнения, симулятор кэша и шпаргалка на английском.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 10. Кэш-память. Многоуровневая кэш-память. Типы основной памяти. ROM-память. BIOS</b></p>
+  <p><b>Цель лекции:</b> Изучить назначение и принципы работы кэш-памяти, особенности многоуровневой организации быстродействующей памяти, а также роль постоянной памяти и BIOS в функционировании компьютера.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Назначение кэш-памяти и причины её использования.</li><li>Принципы временной и пространственной локальности обращений к памяти.</li><li>Организация уровней кэш-памяти L1, L2 и L3.</li><li>Попадания и промахи кэша, влияние на производительность процессора.</li><li>Основные способы размещения и замещения данных в кэше.</li><li>Назначение и особенности постоянной памяти ROM.</li><li>Разновидности ROM, PROM, EPROM и EEPROM.</li><li>BIOS, его функции и роль при начальной загрузке компьютера.</li></ul>
+  <aside class="add"><span class="tag">дополнение · зачем нужен кэш</span>
+    <p>Процессор выполняет команду за доли наносекунды, а чтение из оперативной памяти (DRAM) занимает 60–100 нс — сотни тактов простоя. <b>Кэш</b> — небольшая, но очень быстрая память (SRAM) прямо на кристалле процессора, где лежат <b>копии</b> тех участков ОЗУ, к которым обращались недавно. Программист кэш не видит и не адресует: процессор сам решает, что в нём держать.</p>
+    <p>Кэш работает, потому что программы обращаются к памяти не хаотично, а с <b>локальностью</b>:</p>
+    <ul><li><b>временная</b> (temporal) — к тому, что использовали только что, скоро обратятся снова: переменная цикла, вершина стека, тело цикла;</li><li><b>пространственная</b> (spatial) — после адреса A скоро понадобятся A+1, A+2…: проход по массиву, последовательные команды. Поэтому из ОЗУ в кэш копируют сразу целую <b>строку</b> (cache line, обычно 64 байта).</li></ul>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · уровни L1, L2, L3</span>
+    <div class="tw"><table><tr><th>Уровень</th><th>Объём (типично)</th><th>Задержка</th><th>Где</th></tr><tr><td>Регистры</td><td>сотни байт</td><td>0 тактов</td><td>в ядре</td></tr><tr><td><b>L1</b></td><td>32–64 КБ на ядро, делится на L1i (команды) и L1d (данные)</td><td>~4 такта, 1 нс</td><td>в каждом ядре</td></tr><tr><td><b>L2</b></td><td>256 КБ – 2 МБ на ядро</td><td>~12 тактов</td><td>в каждом ядре</td></tr><tr><td><b>L3</b></td><td>8–64 МБ на весь процессор</td><td>~40 тактов</td><td>общий для ядер</td></tr><tr><td>ОЗУ (DRAM)</td><td>8–64 ГБ</td><td>~200 тактов, 60–100 нс</td><td>модули на плате</td></tr></table></div>
+    <p>Процессор ищет данные сначала в L1, при промахе — в L2, потом в L3, и только потом идёт в ОЗУ. Раздельный кэш команд и данных в L1 (как в <b>Pentium</b> — этот вопрос есть в тестах) позволяет одновременно выбирать команду и читать операнд.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · попадания, промахи и среднее время доступа</span>
+    <p><b>Попадание (hit)</b> — нужные данные есть в кэше. <b>Промах (miss)</b> — нет, строку приходится загружать с нижнего уровня. Доля попаданий (hit rate) у L1 обычно 90–99 %.</p>
+    <p><b>AMAT</b> (среднее время доступа) = время попадания + доля промахов × штраф промаха. Пример: 1 нс + 0,05 × 100 нс = <b>6 нс</b>. Даже 5 % промахов увеличивают время в 6 раз — поэтому так важна локальность.</p>
+    <p>Типы промахов («три C»): <b>обязательные</b> (compulsory — первое обращение), <b>ёмкостные</b> (capacity — данные не влезают), <b>конфликтные</b> (conflict — две строки претендуют на одно место).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · размещение и замещение</span>
+    <p>Адрес делят на три части: <b>тег | индекс (номер набора) | смещение в строке</b>.</p>
+    <ul><li><b>Прямое отображение</b> (direct-mapped): строка памяти может лежать только в <b>одном</b> месте кэша (индекс = номер блока mod число строк). Просто, но две «конфликтующие» переменные вытесняют друг друга.</li><li><b>Наборно-ассоциативный</b> (N-way set associative): место — любая из N строк своего набора. Компромисс, так устроены L1–L3 (4–16 каналов).</li><li><b>Полностью ассоциативный</b>: строка может лежать где угодно; приходится сравнивать тег со всеми строками сразу. Так делают маленькие кэши, например TLB.</li></ul>
+    <p>Если набор заполнен, нужно кого-то выбросить: <b>LRU</b> — дольше всех не использовавшуюся, <b>FIFO</b> — загруженную раньше всех, <b>Random</b> — случайную. Запись: <b>write-through</b> (сразу и в кэш, и в память) или <b>write-back</b> (в память — только при вытеснении, по «грязному» биту).</p>
+  </aside>
+  </div>
+  <div class="widget" id="cacheSim"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · постоянная память ROM</span>
+    <p><b>ROM</b> (Read-Only Memory, ПЗУ) — энергонезависимая память: данные сохраняются без питания, в работе только читаются. Разновидности по способу записи:</p>
+    <div class="tw"><table><tr><th>Тип</th><th>Расшифровка</th><th>Как записывается / стирается</th></tr><tr><td><b>ROM</b> (масочное)</td><td>Read-Only Memory</td><td>содержимое задаётся при изготовлении, изменить нельзя</td></tr><tr><td><b>PROM</b></td><td>Programmable ROM</td><td>пользователь записывает <b>один раз</b> (пережигает перемычки)</td></tr><tr><td><b>EPROM</b></td><td>Erasable PROM</td><td>стирается <b>ультрафиолетом</b> через кварцевое окошко, потом перезаписывается</td></tr><tr><td><b>EEPROM</b></td><td>Electrically Erasable PROM</td><td>стирается <b>электрически</b>, побайтно, прямо в схеме</td></tr><tr><td><b>Flash</b></td><td>разновидность EEPROM</td><td>стирается электрически <b>блоками</b> — быстро; в ней сейчас хранится BIOS/UEFI, SSD, флешки</td></tr></table></div>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · BIOS, UEFI и загрузка компьютера</span>
+    <p><b>BIOS</b> (Basic Input/Output System) — программа в ПЗУ материнской платы. При включении процессор начинает выполнять код с адреса FFFF0h — это BIOS. Он:</p>
+    <ol><li>делает <b>POST</b> (Power-On Self-Test) — проверяет процессор, память, видеокарту (ошибки — сигналами динамика);</li><li>инициализирует устройства, заполняет <b>таблицу векторов прерываний</b> (первый килобайт ОЗУ) и область данных BIOS;</li><li>читает настройки из <b>CMOS</b> (порядок загрузки, дата/время);</li><li>находит загрузочный диск и читает его первый сектор — <b>boot-сектор / MBR</b> (512 байт, сигнатура 55AAh) — в память по адресу <b>0000:7C00h</b> и передаёт ему управление.</li></ol>
+    <p>Дальше в <b>MS-DOS</b>: загрузчик из boot-сектора грузит <b>IO.SYS</b> (драйверы, связь с BIOS) и <b>MSDOS.SYS</b> (ядро), затем выполняется <b>CONFIG.SYS</b> (драйверы, настройки), запускается командный процессор <b>COMMAND.COM</b> (в нём «внутренние» команды dir, cd, copy…) и пакетный файл <b>AUTOEXEC.BAT</b>. Без IO.SYS DOS не загрузится, без AUTOEXEC.BAT и CONFIG.SYS — загрузится.</p>
+    <p><b>UEFI</b> — современная замена BIOS: 32/64-битная модульная прошивка с драйверами, графическим меню, поддержкой дисков <b>GPT</b> больше 2 ТБ (у MBR предел 2 ТБ), быстрой загрузкой и <b>Secure Boot</b> (проверка подписи загрузчика). Загрузчики лежат как файлы в разделе EFI (например, \EFI\Microsoft\Boot\bootmgfw.efi).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · команды MS-DOS из тестов</span>
+    <div class="tw"><table><tr><th>Команда</th><th>Что делает</th></tr><tr><td><b>dir</b></td><td>содержимое каталога</td></tr><tr><td><b>cd имя</b> / <b>cd..</b> / <b>cd\</b></td><td>войти в каталог / на уровень выше / в корень диска</td></tr><tr><td><b>md имя</b></td><td>создать каталог (make directory)</td></tr><tr><td><b>rd имя</b></td><td>удалить пустой каталог (remove directory)</td></tr><tr><td><b>copy</b>, <b>del</b>, <b>type</b>, <b>ren</b></td><td>копировать, удалить файл, показать текстовый файл, переименовать</td></tr><tr><td><b>attrib</b></td><td>атрибуты файла (R, H, S, A)</td></tr><tr><td><b>mode</b></td><td>состояние и настройка устройств (COM, LPT, CON)</td></tr></table></div>
+    <p>Дискета 3,5″: 1,44 МБ (HD), 720 КБ (DD); 5,25″: 1,2 МБ и 360 КБ.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr>
+      <tr><td>Why is cache memory used?</td><td>to bridge the speed gap between CPU and main memory</td></tr><tr><td>Temporal locality</td><td>recently used data will be used again soon</td></tr><tr><td>Spatial locality</td><td>neighbouring addresses will be used soon</td></tr><tr><td>Cache hit / cache miss</td><td>data found / not found in the cache</td></tr><tr><td>Fastest and smallest cache level</td><td>L1</td></tr><tr><td>Shared by all cores</td><td>L3 (last-level cache)</td></tr><tr><td>Replacement policy LRU</td><td>evicts the Least Recently Used line</td></tr><tr><td>Memory that keeps data without power and is read-only</td><td>ROM</td></tr><tr><td>Erased by ultraviolet light</td><td>EPROM</td></tr><tr><td>Electrically erasable</td><td>EEPROM (Flash)</td></tr><tr><td>Power-on self-test</td><td>POST (performed by BIOS)</td></tr><tr><td>Program in the first sector of a boot disk</td><td>boot loader (MBR / boot sector)</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t10-lab">Лабораторная работа № 10. Кэш-память. Многоуровневая кэш-память. ROM. BIOS</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Сформировать практические навыки анализа характеристик кэш-памяти и исследования роли постоянной памяти и BIOS в работе вычислительной системы.</p>
+    <p><b>Основная активность студентов:</b> Изучение характеристик кэш-памяти L1, L2 и L3; сравнение объёма и назначения уровней кэширования; анализ принципов попаданий и промахов кэша; исследование сведений о процессоре и памяти с помощью системных утилит; изучение основных функций BIOS/UEFI и параметров начальной загрузки компьютера.</p>
+  </div>
+  <aside class="add"><span class="tag">дополнение · методички к этой лабе нет</span>
+    <p>Отдельного файла лабы 10 в материалах нет, поэтому задания ниже составлены по «основной активности» и заданиям СРО из УМКД. Их и спросят на защите.</p>
+  </aside>
+  <div class="lab-task" id="t10-z1"><span class="tl">Задание 1 · характеристики кэша своего процессора</span>
+    <p>Определите модель процессора и объём кэша L1 (команд и данных), L2 и L3 на своём компьютере с помощью системных утилит. Сравните с характеристиками ещё одного современного процессора (СРО).</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение: команды для Windows и Linux</summary><div class="solve">
+    <p><b>Windows</b> — в PowerShell:</p>
+<pre>Get-CimInstance Win32_Processor | Select Name, NumberOfCores, NumberOfLogicalProcessors, L2CacheSize, L3CacheSize, MaxClockSpeed
+Get-CimInstance Win32_CacheMemory | Select Purpose, InstalledSize, Associativity</pre>
+    <p>или «Диспетчер задач → Производительность → ЦП» (внизу справа: кэш L1, L2, L3), или программа <b>CPU-Z</b> (вкладка Caches — там видна и ассоциативность: «8-way»).</p>
+    <p><b>Linux:</b></p>
+<pre>lscpu | grep -i cache
+cat /sys/devices/system/cpu/cpu0/cache/index*/size
+getconf -a | grep CACHE</pre>
+    <p>Пример оформления (Intel Core i5-12400): L1d 6 × 48 КБ, L1i 6 × 32 КБ, L2 6 × 1,25 МБ, L3 18 МБ (общий). Для сравнения AMD Ryzen 5 5600X: L1 6 × 32+32 КБ, L2 6 × 512 КБ, L3 32 МБ. Вывод: L1 и L2 у каждого ядра свои, L3 общий; чем ниже уровень, тем больше объём и медленнее доступ.</p>
+  </div></details>
+  <div class="lab-task" id="t10-z2"><span class="tl">Задание 2 · попадания и промахи</span>
+    <p>Для кэша из 8 строк по 4 байта промоделируйте последовательность адресов 0, 4, 8, 12, 0, 4, 64, 68, 0, 128, 4, 256, 0 для прямого отображения, 2-канальной ассоциативности и полностью ассоциативного кэша (LRU). Подсчитайте hit rate и среднее время доступа (кэш 1 нс, память 100 нс). Объясните разницу.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение + симулятор (меняй организацию и смотри таблицу)</summary><div class="solve">
+    <p>Как считать вручную: блок = ⌊адрес / 4⌋; при прямом отображении строка = блок mod 8. Адреса 0, 64, 128, 256 → блоки 0, 16, 32, 64 → все в строку 0 и вытесняют друг друга (конфликтные промахи). В 2-канальном кэше в каждом наборе по 2 места — часть конфликтов пропадает, в полностью ассоциативном — ещё меньше.</p>
+    <div class="widget" id="cacheSim2"></div>
+    <div class="trap"><b>Частая ошибка:</b> считать строку по адресу, а не по номеру блока. Сначала делим адрес на размер строки.</div>
+  </div></details>
+  <div class="lab-task" id="t10-z3"><span class="tl">Задание 3 · ROM, BIOS и UEFI</span>
+    <p>Составьте сравнительную таблицу ROM, PROM, EPROM, EEPROM. Войдите в BIOS/UEFI своего компьютера (или изучите по скриншотам) и выпишите: версию прошивки, режим загрузки (Legacy/UEFI), порядок загрузочных устройств, состояние Secure Boot. Подготовьте сравнение BIOS и UEFI (СРО).</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>Таблица ROM-типов — в лекции выше. Узнать режим загрузки и версию без входа в BIOS (Windows): <code>msinfo32</code> → «Режим BIOS: UEFI / Устаревший», «Версия BIOS», «Состояние безопасной загрузки». PowerShell: <code>Get-CimInstance Win32_BIOS</code>, <code>Confirm-SecureBootUEFI</code>. Linux: <code>sudo dmidecode -t bios</code>, <code>[ -d /sys/firmware/efi ] && echo UEFI || echo BIOS</code>.</p>
+    <div class="tw"><table><tr><th></th><th>BIOS (Legacy)</th><th>UEFI</th></tr><tr><td>Разрядность</td><td>16 бит, реальный режим</td><td>32/64 бит</td></tr><tr><td>Разметка диска</td><td>MBR, до 2 ТБ, 4 основных раздела</td><td>GPT, практически без ограничений, 128 разделов</td></tr><tr><td>Загрузчик</td><td>код в первом секторе (512 Б)</td><td>файл .efi в разделе EFI</td></tr><tr><td>Интерфейс</td><td>текстовый, клавиатура</td><td>графический, мышь</td></tr><tr><td>Безопасность</td><td>нет</td><td>Secure Boot</td></tr><tr><td>Общее</td><td colspan="2">POST, инициализация устройств, выбор загрузочного устройства, передача управления загрузчику ОС</td></tr></table></div>
+  </div></details>
+  <div class="lab-task" id="t10-z4"><span class="tl">Задание 4 · загрузка MS-DOS (по тестам базы)</span>
+    <p>Опишите последовательность загрузки MS-DOS от включения питания до приглашения командной строки. Какие файлы обязательны? Выполните в DOSBox (или cmd.exe) команды md, cd, cd.., cd\, rd, dir, mode.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+<pre>Питание → BIOS (ПЗУ, адрес FFFF0h): POST, векторы прерываний
+       → boot-сектор (512 Б) → 0000:7C00h, загрузчик
+       → IO.SYS → MSDOS.SYS → CONFIG.SYS → COMMAND.COM → AUTOEXEC.BAT → C:\&gt;</pre>
+    <p>Обязательны IO.SYS, MSDOS.SYS и COMMAND.COM. CONFIG.SYS и AUTOEXEC.BAT — необязательные настройки пользователя.</p>
+<pre>C:\&gt; md LAB10        ← создать каталог
+C:\&gt; cd LAB10        ← войти
+C:\LAB10&gt; cd..       ← на уровень выше
+C:\&gt; cd\             ← в корень (из любого места)
+C:\&gt; rd LAB10        ← удалить (пустой)
+C:\&gt; mode            ← состояние устройств</pre>
+  </div></details>
+
+  <h2 id="t10-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 10</summary><div class="solve"><ol>
+    <li><b>Для чего процессору кэш?</b> Чтобы не ждать медленную DRAM: держать рядом копии часто используемых данных в быстрой SRAM.</li>
+    <li><b>Временная локальность</b> — к недавно использованным данным скоро обратятся снова.</li>
+    <li><b>Пространственная локальность</b> — скоро обратятся к соседним адресам, поэтому в кэш грузят строку целиком.</li>
+    <li><b>L1, L2, L3</b> различаются объёмом (L1 меньше всех), скоростью (L1 быстрее всех) и тем, кому принадлежат (L1/L2 — ядру, L3 — общий).</li>
+    <li><b>Cache hit</b> — данные нашлись в кэше.</li>
+    <li><b>Cache miss</b> — данных нет, строку загружают с нижнего уровня (штраф промаха).</li>
+    <li><b>Стратегия замещения</b> выбирает, какую строку выбросить, когда набор полон (LRU, FIFO, Random); от неё зависит число промахов.</li>
+    <li><b>ROM vs RAM:</b> ROM сохраняет данные без питания и в работе только читается; RAM энергозависима и пишется.</li>
+    <li><b>PROM</b> — программируется один раз; <b>EPROM</b> — стирается ультрафиолетом; <b>EEPROM</b> — стирается электрически.</li>
+    <li><b>BIOS/UEFI при запуске:</b> POST, инициализация устройств, чтение настроек CMOS, поиск загрузочного устройства, передача управления загрузчику ОС.</li></ol></div></details>
+
+  <h2 class="testshead" id="t10-test">Тесты темы 10</h2>
+  <div id="tests-t10"></div>
+</div>
+</section>
+
+<!-- ===================================================== ТЕМА 11 -->
+<section id="t11" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 11 · лекция, лаба, тесты (5 из базы + 18)</div>
+    <h1>Типы основной памяти. DRAM, SRAM, RAM. Модули памяти</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t11-lab">Лаба</a><a href="#t11-q">Вопросы УМКД</a><a href="#t11-test">Тесты</a><a href="#t11-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t11-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД + как устроены ячейки SRAM и DRAM, поколения DDR, модули и каналы.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 11. Типы основной памяти. DRAM, SRAM, RAM. Модули памяти</b></p>
+  <p><b>Цель лекции:</b> Изучить устройство, классификацию и характеристики оперативной памяти, особенности технологий DRAM и SRAM, а также принципы организации и функционирования модулей памяти современных компьютеров.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Назначение оперативной памяти и её роль в вычислительной системе.</li><li>Основные характеристики RAM: объём, скорость, задержки и пропускная способность.</li><li>Статическая память SRAM: структура, принцип работы и особенности применения.</li><li>Динамическая память DRAM: организация хранения данных и необходимость регенерации.</li><li>Сравнительная характеристика SRAM и DRAM.</li><li>Поколения оперативной памяти DDR и особенности их развития.</li><li>Форм-факторы модулей памяти DIMM и SO-DIMM.</li><li>Канальная организация памяти и влияние характеристик модулей на производительность системы.</li></ul>
+  <aside class="add"><span class="tag">дополнение · RAM — память с произвольным доступом</span>
+    <p><b>RAM</b> (Random Access Memory) — память, в которой любую ячейку можно прочитать или записать за одинаковое время, в любом порядке (в отличие от ленты или диска). Это <b>оперативная</b> память: в ней лежат выполняемые программы и их данные. Она <b>энергозависима</b>: без питания всё стирается. По устройству ячейки RAM бывает статической (SRAM) и динамической (DRAM).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · SRAM: бит в триггере</span>
+    <p>Ячейка <b>SRAM</b> (Static RAM) — это <b>триггер</b> из двух инверторов, замкнутых в кольцо (тот же RS-триггер из темы 6), плюс два ключа доступа: всего <b>6 транзисторов</b> на бит (6T). Пока есть питание, бит держится сам — <b>регенерация не нужна</b>, чтение быстрое (единицы наносекунд). Минус — ячейка большая, память дорогая и малой ёмкости. Применение: <b>кэш L1–L3</b>, регистровые файлы, буферы.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · DRAM: бит как заряд конденсатора</span>
+    <p>Ячейка <b>DRAM</b> (Dynamic RAM) — <b>1 транзистор + 1 конденсатор</b> (1T1C): заряжен — 1, разряжен — 0. Ячейка крошечная → большая ёмкость и низкая цена. Но конденсатор постепенно разряжается из-за утечек, поэтому каждую строку нужно <b>регенерировать</b> (перечитывать и перезаписывать) примерно раз в <b>64 мс</b>. Чтение разрушает заряд, поэтому после чтения строку тоже записывают обратно. Применение: <b>оперативная память</b> (модули DIMM), видеопамять GDDR.</p>
+    <p>Ячейки DRAM организованы в матрицу строк и столбцов: сначала подаётся адрес строки (<b>RAS</b>), строка копируется в усилители, потом адрес столбца (<b>CAS</b>). Отсюда тайминги: <b>CL</b> (CAS Latency) — тактов от команды чтения до данных, <b>tRCD</b>, <b>tRP</b>, <b>tRAS</b>. Запись «16-18-18-38» — это CL-tRCD-tRP-tRAS.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · SRAM или DRAM — сравнение</span>
+    <div class="tw"><table><tr><th></th><th>SRAM</th><th>DRAM</th></tr><tr><td>Хранение бита</td><td>триггер, 6 транзисторов</td><td>заряд конденсатора, 1T1C</td></tr><tr><td>Регенерация</td><td><b>не нужна</b></td><td>нужна (≈ раз в 64 мс)</td></tr><tr><td>Скорость</td><td>очень высокая (1–10 нс)</td><td>ниже (≈ 50–100 нс)</td></tr><tr><td>Ёмкость на кристалле</td><td>малая</td><td>большая</td></tr><tr><td>Цена за бит</td><td>высокая</td><td>низкая</td></tr><tr><td>Потребление в покое</td><td>низкое</td><td>есть (на регенерацию)</td></tr><tr><td>Где</td><td>кэш, регистры</td><td>оперативная память</td></tr></table></div>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · от SDRAM к DDR5</span>
+    <p><b>SDRAM</b> (Synchronous DRAM) работает синхронно с тактовым сигналом шины — одна передача за такт. <b>DDR SDRAM</b> (Double Data Rate) передаёт данные <b>по обоим фронтам</b> такта — вдвое больше при той же частоте. Каждое следующее поколение увеличивает внутреннюю предвыборку (prefetch) и частоту, снижает напряжение:</p>
+    <div class="tw"><table><tr><th>Поколение</th><th>Скорость, MT/s</th><th>Напряжение</th><th>Контактов (DIMM)</th><th>Пример маркировки</th></tr><tr><td>SDRAM</td><td>66–133</td><td>3,3 В</td><td>168</td><td>PC133</td></tr><tr><td>DDR</td><td>200–400</td><td>2,5 В</td><td>184</td><td>PC-3200</td></tr><tr><td>DDR2</td><td>400–1066</td><td>1,8 В</td><td>240</td><td>PC2-6400</td></tr><tr><td>DDR3</td><td>800–2133</td><td>1,5 В</td><td>240</td><td>PC3-12800</td></tr><tr><td>DDR4</td><td>1600–3200 (+)</td><td>1,2 В</td><td>288</td><td>PC4-25600</td></tr><tr><td>DDR5</td><td>4800–8400</td><td>1,1 В</td><td>288</td><td>PC5-38400</td></tr></table></div>
+    <p>Модули разных поколений <b>не взаимозаменяемы</b>: вырез-ключ в другом месте. Число в маркировке PCx-NNNNN — пропускная способность в МБ/с: DDR4-3200 × 8 байт = 25 600 МБ/с.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · модули и каналы</span>
+    <p><b>SIMM</b> (Single In-line Memory Module) — контакты на двух сторонах платы соединены, это один ряд выводов (30 и 72 pin, эпоха 386–Pentium). <b>DIMM</b> (Dual In-line) — контакты на сторонах независимые, шина 64 бита. <b>SO-DIMM</b> — укороченный DIMM для ноутбуков. <b>RIMM</b> — модули Rambus (RDRAM).</p>
+    <p><b>Каналы:</b> контроллер памяти (сейчас — в процессоре) имеет 1, 2, 4 и более независимых 64-битных канала. В <b>двухканальном</b> режиме два одинаковых модуля в слотах разных каналов работают параллельно — ширина 128 бит, теоретическая пропускная способность удваивается (объём не удваивается!). Поэтому лучше 2 × 8 ГБ, чем 1 × 16 ГБ.</p>
+    <p><b>ECC</b>-память (серверы) хранит 72 бита на 64 бита данных: код Хэмминга + бит чётности исправляет одиночные ошибки (тема 13).</p>
+  </aside>
+  </div>
+  <div class="widget" id="ramCalc"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Dynamic random access memory</td><td>DRAM — bit stored as charge in a capacitor, needs refresh</td></tr><tr><td>Static RAM cell</td><td>flip-flop (6 transistors), no refresh</td></tr><tr><td>Memory preferred for cache</td><td>SRAM</td></tr><tr><td>Does not require refreshing</td><td>SRAM</td></tr><tr><td>Transfers data twice per clock cycle</td><td>DDR SDRAM</td></tr><tr><td>Dual in-line memory module</td><td>DIMM (two rows of independent contacts)</td></tr><tr><td>Single in-line memory module</td><td>SIMM</td></tr><tr><td>Module for laptops</td><td>SO-DIMM</td></tr><tr><td>Where is the screen image stored?</td><td>in video RAM (frame buffer)</td></tr><tr><td>Dual-channel mode</td><td>doubles bus width → up to 2× bandwidth</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t11-lab">Лабораторная работа № 11. Типы основной памяти. DRAM, SRAM, RAM. Модули памяти</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Сформировать навыки определения и сравнительного анализа характеристик оперативной памяти, изучить особенности различных технологий и модулей памяти.</p>
+    <p><b>Основная активность студентов:</b> Определение объёма, типа и частоты установленной оперативной памяти; исследование характеристик модулей RAM; сравнение принципов работы SRAM и DRAM; анализ различий между поколениями DDR; изучение форм-факторов DIMM и SO-DIMM; оценка влияния характеристик памяти на производительность компьютера.</p>
+  </div>
+  <div class="lab-task" id="t11-z1"><span class="tl">Задание 1 · память своего компьютера</span>
+    <p>Определите объём, тип (DDR3/DDR4/DDR5), частоту, число модулей и занятые слоты, режим работы (одно/двухканальный) оперативной памяти своего компьютера.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение: команды Windows и Linux</summary><div class="solve">
+<pre>Get-CimInstance Win32_PhysicalMemory | Select BankLabel, DeviceLocator, Capacity, Speed, ConfiguredClockSpeed, SMBIOSMemoryType, Manufacturer, PartNumber
+wmic memorychip get Capacity, Speed, DeviceLocator, MemoryType</pre>
+    <p>SMBIOSMemoryType: 24 = DDR3, 26 = DDR4, 34 = DDR5. Ещё проще — «Диспетчер задач → Производительность → Память» (скорость, использовано слотов, форм-фактор) или CPU-Z (вкладки Memory и SPD — там видны тайминги и Dual/Single channel).</p>
+<pre>sudo dmidecode -t memory | grep -E "Size|Type:|Speed|Locator"     # Linux
+free -h</pre>
+    <p>Пример вывода и вывода-заключения: «2 × 8 ГБ DDR4-3200 (PC4-25600), SO-DIMM, двухканальный режим, CL22. Теоретическая пропускная способность 2 × 25,6 = 51,2 ГБ/с».</p>
+  </div></details>
+  <div class="lab-task" id="t11-z2"><span class="tl">Задание 2 · пропускная способность DDR3, DDR4, DDR5 (СРО)</span>
+    <p>Рассчитайте пропускную способность модулей DDR3-1600, DDR4-3200 и DDR5-5600 в одноканальном и двухканальном режимах. Сравните рабочие частоты, напряжение и особенности организации.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение + калькулятор</summary><div class="solve">
+    <p>Формула: <b>MT/s × 8 байт × число каналов</b>.</p>
+    <div class="tw"><table><tr><th>Модуль</th><th>Частота шины</th><th>1 канал</th><th>2 канала</th></tr><tr><td>DDR3-1600 (PC3-12800)</td><td>800 МГц</td><td>12,8 ГБ/с</td><td>25,6 ГБ/с</td></tr><tr><td>DDR4-3200 (PC4-25600)</td><td>1600 МГц</td><td>25,6 ГБ/с</td><td>51,2 ГБ/с</td></tr><tr><td>DDR5-5600 (PC5-44800)</td><td>2800 МГц</td><td>44,8 ГБ/с</td><td>89,6 ГБ/с</td></tr></table></div>
+    <p>Особенность DDR5: каждый модуль разделён на <b>два независимых 32-битных подканала</b>, есть встроенный ECC внутри чипов и свой контроллер питания (PMIC) на модуле.</p>
+    <div class="widget" id="ramCalc2"></div>
+  </div></details>
+  <div class="lab-task" id="t11-z3"><span class="tl">Задание 3 · SRAM и DRAM, рекомендации (СРО)</span>
+    <p>Составьте сравнительную таблицу SRAM и DRAM. Подготовьте рекомендации по выбору оперативной памяти для учебного компьютера.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>Таблица — в лекции. Рекомендации: тип памяти определяется материнской платой (DDR4 или DDR5 — не смешиваются); объём для учёбы — 16 ГБ; ставить <b>два одинаковых модуля</b> (2 × 8 ГБ) для двухканального режима; частота — максимальная, поддерживаемая процессором (DDR4-3200 / DDR5-5600), включить профиль XMP/EXPO в BIOS; для ноутбука — SO-DIMM.</p>
+    <div class="trap"><b>Частая ошибка:</b> думать, что двухканальный режим удваивает объём. Он удваивает только ширину шины; объём — сумма модулей.</div>
+  </div></details>
+
+  <h2 id="t11-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 11</summary><div class="solve"><ol>
+    <li><b>RAM</b> — Random Access Memory, память с произвольным доступом (оперативная).</li>
+    <li><b>Бит в SRAM</b> хранится в триггере из 6 транзисторов.</li>
+    <li><b>Бит в DRAM</b> — заряд конденсатора (1 транзистор + 1 конденсатор).</li>
+    <li><b>Регенерация DRAM</b> нужна, потому что конденсатор теряет заряд из-за утечек.</li>
+    <li><b>SRAM против DRAM:</b> быстрее и без регенерации, но дороже и меньше ёмкость.</li>
+    <li><b>SRAM</b> — в кэше и регистрах, <b>DRAM</b> — в оперативной памяти.</li>
+    <li><b>Пропускная способность</b> — сколько байт в секунду память передаёт (MT/s × ширина × каналы).</li>
+    <li><b>DDR SDRAM</b> — синхронная DRAM с передачей по обоим фронтам такта.</li>
+    <li><b>DIMM и SO-DIMM:</b> SO-DIMM — короче, для ноутбуков; электрически то же.</li>
+    <li><b>Двухканальный режим</b> удваивает ширину шины до 128 бит → до 2× пропускная способность.</li></ol></div></details>
+
+  <h2 class="testshead" id="t11-test">Тесты темы 11</h2>
+  <div id="tests-t11"></div>
+</div>
+</section>
+
+<!-- ===================================================== ТЕМА 12 -->
+<section id="t12" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 12 · лекция, лаба, тесты (15 из базы + 16)</div>
+    <h1>Характеристики процессора: тактовая частота, разрядность, режимы. Модели памяти. Сегментная модель памяти. Адресация в реальном и защищённом режимах</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t12-lab">Лаба</a><a href="#t12-q">Вопросы УМКД</a><a href="#t12-test">Тесты</a><a href="#t12-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t12-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД + сегмент:смещение, дескрипторы GDT/LDT, страницы, режимы x86 и калькулятор адресов.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 12. Характеристики процессора: тактовая частота, разрядность, режимы. Модели памяти. Сегментная модель памяти. Адресация в реальном и защищённом режимах</b></p>
+  <p><b>Цель лекции:</b> Сформировать знания об основных характеристиках процессоров, режимах их функционирования и моделях организации памяти, изучить принципы формирования адресов и особенности доступа к памяти в реальном и защищённом режимах.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Основные характеристики процессора: тактовая частота, разрядность и производительность.</li><li>Понятие машинного слова и разрядности регистров.</li><li>Режимы работы процессоров семейства x86.</li><li>Организация памяти и основные модели адресации.</li><li>Сегментная модель памяти и назначение сегментных регистров.</li><li>Формирование физического адреса в реальном режиме.</li><li>Особенности защищённого режима и механизмы защиты памяти.</li><li>Сегментация и страничная организация памяти.</li></ul>
+  <aside class="add"><span class="tag">дополнение · характеристики процессора</span>
+    <ul><li><b>Тактовая частота</b> — сколько тактов в секунду (ГГц = 10⁹). Сама по себе не определяет скорость: важно, сколько команд выполняется за такт (<b>IPC</b>), сколько ядер, какой кэш. Pentium первого поколения (1993) — 60 и 66 МГц, сейчас 3–5 ГГц.</li><li><b>Разрядность</b> — ширина регистров общего назначения = машинного слова. 8086 — 16 бит (слово 16 бит, двойное слово 32), 80386 — 32 бита, x86-64 — 64.</li><li><b>Разрядность шины адреса</b> задаёт максимум адресуемой памяти: 2ᴺ байт. 8086 — <b>20</b> линий (1 МБ), 80286 — <b>24</b> (16 МБ), 80386 и выше — <b>32</b> (4 ГБ).</li><li>Ещё: число ядер/потоков, объём кэша, техпроцесс, TDP, набор команд (SSE, AVX).</li></ul>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · режимы процессора x86</span>
+    <div class="tw"><table><tr><th>Режим</th><th>С какого процессора</th><th>Адресация</th><th>Память</th><th>Защита</th></tr><tr><td><b>Реальный</b></td><td>8086 (и все последующие при включении)</td><td>сегмент × 16 + смещение</td><td>1 МБ</td><td>нет — любая программа пишет куда угодно</td></tr><tr><td><b>Защищённый</b></td><td>80286 (16 бит), 80386 (32 бита)</td><td>селектор → дескриптор → база + смещение; + страницы</td><td>16 МБ / 4 ГБ</td><td>уровни привилегий 0–3, границы сегментов, права доступа</td></tr><tr><td><b>V86</b></td><td>80386</td><td>реальный внутри защищённого</td><td>1 МБ на задачу</td><td>да</td></tr><tr><td><b>Long mode</b></td><td>x86-64 (AMD64)</td><td>плоская 64-битная, страницы</td><td>до 2⁴⁸ (256 ТБ) виртуальной</td><td>да</td></tr></table></div>
+    <p>Защищённый режим называют «многозадачным» (так в тестах): именно он даёт аппаратную поддержку многозадачности — защиту памяти задач друг от друга, сегмент состояния задачи (TSS), привилегии.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · сегментная модель и реальный режим</span>
+    <p>У 8086 регистры 16-битные (максимум FFFFh = 64 КБ), а адрес нужен 20-битный. Решение — <b>сегментация</b>: адрес задаётся парой <b>сегмент:смещение</b>, и процессор складывает</p>
+    <p style="text-align:center;font:600 17px var(--f-mono)">физический адрес = сегмент × 16 + смещение</p>
+    <p>× 16 = сдвиг на 4 бита = дописать ноль в hex. <b>1000h:0020h</b> → 10000h + 0020h = <b>10020h</b>; <b>2000h:0100h</b> → <b>20100h</b>; <b>1234h:5678h</b> → 12340h + 5678h = <b>179B8h</b>. Сегменты начинаются через каждые 16 байт (параграф) и перекрываются — один физический адрес можно записать до 4096 способами.</p>
+    <p><b>Сегментные регистры:</b> <b>CS</b> — код (адрес команды CS:IP), <b>DS</b> — данные, <b>SS</b> — стек (SS:SP), <b>ES</b> — дополнительный; с 80386 добавлены <b>FS</b> и <b>GS</b>. Итого 4 у 8086 и 6 у 386+ (в базе ответ 6).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · защищённый режим: дескрипторы, GDT и LDT</span>
+    <p>В защищённом режиме в сегментном регистре лежит не адрес, а <b>селектор</b>: индекс (13 бит) + TI (из какой таблицы: 0 — GDT, 1 — LDT) + RPL (уровень привилегий). По индексу процессор берёт 8-байтный <b>дескриптор</b> сегмента: <b>база</b> (32 бита), <b>предел</b> (размер), права доступа и уровень привилегий DPL. Линейный адрес = база из дескриптора + смещение; если смещение больше предела или прав не хватает — исключение #GP.</p>
+    <ul><li><b>GDT</b> (Global Descriptor Table) — <b>одна</b> на систему, описывает сегменты ОС и общие сегменты; её адрес — в регистре <b>GDTR</b>.</li><li><b>LDT</b> (Local Descriptor Table) — может быть у каждой задачи своя, описывает <b>локальные сегменты программы</b>; регистр LDTR.</li><li><b>IDT</b> — таблица дескрипторов прерываний (замена таблицы векторов реального режима).</li></ul>
+    <p><b>4 кольца привилегий:</b> 0 — ядро ОС, 3 — программы пользователя (1 и 2 почти не используются).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · страничная организация и модели памяти</span>
+    <p><b>Страничная организация</b> (paging) делит линейное адресное пространство на <b>страницы</b> по 4 КБ, а физическую память — на кадры того же размера. Таблица страниц говорит, в каком кадре лежит каждая страница (или что её нет в памяти — тогда #PF и ОС подкачивает её с диска). Так работают <b>виртуальная память</b> и изоляция процессов (подробно — тема 9, калькулятор «виртуальный адрес → физический»).</p>
+    <p>Цепочка: <b>логический</b> адрес (селектор:смещение) → сегментация → <b>линейный</b> → страницы → <b>физический</b>.</p>
+    <p><b>Модели памяти:</b> <b>сегментная</b> (программа видит несколько сегментов), <b>плоская</b> (flat: все сегменты с базой 0 и размером 4 ГБ — Windows/Linux, защита на страницах), в DOS-компиляторах — tiny, small, medium, compact, large, huge (сколько сегментов кода и данных).</p>
+  </aside>
+  </div>
+  <div class="widget" id="segCalc"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Max addressable memory depends on</td><td>address bus width</td></tr><tr><td>8086 / 80286 / 80386 address bus</td><td>20 / 24 / 32 bits → 1 MB / 16 MB / 4 GB</td></tr><tr><td>Physical address in real mode</td><td>segment × 16 + offset</td></tr><tr><td>Registers in real mode</td><td>16-bit</td></tr><tr><td>Protected mode is also called</td><td>multitasking mode</td></tr><tr><td>Segment base in protected mode</td><td>from descriptor tables indexed by segment registers (selectors)</td></tr><tr><td>Global / local descriptor table</td><td>GDT (one) / LDT (per task)</td></tr><tr><td>Paging</td><td>memory divided into fixed-size pages (4 KB)</td></tr><tr><td>First Pentium clock rates</td><td>60 and 66 MHz</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t12-lab">Лабораторная работа № 12. Характеристики процессора. Модели памяти. Адресация в реальном и защищённом режимах</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Сформировать практические навыки анализа характеристик процессора и вычисления адресов памяти с учётом различных режимов работы и моделей адресации.</p>
+    <p><b>Основная активность студентов:</b> Определение характеристик процессора; анализ разрядности и режимов работы; изучение сегментной организации памяти; вычисление физических адресов по значениям сегмента и смещения в реальном режиме; исследование принципов адресации в защищённом режиме; сравнение механизмов организации и защиты памяти.</p>
+  </div>
+  <div class="lab-task" id="t12-z1"><span class="tl">Задание 1 · характеристики своего процессора</span>
+    <p>Определите модель, частоту (базовую и максимальную), число ядер и потоков, разрядность (архитектуру) своего процессора и режим работы ОС (32/64 бит).</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+<pre>Get-CimInstance Win32_Processor | Select Name, Architecture, AddressWidth, DataWidth, MaxClockSpeed, NumberOfCores, NumberOfLogicalProcessors
+[Environment]::Is64BitOperatingSystem</pre>
+    <p>Architecture = 9 — x64, AddressWidth/DataWidth = 64. Linux: <code>lscpu</code> (поля Architecture, CPU op-mode(s): 32-bit, 64-bit; Address sizes: 39 bits physical, 48 bits virtual).</p>
+    <p>Обрати внимание: «Address sizes: 48 bits virtual» — 64-битный процессор использует только 48 бит виртуального адреса (256 ТБ), физический — 39–52 бита.</p>
+  </div></details>
+  <div class="lab-task" id="t12-z2"><span class="tl">Задание 2 · физические адреса (СРО)</span>
+    <p>Выведите формулу вычисления физического адреса в реальном режиме. Определите физические адреса для пар сегмент:смещение 1000h:0020h, 2000h:0100h и 1234h:5678h.</p>
+  </div>
+  <details class="sol"><summary>Решение + калькулятор</summary><div class="solve">
+<pre>  1000h:0020h  →  10000h + 0020h = 10020h
+  2000h:0100h  →  20000h + 0100h = 20100h
+  1234h:5678h  →  12340h + 5678h = 179B8h
+                    12340
+                  +  5678
+                  ───────
+                    179B8   (справа налево: 0+8=8, 4+7=B, 3+6=9, 2+5=7, 1)</pre>
+    <p>Ответ: <span class="answer">10020h, 20100h, 179B8h</span>.</p>
+    <div class="widget" id="segCalc2"></div>
+    <div class="trap"><b>Частая ошибка:</b> умножить сегмент на 16 в десятичной системе и сложить с hex-смещением. Делай всё в hex: «× 16» — просто дописать 0.</div>
+  </div></details>
+  <div class="lab-task" id="t12-z3"><span class="tl">Задание 3 · защищённый режим и сравнение режимов (СРО)</span>
+    <p>Изучите принципы организации адресации и защиты памяти в защищённом режиме. Разберите селектор 002Bh. Составьте сравнительную таблицу реального и защищённого режимов.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>002Bh = 0000 0000 0010 1011₂ → индекс = 101₂ = <b>5</b>, TI = <b>0</b> (GDT), RPL = 11₂ = <b>3</b> (пользовательский уровень). Дескриптор — в GDT по смещению 5 × 8 = 40 = 28h.</p>
+    <div class="tw"><table><tr><th></th><th>Реальный</th><th>Защищённый</th></tr><tr><td>Адрес</td><td>сегмент × 16 + смещение</td><td>база из дескриптора + смещение (+ страницы)</td></tr><tr><td>В сегментном регистре</td><td>старшие 16 бит адреса сегмента</td><td>селектор (индекс, TI, RPL)</td></tr><tr><td>Объём</td><td>1 МБ</td><td>4 ГБ (32 бит), больше с PAE / в 64-битном</td></tr><tr><td>Размер сегмента</td><td>всегда 64 КБ</td><td>от 1 байта до 4 ГБ (предел в дескрипторе)</td></tr><tr><td>Защита</td><td>нет</td><td>привилегии 0–3, предел, права R/W/X</td></tr><tr><td>Многозадачность</td><td>нет аппаратной</td><td>есть (TSS, изоляция)</td></tr><tr><td>Прерывания</td><td>таблица векторов (1 КБ, адрес 0)</td><td>IDT (любой адрес, регистр IDTR)</td></tr><tr><td>ОС</td><td>MS-DOS</td><td>Windows, Linux</td></tr></table></div>
+  </div></details>
+  <div class="lab-task" id="t12-z4"><span class="tl">Задание 4 · ассемблер: где лежит переменная</span>
+    <p>В программе 8086 DS = 0B5Ah, переменная X лежит по смещению 0004h. Найдите её физический адрес. Как изменится адрес, если DS = 0B5Bh, а смещение 0FFF4h?</p>
+  </div>
+  <details class="sol"><summary>Решение</summary><div class="solve">
+    <p>0B5A0h + 0004h = <b>0B5A4h</b>. Во втором случае: 0B5B0h + 0FFF4h = <b>1B5A4h</b> — это уже другая ячейка (на 64 КБ дальше). Вывод: смещение 16-битное, сегмент «окном» в 64 КБ скользит по 1 МБ с шагом 16 байт. Посмотреть DS живьём можно в симуляторе темы 9 (программы 8086).</p>
+  </div></details>
+
+  <h2 id="t12-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 12</summary><div class="solve"><ol>
+    <li><b>Тактовая частота</b> — число тактов в секунду; задаёт темп работы.</li>
+    <li><b>Разрядность процессора</b> — ширина регистров/машинного слова (16, 32, 64 бита).</li>
+    <li><b>Частота ≠ производительность:</b> важны IPC, число ядер, кэш, архитектура.</li>
+    <li><b>Сегментная модель</b> — память видна как набор сегментов, адрес = сегмент + смещение.</li>
+    <li><b>Сегментные регистры x86:</b> CS, DS, SS, ES (+ FS, GS с 80386).</li>
+    <li><b>Физический адрес в реальном режиме</b> = сегмент × 16 + смещение.</li>
+    <li><b>1000h:0020h</b> → 10020h.</li>
+    <li><b>Реальный vs защищённый:</b> 1 МБ без защиты против 4 ГБ с дескрипторами, привилегиями и страницами.</li>
+    <li><b>Защита памяти</b> не даёт программам портить чужую память и ядро ОС (границы, права, кольца).</li>
+    <li><b>Страничная организация</b> — память делится на страницы по 4 КБ; основа виртуальной памяти и изоляции процессов.</li></ol></div></details>
+
+  <h2 class="testshead" id="t12-test">Тесты темы 12</h2>
+  <div id="tests-t12"></div>
+</div>
+</section>
+
+<!-- ===================================================== ТЕМА 13 -->
+<section id="t13" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 13 · лекция, лаба, тесты (6 из базы + 16)</div>
+    <h1>Распределение адресного пространства. Корректирующие коды. Код Хэмминга</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t13-lab">Лаба</a><a href="#t13-q">Вопросы УМКД</a><a href="#t13-test">Тесты</a><a href="#t13-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t13-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД + карта памяти IBM PC и код Хэмминга по шагам, как в тестах базы.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 13. Распределение адресного пространства. Корректирующие коды. Код Хэмминга</b></p>
+  <p><b>Цель лекции:</b> Изучить принципы распределения адресного пространства вычислительной системы и методы повышения надёжности хранения и передачи информации с использованием кодов обнаружения и исправления ошибок.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Понятие адресного пространства и его организация.</li><li>Физические и логические адреса памяти.</li><li>Распределение адресного пространства между памятью и устройствами ввода-вывода.</li><li>Причины возникновения ошибок при хранении и передаче данных.</li><li>Избыточное кодирование как средство повышения достоверности информации.</li><li>Понятие кодового расстояния и корректирующей способности кода.</li><li>Принцип построения кода Хэмминга и размещения контрольных битов.</li><li>Обнаружение и исправление одиночных ошибок с использованием синдрома ошибки.</li></ul>
+  <aside class="add"><span class="tag">дополнение · адресное пространство и карта первого мегабайта</span>
+    <p><b>Адресное пространство</b> — все адреса, которые может сформировать процессор: 2ᴺ при N-битной шине адреса. Его делят между ОЗУ, ПЗУ и устройствами. Классическая карта первого мегабайта IBM PC (реальный режим):</p>
+<pre>00000h–003FFh   1 КБ    таблица векторов прерываний (256 × 4 байта)
+00400h–004FFh           область данных BIOS
+00500h–9FFFFh   ≈640 КБ основная память (Conventional): DOS и программы
+A0000h–BFFFFh   128 КБ  видеопамять (B8000h — текстовый экран цветного адаптера)
+C0000h–EFFFFh           ПЗУ адаптеров (видео BIOS и др.), UMB
+F0000h–FFFFFh   64 КБ   системный BIOS (ПЗУ); FFFF0h — точка старта процессора
+100000h–10FFEFh ≈64 КБ  HMA (на 286+ при открытой линии A20)</pre>
+    <p>Поэтому в тестах: <b>в первом килобайте — таблица векторов прерываний</b>; изображение на экране хранится в <b>видео-ОЗУ</b>.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · логический и физический адрес, порты</span>
+    <p><b>Логический</b> адрес формирует программа (сегмент:смещение или виртуальный адрес), <b>физический</b> — то, что выставляется на шину адреса. Преобразование делает процессор (сегментация) и MMU (страницы) — тема 12.</p>
+    <p>Устройства ввода-вывода подключаются двумя способами: <b>отдельное пространство портов</b> (x86: 65 536 портов, команды IN/OUT; например, 60h — клавиатура, 20h — контроллер прерываний) или <b>отображение на память</b> (memory-mapped I/O: регистры устройства занимают обычные адреса, работа командой MOV — так видеопамять и современные PCIe-устройства).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · ошибки и избыточность</span>
+    <p>Биты портятся: помехи в линиях связи, космические частицы и альфа-частицы в ячейках DRAM, утечки заряда, износ флеш-памяти. Чтобы их находить, к данным добавляют <b>избыточные</b> (проверочные) биты.</p>
+    <p><b>Расстояние Хэмминга</b> между словами — число разрядов, в которых они различаются (1011 и 1110 → 2). <b>Кодовое расстояние d</b> — минимальное расстояние между разрешёнными кодовыми словами. Код обнаруживает до <b>d − 1</b> ошибок и исправляет до <b>⌊(d − 1)/2⌋</b>.</p>
+    <ul><li>Бит чётности: d = 2 → обнаруживает 1 ошибку, не исправляет.</li><li>Код Хэмминга: d = 3 → исправляет 1 ошибку.</li><li>Хэмминг + общий бит чётности (ECC-память, SECDED): d = 4 → исправляет 1, обнаруживает 2.</li></ul>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · код Хэмминга по шагам (как решать тесты)</span>
+    <ol><li><b>Сколько контрольных битов?</b> Наименьшее r: 2ʳ ≥ m + r + 1 (m — бит данных). m = 4 → r = 3 (код 7,4); m = 5…11 → r = 4; m = 12…26 → r = 5.</li><li><b>Позиции</b> нумеруются <b>слева, с 1</b>. Контрольные биты P стоят на позициях-степенях двойки: 1, 2, 4, 8…; данные заполняют остальные по порядку.</li><li><b>Каждый P<sub>k</sub> проверяет</b> позиции, у которых в двоичном номере есть бит k: P1 — 1, 3, 5, 7, 9, 11…; P2 — 2, 3, 6, 7, 10, 11…; P4 — 4–7, 12–15; P8 — 8–15.</li><li><b>P<sub>k</sub></b> = XOR данных на своих позициях (чётность: сумма единиц в группе — чётная).</li><li><b>Проверка:</b> пересчитай XOR каждой группы <b>вместе</b> с контрольным битом. Получится синдром S = S8 S4 S2 S1. S = 0 — ошибок нет, иначе S — <b>номер ошибочной позиции</b>.</li></ol>
+<pre>Пример из базы: данные 10000 (m = 5 → r = 4, длина 9)
+поз:   1  2  3  4  5  6  7  8  9
+       P1 P2 d  P4 d  d  d  P8 d
+данные       1     0  0  0     0
+P1 = d3⊕d5⊕d7⊕d9 = 1⊕0⊕0⊕0 = 1
+P2 = d3⊕d6⊕d7    = 1⊕0⊕0   = 1
+P4 = d5⊕d6⊕d7    = 0
+P8 = d9          = 0
+код: 1 1 1 0 0 0 0 0 0  → 111000000 ✔</pre>
+  </aside>
+  </div>
+  <div class="widget" id="hammingCalc"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Address space</td><td>the set of all addresses the CPU can generate (2ᴺ)</td></tr><tr><td>What is in the first kilobyte?</td><td>the interrupt vector table</td></tr><tr><td>Memory-mapped I/O</td><td>device registers are accessed as ordinary memory addresses</td></tr><tr><td>Hamming distance</td><td>number of positions in which two words differ</td></tr><tr><td>Parity bits needed for 4 data bits</td><td>3 (Hamming 7,4)</td></tr><tr><td>Positions of check bits</td><td>powers of two: 1, 2, 4, 8…</td></tr><tr><td>Syndrome</td><td>binary number of the erroneous bit (0 = no error)</td></tr><tr><td>Hamming code can correct</td><td>a single-bit error</td></tr><tr><td>Redundancy</td><td>extra check bits added to data</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t13-lab">Лабораторная работа № 13. Распределение адресного пространства. Корректирующие коды. Код Хэмминга</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Освоить принципы организации адресного пространства и сформировать практические навыки кодирования данных с использованием корректирующих кодов для обнаружения и исправления ошибок.</p>
+    <p><b>Основная активность студентов:</b> Анализ распределения адресного пространства; определение диапазонов адресов памяти; изучение принципов избыточного кодирования; вычисление контрольных битов кода Хэмминга; формирование кодовых слов; моделирование одиночных ошибок; вычисление синдрома и определение позиции ошибочного бита; восстановление исходных данных.</p>
+  </div>
+  <div class="lab-task" id="t13-z1"><span class="tl">Задание 1 · диапазоны адресов</span>
+    <p>Определите диапазоны адресов: а) микросхемы ОЗУ 64 КБ, начинающейся с адреса 20000h; б) видеопамяти 128 КБ с адреса A0000h. Сколько адресных линий нужно, чтобы выбрать ячейку внутри микросхемы 64 КБ, и какие старшие линии дешифратор адреса использует для выбора самой микросхемы при 20-битной шине?</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>а) 64 КБ = 10000h байт → <b>20000h–2FFFFh</b>; б) 128 КБ = 20000h → <b>A0000h–BFFFFh</b>.</p>
+    <p>Внутри 64 КБ — 16 линий A0–A15 (2¹⁶ = 65 536). Оставшиеся A16–A19 (4 линии) идут на <b>дешифратор адреса 4→16</b>: код 0010 (= 2) включает эту микросхему (сигнал CS — chip select). Так 1 МБ делится на 16 банков по 64 КБ — дешифратор из темы 5 в деле.</p>
+  </div></details>
+  <div class="lab-task" id="t13-z2"><span class="tl">Задание 2 · код Хэмминга (7,4) (СРО)</span>
+    <p>Для четырёхбитных информационных слов 1011 и 1101 постройте код Хэмминга (7,4) с чётным контролем. Определите значения контрольных битов.</p>
+  </div>
+  <details class="sol"><summary>Решение + калькулятор (впиши свои биты)</summary><div class="solve">
+<pre>         поз: 1  2  3  4  5  6  7
+              P1 P2 d3 P4 d5 d6 d7
+1011:  d3d5d6d7 = 1 0 1 1
+       P1 = d3⊕d5⊕d7 = 1⊕0⊕1 = 0
+       P2 = d3⊕d6⊕d7 = 1⊕1⊕1 = 1
+       P4 = d5⊕d6⊕d7 = 0⊕1⊕1 = 0      → 0 1 1 0 0 1 1
+1101:  d3d5d6d7 = 1 1 0 1
+       P1 = 1⊕1⊕1 = 1;  P2 = 1⊕0⊕1 = 0;  P4 = 1⊕0⊕1 = 0  → 1 0 1 0 1 0 1</pre>
+    <p>Ответ: <span class="answer">1011 → 0110011, 1101 → 1010101</span>.</p>
+    <div class="widget" id="hammingCalc2"></div>
+  </div></details>
+  <div class="lab-task" id="t13-z3"><span class="tl">Задание 3 · ошибка, синдром, восстановление (СРО)</span>
+    <p>Смоделируйте ошибку в одном из разрядов кодового слова, вычислите синдром и восстановите исходные данные. Объясните возможности и ограничения кода Хэмминга.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>Пусть в 0110011 ошибся бит 5: получили <b>0110111</b>. S1 = b1⊕b3⊕b5⊕b7 = 0⊕1⊕1⊕1 = 1; S2 = b2⊕b3⊕b6⊕b7 = 1⊕1⊕1⊕1 = 0; S4 = b4⊕b5⊕b6⊕b7 = 0⊕1⊕1⊕1 = 1. Синдром S4S2S1 = <b>101 = 5</b> → переворачиваем бит 5 → 0110011 → данные (позиции 3, 5, 6, 7) = <b>1011</b>.</p>
+    <p><b>Возможности:</b> исправляет любую одиночную ошибку, в том числе в контрольном бите. <b>Ограничения:</b> при двух ошибках синдром укажет на <b>неверный</b> бит (исправление испортит третий). Для обнаружения двойных ошибок добавляют общий бит чётности (код 8,4 — SECDED, так работает ECC-память).</p>
+    <p>Задачи из базы: <b>111001000</b> → синдром 0110 = <b>6</b>; <b>1010110101</b> → 0011 = <b>3</b>; <b>111001</b> → <b>0110110101</b>; для <b>1001</b> нужно <b>3</b> контрольных бита. Проверь их в калькуляторе выше (поле «проверить готовый код»).</p>
+  </div></details>
+
+  <h2 id="t13-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 13</summary><div class="solve"><ol>
+    <li><b>Адресное пространство</b> — множество всех адресов, которые процессор может выставить на шину (2ᴺ).</li>
+    <li><b>Логический vs физический:</b> логический формирует программа, физический — реальный адрес на шине после преобразования.</li>
+    <li><b>Отображение ввода-вывода в память</b> — регистры устройств доступны по адресам памяти обычными командами.</li>
+    <li><b>Причины ошибок:</b> помехи, частицы, утечки заряда, износ носителей.</li>
+    <li><b>Избыточность</b> — дополнительные проверочные биты сверх информационных.</li>
+    <li><b>Кодовое расстояние</b> — минимальное число различающихся разрядов между двумя разрешёнными кодовыми словами.</li>
+    <li><b>Код (7,4)</b> — 3 проверочных бита.</li>
+    <li><b>Позиции</b> проверочных битов — 1, 2, 4 (степени двойки).</li>
+    <li><b>Синдром</b> — XOR каждой проверочной группы вместе с её контрольным битом; двоичное число из результатов.</li>
+    <li><b>Исправление:</b> синдром ≠ 0 указывает номер ошибочного бита — его инвертируют.</li></ol></div></details>
+
+  <h2 class="testshead" id="t13-test">Тесты темы 13</h2>
+  <div id="tests-t13"></div>
+</div>
+</section>
+
+<!-- ===================================================== ТЕМА 14 -->
+<section id="t14" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 14 · лекция, лаба, тесты (5 из базы + 17)</div>
+    <h1>Шины. Основные стандарты шин. Характеристики шин</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t14-lab">Лаба</a><a href="#t14-q">Вопросы УМКД</a><a href="#t14-test">Тесты</a><a href="#t14-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t14-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД + шины адреса, данных и управления, PCI/PCIe/USB, расчёт пропускной способности.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 14. Шины. Основные стандарты шин. Характеристики шин</b></p>
+  <p><b>Цель лекции:</b> Сформировать представление о принципах организации обмена данными между компонентами компьютера, изучить назначение, классификацию и основные характеристики системных шин и интерфейсов передачи информации.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Понятие компьютерной шины и её роль в архитектуре вычислительной системы.</li><li>Шины данных, адреса и управления.</li><li>Параллельная и последовательная передача данных.</li><li>Основные характеристики шин: разрядность, частота, пропускная способность.</li><li>Синхронные и асинхронные способы обмена информацией.</li><li>Стандарты шин и интерфейсов: PCI, PCI Express, USB.</li><li>Принципы организации взаимодействия процессора, памяти и периферийных устройств.</li><li>Влияние характеристик шин на производительность вычислительной системы.</li></ul>
+  <aside class="add"><span class="tag">дополнение · что такое шина</span>
+    <p><b>Шина</b> — общий набор линий (проводников) и правил обмена (протокол), по которым обмениваются несколько устройств. Системная шина состоит из трёх частей:</p>
+    <ul><li><b>Шина адреса</b> — однонаправленная (процессор → память/устройства): <b>какую</b> ячейку или порт выбрать. Её ширина задаёт объём адресуемой памяти (тема 12).</li><li><b>Шина данных</b> — двунаправленная: <b>что</b> передать. Её ширина — сколько бит за одну передачу (8086 — 16, Pentium — 64).</li><li><b>Шина управления</b> — <b>как и когда</b>: чтение/запись памяти и портов (MEMR, MEMW, IOR, IOW), такт CLK, запросы прерываний IRQ, сброс RESET, запросы DMA и захвата шины.</li></ul>
+    <p><b>Контроллер</b> — устройство (микросхема), которое связывает внешнее устройство с шиной; <b>драйвер</b> — программа ОС, которая управляет устройством через контроллер. <b>Устройства ввода</b>: клавиатура, мышь, сканер; <b>вывода</b>: монитор, принтер, колонки.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · параллельно или последовательно</span>
+    <p><b>Параллельная</b> передача — много бит одновременно по многим линиям (ISA, PCI, старые IDE и LPT). <b>Последовательная</b> — биты по одной паре линий друг за другом (USB, SATA, PCIe). Казалось бы, параллельная быстрее, но на высоких частотах сигналы по разным линиям приходят в разное время (<b>перекос</b>, skew) и наводят помехи друг на друга. Последовательные дифференциальные линии можно разогнать до десятков ГГц, поэтому все современные интерфейсы — последовательные.</p>
+    <p><b>Синхронная</b> шина — все действия по общему тактовому сигналу (PCI, системная шина памяти). <b>Асинхронная</b> — по «рукопожатию»: запрос → подтверждение (REQ/ACK), подходит для устройств разной скорости.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · пропускная способность</span>
+    <p style="text-align:center;font:600 16px var(--f-mono)">B = ширина (байт) × частота × передач за такт</p>
+    <p>Пример из СРО: 32 бита, 100 МГц, 1 передача за такт → 4 Б × 100·10⁶ = <b>400 МБ/с</b>. Классическая PCI: 32 бита × 33 МГц = 133 МБ/с <b>на всех</b> (общая шина). У последовательных интерфейсов учитывают кодирование: 8b/10b теряет 20 %, 128b/130b — около 1,5 %.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · стандарты шин</span>
+    <div class="tw"><table><tr><th>Шина</th><th>Тип</th><th>Ширина / линии</th><th>Скорость</th><th>Для чего</th></tr><tr><td>ISA</td><td>параллельная, общая</td><td>8/16 бит, 8 МГц</td><td>≈ 8–16 МБ/с</td><td>платы расширения IBM PC/AT</td></tr><tr><td><b>PCI</b></td><td>параллельная, общая, синхронная</td><td>32 бита, 33 МГц (64/66)</td><td>133 МБ/с (до 533)</td><td>платы 1993–2005</td></tr><tr><td>AGP</td><td>параллельная, только видео</td><td>32 бита, 66 МГц ×1…×8</td><td>до 2,1 ГБ/с</td><td>видеокарты</td></tr><tr><td><b>PCI Express</b></td><td>последовательная, точка-точка, дуплекс</td><td>x1, x4, x8, x16 линий</td><td>3.0: ≈1 ГБ/с на линию; 4.0: ≈2; 5.0: ≈4</td><td>видеокарты, NVMe SSD, сетевые</td></tr><tr><td><b>USB</b></td><td>последовательная, дерево с хабами, горячее подключение, питание</td><td>1 пара (USB 3 — ещё 2)</td><td>1.1: 12 Мбит/с; 2.0: 480 Мбит/с; 3.2 Gen1: 5 Гбит/с; Gen2: 10; USB4: 40</td><td>периферия: клавиатура, мышь, флешки, принтеры</td></tr><tr><td>SATA</td><td>последовательная</td><td>1 линия</td><td>III: 6 Гбит/с ≈ 600 МБ/с</td><td>диски</td></tr></table></div>
+    <p><b>Главное отличие PCIe от PCI:</b> вместо одной общей параллельной шины, которую устройства делят по очереди, у каждого устройства свои последовательные линии (lanes) к коммутатору, передача одновременно в обе стороны.</p>
+    <p><b>Арбитраж шины</b> — выбор, какое из устройств-«мастеров» займёт шину (процессор, контроллер DMA, плата с bus mastering). <b>DMA</b> — прямой доступ к памяти: устройство пишет в ОЗУ без участия процессора в каждом байте.</p>
+  </aside>
+  </div>
+  <div class="widget" id="busCalc"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Address bus</td><td>carries the address (one-way: CPU → memory/devices)</td></tr><tr><td>Data bus</td><td>carries data (bidirectional)</td></tr><tr><td>Control bus</td><td>read/write, clock, interrupt request, reset signals</td></tr><tr><td>Bus bandwidth</td><td>width × frequency × transfers per clock</td></tr><tr><td>32-bit bus, 100 MHz, 1 transfer per clock</td><td>400 MB/s</td></tr><tr><td>PCI Express vs PCI</td><td>serial point-to-point lanes vs shared parallel bus</td></tr><tr><td>USB is used for</td><td>peripherals (keyboard, mouse, flash drives, printers)</td></tr><tr><td>A driver is</td><td>a program that controls an external device</td></tr><tr><td>A controller is</td><td>a device that controls an external device</td></tr><tr><td>Input / output devices</td><td>scanner, mouse, keyboard / monitor, printer</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t14-lab">Лабораторная работа № 14. Шины. Основные стандарты шин. Характеристики шин</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Сформировать навыки анализа архитектуры компьютерных шин, определения их основных характеристик и оценки эффективности передачи данных между компонентами вычислительной системы.</p>
+    <p><b>Основная активность студентов:</b> Изучение назначения шин данных, адреса и управления; анализ характеристик интерфейсов PCI, PCI Express и USB; определение разрядности и пропускной способности шин; выполнение расчётов теоретической скорости передачи данных; сравнение различных стандартов интерфейсов; исследование взаимодействия компонентов компьютера.</p>
+  </div>
+  <div class="lab-task" id="t14-z1"><span class="tl">Задание 1 · расчёт скорости шины (СРО)</span>
+    <p>Рассчитайте теоретическую скорость передачи данных для параллельной шины шириной 32 бита с частотой 100 МГц при одной передаче за такт. Повторите для PCI (32 бита, 33 МГц), PCI-X (64 бита, 133 МГц) и шины памяти DDR4-3200 (64 бита, 1600 МГц, 2 передачи за такт).</p>
+  </div>
+  <details class="sol"><summary>Решение + калькулятор</summary><div class="solve">
+<pre>32 бит, 100 МГц, ×1:   4 Б × 100 М  = 400 МБ/с
+PCI 32 бит, 33,33 МГц: 4 Б × 33,33 М = 133 МБ/с
+PCI-X 64 бит, 133 МГц: 8 Б × 133 М  = 1066 МБ/с
+DDR4-3200:             8 Б × 1600 М × 2 = 25 600 МБ/с</pre>
+    <p>Ответ: <span class="answer">400 МБ/с</span> для задачи СРО.</p>
+    <div class="widget" id="busCalc2"></div>
+    <div class="trap"><b>Частая ошибка:</b> забыть разделить биты на 8 (получится в 8 раз больше) или перепутать МБ/с и Мбит/с.</div>
+  </div></details>
+  <div class="lab-task" id="t14-z2"><span class="tl">Задание 2 · сравнение PCI, PCI Express и USB (СРО)</span>
+    <p>Составьте сравнительную таблицу интерфейсов PCI, PCI Express и USB: тип передачи, топология, разрядность/линии, пропускная способность, горячее подключение, применение. Рассчитайте пропускную способность PCIe 3.0 x16 и PCIe 4.0 x4.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <div class="tw"><table><tr><th></th><th>PCI</th><th>PCI Express</th><th>USB</th></tr><tr><td>Передача</td><td>параллельная</td><td>последовательная, дифференциальные пары</td><td>последовательная</td></tr><tr><td>Топология</td><td>общая шина</td><td>точка-точка через коммутатор</td><td>дерево (хабы), до 127 устройств</td></tr><tr><td>Ширина</td><td>32/64 бита</td><td>x1…x16 линий</td><td>1 пара данных (USB 3 — ещё 2 пары)</td></tr><tr><td>Скорость</td><td>133–533 МБ/с на всех</td><td>3.0: ≈0,985 ГБ/с × линии в каждую сторону</td><td>480 Мбит/с … 40 Гбит/с</td></tr><tr><td>Горячее подключение</td><td>нет</td><td>ограниченно</td><td>да</td></tr><tr><td>Применение</td><td>старые платы расширения</td><td>видеокарты, NVMe SSD, сетевые карты</td><td>периферия</td></tr></table></div>
+    <p>PCIe 3.0 x16: 8 ГТ/с × 128/130 / 8 × 16 ≈ <b>15,75 ГБ/с</b>; PCIe 4.0 x4 (NVMe SSD): 16 × 128/130 / 8 × 4 ≈ <b>7,88 ГБ/с</b> — поэтому быстрые SSD читают до ~7 ГБ/с.</p>
+  </div></details>
+  <div class="lab-task" id="t14-z3"><span class="tl">Задание 3 · шины своего компьютера</span>
+    <p>Определите, какие устройства подключены к шине PCI Express вашего компьютера, сколько линий и какого поколения использует видеокарта (или NVMe-диск), какие USB-контроллеры установлены.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p><b>Windows:</b> Диспетчер устройств → «Вид → Устройства по подключению» — дерево шин. GPU-Z показывает «Bus Interface: PCIe x16 4.0 @ x16 4.0». PowerShell: <code>Get-PnpDevice -PresentOnly | Where-Object InstanceId -like 'PCI*' | Select FriendlyName</code>, USB: <code>Get-PnpDevice -Class USB</code>.</p>
+    <p><b>Linux:</b> <code>lspci -tv</code> (дерево), <code>sudo lspci -vv | grep -E "LnkCap|LnkSta"</code> (скорость и ширина линии: «Speed 16GT/s, Width x4»), <code>lsusb -t</code> (скорость USB: 480M, 5000M).</p>
+  </div></details>
+
+  <h2 id="t14-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 14</summary><div class="solve"><ol>
+    <li><b>Шина</b> — общий набор линий и правил обмена между устройствами компьютера.</li>
+    <li><b>Шина данных</b> передаёт данные (двунаправленная).</li>
+    <li><b>Адресная шина</b> передаёт адрес ячейки или порта (от процессора).</li>
+    <li><b>Шина управления</b> передаёт управляющие сигналы: чтение/запись, такт, прерывания, сброс.</li>
+    <li><b>Последовательная vs параллельная:</b> по одной линии по очереди против многих линий одновременно.</li>
+    <li><b>Разрядность шины</b> — сколько бит передаётся одновременно.</li>
+    <li><b>Пропускная способность</b> = ширина (байт) × частота × передач за такт.</li>
+    <li><b>32 бита, 100 МГц, 1 передача</b> → 400 МБ/с.</li>
+    <li><b>PCIe vs PCI:</b> последовательные двухточечные линии вместо общей параллельной шины.</li>
+    <li><b>USB</b> — для внешней периферии: клавиатуры, мыши, накопители, принтеры, камеры.</li></ol></div></details>
+
+  <h2 class="testshead" id="t14-test">Тесты темы 14</h2>
+  <div id="tests-t14"></div>
+</div>
+</section>
+
+<!-- ===================================================== ТЕМА 15 -->
+<section id="t15" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тема 15 · лекция, лаба, тесты (5 из базы + 17)</div>
+    <h1>Прерывания. Виды прерываний. Приоритет. Арбитраж</h1>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--surface)"></i>Обычный текст — оригинал УМКД</span>
+      <span><i class="sw" style="background:var(--add-bg);border-style:dashed"></i>Дополнение</span>
+      <span><i class="sw" style="background:var(--fix-bg)"></i>Поправка</span>
+    </div>
+  </div>
+  <nav class="subnav"><a href="#t15-lab">Лаба</a><a href="#t15-q">Вопросы УМКД</a><a href="#t15-test">Тесты</a><a href="#t15-lecture">Лекция</a></nav>
+</div>
+<details class="lec" id="t15-lecture"><summary><span class="ic">📖</span><span class="tx"><b>Лекция по теме</b><span>Оригинал УМКД + виды прерываний, таблица векторов, контроллер 8259 и тренажёр приоритетов.</span></span><span class="ar"></span></summary><div class="lecbody"><div class="read">
+  <p><b>Лекция 15. Прерывания. Виды прерываний. Приоритет. Арбитраж</b></p>
+  <p><b>Цель лекции:</b> Изучить механизмы обработки прерываний в вычислительных системах, их классификацию, принципы приоритетного обслуживания и арбитража запросов, сформировать понимание роли прерываний в организации взаимодействия процессора с внешними устройствами.</p>
+  <p><b>Основные тезисы:</b></p>
+  <ul><li>Понятие прерывания и его назначение в компьютерной системе.</li><li>Аппаратные и программные прерывания.</li><li>Маскируемые и немаскируемые прерывания.</li><li>Исключения процессора и их отличие от внешних прерываний.</li><li>Последовательность обработки прерывания процессором.</li><li>Таблица векторов прерываний и обработчики прерываний.</li><li>Приоритеты прерываний и механизмы разрешения конфликтов.</li><li>Арбитраж запросов и роль контроллеров прерываний в вычислительной системе.</li></ul>
+  <aside class="add"><span class="tag">дополнение · зачем прерывания</span>
+    <p><b>Прерывание</b> — сигнал, по которому процессор приостанавливает текущую программу, выполняет специальную подпрограмму — <b>обработчик</b> (ISR), а потом возвращается точно туда, где остановился. Альтернатива — <b>опрос</b> (polling): процессор в цикле спрашивает устройство «готово?». Опрос тратит время впустую, когда событий нет; прерывание будит процессор только тогда, когда устройству действительно есть что сказать (нажата клавиша, пришёл пакет, диск дочитал блок).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · виды прерываний</span>
+    <div class="tw"><table><tr><th>Вид</th><th>Кто вызывает</th><th>Примеры</th></tr><tr><td><b>Аппаратные внешние</b></td><td>устройства через линии IRQ контроллера — в любой момент (асинхронно)</td><td>таймер (IRQ0), клавиатура (IRQ1), диск, сеть</td></tr><tr><td>— <b>маскируемые</b></td><td>можно запретить: флаг IF (команда CLI) или маска в контроллере</td><td>все IRQ</td></tr><tr><td>— <b>немаскируемое NMI</b></td><td>запретить нельзя, вектор 2</td><td>ошибка памяти (чётность), сбой питания</td></tr><tr><td><b>Программные</b></td><td>команда <b>INT n</b> в программе</td><td>INT 21h — функции DOS, INT 10h — видео BIOS, INT 80h — Linux</td></tr><tr><td><b>Исключения</b> (внутренние)</td><td>сам процессор при выполнении команды (синхронно)</td><td>деление на 0 (вектор 0), неверный код операции (6), ошибка страницы (14), общая защита (13)</td></tr></table></div>
+    <p>Исключения бывают: <b>fault</b> (после обработки команда повторяется — ошибка страницы), <b>trap</b> (продолжение со следующей — точка останова INT 3), <b>abort</b> (продолжить нельзя — двойная ошибка).</p>
+    <p><b>Запрет прерываний называется маскированием</b> (это вопрос из базы).</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · таблица векторов</span>
+    <p>В реальном режиме x86 первые <b>1024 байта</b> памяти (00000h–003FFh) — <b>таблица векторов прерываний</b>: <b>256</b> векторов по <b>4 байта</b>. Вектор — это <b>адрес</b> обработчика: 2 байта смещения (IP) и 2 байта сегмента (CS). Вектор номер N лежит по адресу <b>N × 4</b>: INT 21h → 84h, INT 09h (клавиатура) → 24h. В защищённом режиме вместо неё — <b>IDT</b> (таблица дескрипторов прерываний), её адрес в регистре IDTR.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · что делает процессор при прерывании</span>
+    <ol><li>Заканчивает текущую команду (прерывания принимаются между командами).</li><li>Если прерывание маскируемое — проверяет флаг IF; узнаёт номер вектора (от контроллера по шине данных — цикл INTA, или из команды INT).</li><li>Кладёт в <b>стек</b> FLAGS, CS и IP (состояние прерванной программы — поэтому в тестах «для запоминания состояния прерванной программы используется стек»).</li><li>Сбрасывает IF и TF (чтобы не прерваться ещё раз сразу).</li><li>Загружает CS:IP из таблицы векторов → выполняется обработчик. Он сохраняет регистры, которые портит, работает с устройством и посылает контроллеру <b>EOI</b> (OUT 20h, 20h).</li><li>Команда <b>IRET</b> восстанавливает IP, CS, FLAGS — программа продолжается.</li></ol>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · приоритет и арбитраж: контроллер 8259</span>
+    <p>Если несколько устройств просят одновременно, кто-то должен решить, кого обслужить первым — это <b>арбитраж</b>. В IBM PC его делает <b>программируемый контроллер прерываний 8259A (PIC)</b>: 8 входов IRQ0–IRQ7; два контроллера каскадом (ведомый на IRQ2 ведущего) дают IRQ0–IRQ15. По умолчанию — <b>фиксированный приоритет</b>: <b>чем меньше номер, тем выше приоритет</b>. IRQ0 — системный таймер (наивысший), IRQ1 — клавиатура, IRQ3/4 — COM2/COM1, IRQ6 — дисковод, IRQ7 — LPT1, IRQ8 — часы, IRQ12 — мышь PS/2, IRQ14/15 — IDE. Внутри у 8259 регистры <b>IRR</b> (кто просит), <b>ISR</b> (кто обслуживается), <b>IMR</b> (маска).</p>
+    <p>Приоритет решается тем же <b>приоритетным шифратором</b>, что в теме 5: на выход идёт номер старшего запроса. Пока обслуживается IRQ3, контроллер пропустит только IRQ0–IRQ2 (если обработчик разрешил прерывания STI) — это <b>вложенные</b> прерывания. Другие схемы: <b>циклический</b> приоритет (обслуженный становится последним), <b>опрос по цепочке</b> (daisy chain — приоритет по физическому месту в цепи).</p>
+    <p><b>APIC</b> (Advanced PIC) — в многоядерных системах: Local APIC в каждом ядре и I/O APIC на чипсете, 24+ линий, распределение прерываний между ядрами. Сейчас устройства PCIe чаще шлют прерывания сообщениями — <b>MSI/MSI-X</b>.</p>
+  </aside>
+  </div>
+  <div class="widget" id="irqSim"></div>
+  <div class="read">
+  <aside class="add"><span class="tag">дополнение · шпаргалка для теста на английском</span>
+    <div class="tw"><table><tr><th>Формулировка (EN)</th><th>Ответ</th></tr><tr><td>Disabling an interrupt is called</td><td>masking</td></tr><tr><td>Interrupt vectors are</td><td>addresses where interrupt handlers begin</td></tr><tr><td>Size of an interrupt vector</td><td>4 bytes</td></tr><tr><td>Number of interrupt vectors in a PC</td><td>256</td></tr><tr><td>Highest-priority hardware interrupt</td><td>system timer (IRQ0)</td></tr><tr><td>What is in the first KB of memory?</td><td>interrupt vector table</td></tr><tr><td>Non-maskable interrupt</td><td>NMI — cannot be disabled by IF</td></tr><tr><td>Software interrupt</td><td>INT n instruction</td></tr><tr><td>Exception</td><td>internal CPU event during an instruction (divide by zero, page fault)</td></tr><tr><td>Interrupt controller</td><td>8259 PIC / APIC</td></tr><tr><td>Why interrupts are better than polling</td><td>the CPU does not waste time checking idle devices</td></tr></table></div>
+  </aside>
+</div></div></details>
+<div class="read">
+  <h2 class="labhead" id="t15-lab">Лабораторная работа № 15. Прерывания. Виды прерываний. Приоритет. Арбитраж</h2>
+  <div class="lab-task"><span class="tl">Оригинал УМКД · цель и активность</span>
+    <p><b>Цель:</b> Сформировать практические навыки анализа механизмов обработки прерываний, определения их приоритетов и исследования взаимодействия процессора с периферийными устройствами.</p>
+    <p><b>Основная активность студентов:</b> Изучение классификации аппаратных и программных прерываний; анализ последовательности обработки запроса прерывания; исследование таблицы векторов и обработчиков прерываний; моделирование возникновения нескольких запросов; определение порядка их обслуживания; анализ механизмов приоритизации и арбитража; исследование роли прерываний при взаимодействии процессора с устройствами ввода-вывода.</p>
+  </div>
+  <div class="lab-task" id="t15-z1"><span class="tl">Задание 1 · три одновременных запроса (СРО)</span>
+    <p>Смоделируйте ситуацию одновременного поступления трёх запросов с различными приоритетами (например, IRQ1 — клавиатура, IRQ0 — таймер, IRQ6 — дисковод) и определите порядок их обработки. Как изменится порядок, если во время обработки IRQ6 придёт IRQ3?</p>
+  </div>
+  <details class="sol"><summary>Решение + тренажёр контроллера 8259 (меняй запросы и режим)</summary><div class="solve">
+    <p>Фиксированный приоритет: меньший номер важнее → <b>IRQ0 → IRQ1 → IRQ6</b>. Если во время IRQ6 приходит IRQ3 и обработчик IRQ6 разрешил прерывания (STI), IRQ3 важнее → он прерывает IRQ6, обслуживается, потом IRQ6 доделывается (вложенность). Если прерывания запрещены (CLI) — IRQ3 ждёт конца IRQ6.</p>
+    <div class="widget" id="irqSim2"></div>
+  </div></details>
+  <div class="lab-task" id="t15-z2"><span class="tl">Задание 2 · блок-схема обработки прерывания (СРО)</span>
+    <p>Разработайте блок-схему обработки прерывания центральным процессором. Рассмотрите механизмы маскирования и приоритетного обслуживания.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+<pre>  ┌─────────────────────────┐
+  │ выполнить команду       │◄──────────────────────────┐
+  └───────────┬─────────────┘                           │
+              ▼                                         │
+      есть запрос (NMI или IRQ)? ──нет──────────────────┤
+              │да                                       │
+              ▼                                         │
+      IRQ и IF = 0 (замаскирован)? ──да─────────────────┤
+              │нет                                      │
+              ▼                                         │
+  контроллер выбирает старший по приоритету,            │
+  выдаёт номер вектора N                                │
+              ▼                                         │
+  PUSH FLAGS, PUSH CS, PUSH IP;  IF = 0, TF = 0         │
+              ▼                                         │
+  CS:IP ← [N × 4]  (вектор из таблицы)                  │
+              ▼                                         │
+  обработчик: сохранить регистры → работа с устройством │
+  → EOI в контроллер → восстановить регистры            │
+              ▼                                         │
+  IRET: POP IP, POP CS, POP FLAGS ─────────────────────┘</pre>
+    <p><b>Маскирование:</b> общее — флаг IF (CLI/STI), выборочное — регистр маски IMR контроллера (порт 21h): бит 1 = линия запрещена. NMI замаскировать флагом нельзя.</p>
+  </div></details>
+  <div class="lab-task" id="t15-z3"><span class="tl">Задание 3 · таблица векторов и обработчики</span>
+    <p>Найдите адреса векторов прерываний 08h (таймер), 09h (клавиатура), 10h (видео BIOS), 21h (DOS). Сколько места занимает таблица векторов и где она расположена? Изучите прерывания своего компьютера: какие IRQ/векторы назначены устройствам.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <p>N × 4: 08h → <b>0020h</b>, 09h → <b>0024h</b>, 10h → <b>0040h</b>, 21h → <b>0084h</b> (всё в сегменте 0000). Таблица — 256 × 4 = <b>1024 байта</b>, адреса 00000h–003FFh.</p>
+    <p>Свой компьютер: Windows — <code>msinfo32</code> → «Аппаратные ресурсы → Прерывания IRQ» или Диспетчер устройств → «Вид → Ресурсы по типу». Linux — <code>cat /proc/interrupts</code> (видно число прерываний от каждого устройства по ядрам: таймер, клавиатура i8042, сеть, NVMe…). В DOSBox или отладчике DEBUG: <code>-d 0:0 L 400</code> — дамп таблицы векторов.</p>
+  </div></details>
+  <div class="lab-task" id="t15-z4"><span class="tl">Задание 4 · PIC, APIC, прерывания против опроса (СРО)</span>
+    <p>Исследуйте назначение контроллеров прерываний PIC и APIC. Объясните преимущества использования прерываний по сравнению с постоянным опросом устройств.</p>
+  </div>
+  <details class="sol"><summary>Решение и пояснение</summary><div class="solve">
+    <div class="tw"><table><tr><th></th><th>PIC 8259A</th><th>APIC</th></tr><tr><td>Линий</td><td>8 (каскад из двух — 15)</td><td>24 и больше (I/O APIC), плюс MSI</td></tr><tr><td>Процессоров</td><td>один</td><td>много; прерывания распределяются по ядрам</td></tr><tr><td>Межпроцессорные прерывания</td><td>нет</td><td>есть (IPI)</td></tr><tr><td>Приоритет</td><td>по номеру IRQ</td><td>по номеру вектора (класс приоритета = старшие 4 бита)</td></tr></table></div>
+    <p><b>Прерывания против опроса:</b> процессор не тратит такты на проверку устройств, которым нечего сообщить; реакция быстрая (не нужно ждать очередного опроса); легко обслуживать много устройств разной скорости. Опрос оправдан, только если события очень частые (опрос быстрее, чем вход в обработчик) — так работают высокоскоростные сетевые драйверы под нагрузкой (NAPI в Linux).</p>
+  </div></details>
+
+  <h2 id="t15-q">Вопросы к экзамену из УМКД — с ответами</h2>
+  <details class="sol"><summary>10 вопросов темы 15</summary><div class="solve"><ol>
+    <li><b>Прерывание</b> — сигнал, по которому процессор приостанавливает программу и выполняет обработчик, затем возвращается.</li>
+    <li><b>Аппаратное vs программное:</b> от устройства через IRQ против команды INT n в программе.</li>
+    <li><b>Маскируемое</b> — его можно запретить (флаг IF, маска контроллера).</li>
+    <li><b>Немаскируемое (NMI)</b> — запретить нельзя; критические события (ошибка памяти, питание).</li>
+    <li><b>Исключение vs внешнее прерывание:</b> возникает внутри процессора при выполнении команды, синхронно с программой.</li>
+    <li><b>Действия процессора:</b> закончить команду → сохранить FLAGS, CS, IP в стеке → сбросить IF → взять вектор → обработчик → IRET.</li>
+    <li><b>Таблица векторов</b> хранит адреса обработчиков (256 × 4 байта в первом КБ).</li>
+    <li><b>Порядок при разных приоритетах</b> — сначала более приоритетный (в 8259 — меньший номер IRQ).</li>
+    <li><b>Арбитраж</b> — выбор одного запроса из нескольких одновременных (контроллер прерываний).</li>
+    <li><b>Прерывания эффективнее опроса</b>: процессор не тратит время на проверку неактивных устройств и реагирует сразу.</li></ol></div></details>
+
+  <h2 class="testshead" id="t15-test">Тесты темы 15</h2>
+  <div id="tests-t15"></div>
+  <p class="foot">Источник оригинального текста тем 10–15 — УМКД (цели, тезисы, план лабораторных, задания СРО и вопросы к экзамену). Отдельных файлов лекций и лаб 10–15 в материалах нет: разборы, задания и калькуляторы — мои дополнения по УМКД.</p>
+</div>
+</section>
+
+<!-- ===================================================== EWB -->
+<section id="t16" class="topic" hidden>
+<div class="read">
+  <div class="topic-head">
+    <div class="eyebrow">Тренажёр · как Electronics Workbench 5.12</div>
+    <h1>EWB — свободная сборка схем</h1>
+  </div>
+</div>
+<div class="ewbtab-intro">Собирай любые схемы, как в настоящем EWB: панели деталей сверху, провода — мышью от вывода к выводу, питание — переключатель <b>O/I</b>. Схема сама сохраняется в браузере; <b>File → Сохранить в файл</b> — чтобы забрать её с собой. <b>File → Примеры</b> — все схемы из лаб. Ниже — задания с автопроверкой по темам 3–7.</div>
+<div id="ewb-main"></div>
+<div id="ewb-task-host" hidden></div>
+<h2 class="ewbt-h">Задания с автопроверкой</h2>
+<div id="ewb-tasks"></div>
+</section>
 
 </main>
 
@@ -2821,6 +3639,8 @@ end start</pre>
 <script src="cpp/topics/c14.js"></script>
 <script src="cpp/topics/c15.js"></script>
 <script src="cpp/cpp-boot.js"></script>
+<script src="arch/arch-circuits.js"></script>
+<script src="arch/arch-tests.js"></script>
 <script>
 /* ======================= Программы для симулятора ======================= */
 const PROGS = {
@@ -3797,7 +4617,7 @@ t9:{ base:[
 ]}};
 
 /* ======================= Темы 1–7: инструменты ======================= */
-const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'];
+const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13','t14','t15','t16','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'];
 Object.assign(DEFAULT_TESTS, window.CPP_TESTS||{});
 TOPICS.forEach(k=>{ if(!DEFAULT_TESTS[k]) DEFAULT_TESTS[k]={base:[],pool:[]}; });
 // вопрос с кодом: ```cpp … ``` — блок, `…` — в строке
@@ -4486,9 +5306,9 @@ function ewbEval(c,get){ const p=c.p||{}, st=c.st;
     case 'hex': c.view={v:get('b0')|(get('b1')<<1)|(get('b2')<<2)|(get('b3')<<3)}; return {};
     case 'ha':{ const a=get('A'),b=get('B'); return {S:a^b,C:a&b}; }
     case 'fa':{ const a=get('A'),b=get('B'),ci=get('Ci'); return {S:a^b^ci,Co:(a&b)|(ci&(a^b))}; }
-    case 'jk': case 'd':{ const C=get('C'), fall=p.edge==='fall';
-      if(st.pc!==undefined&&st.pc!==C&&(fall?C===0:C===1)){ if(c.type==='d') st.q=get('D'); else { const j=get('J'),k=get('K'); st.q= j&&k?1-st.q:j?1:k?0:st.q; } }
-      st.pc=C;
+    case 'jk': case 'd':{ const C=get('C'), fall=p.edge==='fall'; const cur=c.type==='d'?{D:get('D')}:{J:get('J'),K:get('K')}; const pv=(p.pre&&st.pv)||cur; // p.pre: входы берутся ДО фронта (нужно синхронным схемам)
+      if(st.pc!==undefined&&st.pc!==C&&(fall?C===0:C===1)){ if(c.type==='d') st.q=pv.D; else { const j=pv.J,k=pv.K; st.q= j&&k?1-st.q:j?1:k?0:st.q; } }
+      st.pc=C; st.pv=cur;
       if(p.async){ const pr=c.in.PR?get('PR'):1, clr=c.in.CLR?get('CLR'):1; if(clr===0) st.q=0; else if(pr===0) st.q=1; }
       return {Q:st.q,Qn:1-st.q}; }
     case 'wg':{ const o={}; for(let k=0;k<(p.n||8);k++) o['b'+k]=(st.word>>k)&1; c.view={word:st.word}; return o; }
@@ -4532,7 +5352,7 @@ class EWBWin{
     this.cv=$('.e-canvas'); this.pan=$('.e-panels'); this.stat=$('.e-status'); this.stepBox=$('.ewb-step');
     this.el.querySelector('.ewb-ctl').addEventListener('click',e=>this.onCtl(e));
     this.el.querySelector('.pw').addEventListener('click',()=>{ this.power=!this.power; this.render(); });
-    const sel=this.el.querySelector('.ewb-sel select'); if(sel) sel.addEventListener('input',()=>{ const ch=C.choices[+sel.value]; const nc=ch.make(); nc.choices=C.choices; this.load(nc); this.el.querySelector('.ewb-sel select').value=sel.value; });
+    const sel=this.el.querySelector('.ewb-sel select'); if(sel&&C.choiceIdx!=null) sel.value=C.choiceIdx; if(sel) sel.addEventListener('input',()=>{ const ch=C.choices[+sel.value]; const nc=ch.make(); nc.choices=C.choices; this.load(nc); this.el.querySelector('.ewb-sel select').value=sel.value; });
     this.cv.addEventListener('click',e=>{ const g=e.target.closest('[data-sw]'); if(!g||!this.powerOn()) return; const c=this.byId[g.dataset.sw]; c.p.on=!c.p.on; this.settle(); this.render(); });
   }
   onCtl(e){ const b=e.target.closest('button'); if(!b) return;
@@ -4698,7 +5518,7 @@ const EWB_CIRCUITS={
 
 function initEWB(){
   document.querySelectorAll('.ewb').forEach(el=>{ let circ;
-    if(el.dataset.c) circ=EWB_CIRCUITS[el.dataset.c]();
+    if(el.dataset.c) circ=(EWB_CIRCUITS[el.dataset.c]||(window.EWB_EXTRA||{})[el.dataset.c])();
     else if(el.dataset.exprs){ const list=JSON.parse(el.dataset.exprs); const choices=list.map(x=>({t:x.t,make:()=>ewbFromExpr(x.e,{file:x.f||'task.ewb',lc:!!x.lc,out:x.out})})); circ=choices[0].make(); circ.choices=choices; }
     else circ=ewbFromExpr(el.dataset.expr,{file:el.dataset.file||'scheme.ewb',lc:el.dataset.lc==='1',out:el.dataset.out});
     new EWBWin(el,circ); });
@@ -4729,7 +5549,7 @@ function saveTests(key,data){ ED.tests[key]=data; store.setTests(key,data); rend
 function plainQ(s){ return String(s).replace(/```(?:cpp)?\n?/g,'\n').replace(/`/g,'').replace(/\n{2,}/g,'\n').trim(); }
 function renderCarousel(root,key,T){
   // C++: вопросы базы тоже в случайном порядке (новый порядок при каждой загрузке)
-  const BN=T.baseName||'Из базы'; const seq=[...(key[0]==='c'?shuffle(T.base):T.base).map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
+  const BN=T.baseName||'Из базы'; const seq=[...shuffle(T.base).map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
   if(!seq.length){ root.innerHTML='<p style="color:var(--muted)">Тестов к этой теме пока нет.</p>'; return; }
   const st=seq.map(()=>null); let cur=0, ok=0, all=0;
   root.innerHTML=`<div class="tcar" tabindex="0" aria-label="Тесты: стрелки влево и вправо листают вопросы">
@@ -4747,7 +5567,7 @@ function renderCarousel(root,key,T){
     root.querySelector('.tc-src').textContent=src+(src===BN&&cur===T.base.length-1&&T.pool.length?' · дальше — доп. вопросы':'');
     root.querySelector('.tc-pos').textContent=`${cur+1} / ${seq.length}`;
     bar.style.width=((cur+1)/seq.length*100)+'%';
-    q.innerHTML=`<div class="qt">${qfmt(it.q)}</div><div class="opts">${s.opts.map((o,i)=>`<button class="opt" data-i="${i}">${qfmt(o.t)}</button>`).join('')}</div>`;
+    q.innerHTML=`<div class="qt">${qfmt(it.q)}</div>${it.en?`<div class="qen">(EN) ${esc(it.en)}</div>`:''}<div class="opts">${s.opts.map((o,i)=>`<button class="opt" data-i="${i}">${qfmt(o.t)}</button>`).join('')}</div>`;
     if(s.pick!=null) mark(s);
     const txt=plainQ(it.q)+'\nВарианты ответа:\n'+s.opts.map((o,i)=>(i+1)+') '+plainQ(o.t)).join('\n');
     root.querySelector('.tc-g').href='https://www.google.com/search?q='+encodeURIComponent(txt);
@@ -5004,6 +5824,7 @@ function showTopic(t){
   document.getElementById('brandName').textContent=SUBJ[s].name; document.getElementById('brandSub').textContent=SUBJ[s].sub;
   document.title=SUBJ[s].title;
   if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); }
+  if(t==='t16'&&window.ARCH&&ARCH.initTab) ARCH.initTab();
   try{ localStorage.setItem('last-'+s,t); }catch(_){}
 }
 document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; showTopic(b.dataset.t); try{localStorage.setItem('arch-topic',b.dataset.t);}catch(_){} window.scrollTo({top:0});});
@@ -5021,10 +5842,13 @@ amatCalc(document.getElementById('amatCalc'));
 matCalc(document.getElementById('matCalc'));
 stackSim(document.getElementById('stackSim'));
 revealTables();
+if(window.ARCH_MERGE) ARCH_MERGE(DEFAULT_TESTS); else Object.assign(DEFAULT_TESTS, window.ARCH_TESTS||{});
 TOPICS.forEach(renderTests);
 initEWB();
 document.getElementById('solAll').addEventListener('click',e=>{ const all=[...document.querySelectorAll('.topic:not([hidden]) details.sol')]; const open=!all.every(d=>d.open); all.forEach(d=>d.open=open); e.target.textContent=open?'Свернуть все решения':'Открыть все решения'; });
 initEditor();
 if(h && !TOPICS.includes(h)){ const el=document.getElementById(h); if(el){ const d=el.closest('details'); if(d) d.open=true; } if(el) setTimeout(()=>el.scrollIntoView(),50); }
 </script>
+<script src="arch/ewb-studio.js"></script>
+<script src="arch/arch-tools.js"></script>
 </body></html>

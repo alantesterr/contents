@@ -624,6 +624,34 @@ details.sol .ref pre{margin:.4em 0}
 .tmore[hidden]{display:none}
 .tmore .btn{font-size:14px}
 .tmore span{color:var(--muted);font-size:13.5px}
+/* C++: липкий переключатель «Лабораторные | Тесты | Лекция» и листалка заданий */
+.cmode{position:sticky;top:var(--hdrh,64px);z-index:8;background:var(--bg);padding:8px 0;margin:6px 0 4px}
+.cmode-in{max-width:760px;margin:0 auto;padding:0 16px;display:flex;flex-wrap:wrap;gap:6px}
+.cmode button{font:700 14.5px var(--f-body);border:1.5px solid var(--line);background:var(--surface);color:var(--ink);padding:9px 16px;border-radius:999px;cursor:pointer;display:inline-flex;gap:6px;align-items:center}
+.cmode button small{font:600 12px var(--f-body);color:var(--muted)}
+.cmode button[aria-selected="true"]{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.cmode button[aria-selected="true"] small{color:inherit;opacity:.8}
+.cmode .cm-lec{margin-left:auto}
+.cmode .cm-lec[aria-expanded="true"]{border-color:var(--accent);color:var(--accent)}
+.cmode button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.cpane[hidden],.lslide[hidden]{display:none}
+body.editing .cpane[hidden],body.editing .lslide[hidden]{display:block}
+.lc-head{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:10px 0 4px}
+.lc-dots{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.lc-dot{min-width:34px;height:32px;font:700 13px var(--f-mono);border:1.5px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;cursor:pointer}
+.lc-dot.dop{border-style:dashed}
+.lc-dot.ok{border-color:var(--ok);color:var(--ok)}
+.lc-dot.on{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+.lc-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.lc-nav .btn{min-width:130px}
+.lc-nav.lc-bot{margin:14px 0 6px;padding-top:12px;border-top:1px solid var(--line)}
+.lc-pos{font:600 14px var(--f-mono);color:var(--muted);text-align:center}
+.lc-labname{font:600 13px var(--f-body);color:var(--muted);margin:14px 0 -4px}
+details.labinfo{border:1px solid var(--line);border-radius:8px;background:var(--surface);margin:.6em 0 1em;padding:0 12px}
+details.labinfo>summary{cursor:pointer;padding:9px 0;font-weight:600;color:var(--accent)}
+details.labinfo[open]{padding-bottom:10px}
+.lslide .labhead{margin-top:1em}
+@media (max-width:560px){ .lc-nav .btn{min-width:0;padding:7px 10px;font-size:13.5px} .cmode button{padding:8px 12px;font-size:13.5px} }
 /* разбор кода по строчкам и «что сделать в Builder» */
 table.lbl td:first-child{font:13px/1.45 var(--f-mono);white-space:pre-wrap;color:var(--ink);background:var(--bg);min-width:220px;max-width:420px}
 table.lbl td:last-child{font-size:14.5px}

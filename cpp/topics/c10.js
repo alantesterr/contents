@@ -150,7 +150,7 @@ CPP.topic('c10',{n:10,
  lecSub:'Проект и его файлы, форма и GUI, дизайнер форм, добавление и выравнивание компонентов, связь формы с кодом, несколько форм.',
  lecture:LECTURE,
  labs:[{id:'c10-lab',short:'Обучалки и лабы',title:'Обучалки и ООП-лаба 1-2 (продолжение): фон по таймеру, калькулятор',show:2,tasks:T.slice(0,3)}],
- dop:[{id:'c10-dop',short:'Доп. лабы',title:'Доп. лабы: калькулятор как в Windows, simple application, несколько форм',show:1,tasks:[CPP.WINCALC_TASK].concat(T.slice(3))}],
+ dop:[{id:'c10-dop',short:'Доп. лабы',title:'Доп. лабы: калькулятор как в Windows, simple application, несколько форм, три формы по кругу',show:1,tasks:[CPP.WINCALC_TASK].concat(T.slice(3),[CPP.FORMS3_TASK])}],
  umkd:[
   ['Что такое проект в C++Builder?','Совокупность файлов одной программы (.bpr, Project1.cpp, Unit1.cpp/.h/.dfm, .res), из которых собирается exe.'],
   ['Основные шаги создания нового проекта?','File → New → Application; разместить компоненты на форме; настроить свойства; написать обработчики; File → Save All; F9.'],

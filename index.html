@@ -4725,7 +4725,8 @@ function saveTests(key,data){ ED.tests[key]=data; store.setTests(key,data); rend
 /* Тесты-листалка: один вопрос на экране, стрелки ← →, кнопки «Загуглить» и «Спросить ИИ». Сначала база, потом доп. вопросы в случайном порядке. */
 function plainQ(s){ return String(s).replace(/```(?:cpp)?\n?/g,'\n').replace(/`/g,'').replace(/\n{2,}/g,'\n').trim(); }
 function renderCarousel(root,key,T){
-  const BN=T.baseName||'Из базы'; const seq=[...T.base.map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
+  // C++: вопросы базы тоже в случайном порядке (новый порядок при каждой загрузке)
+  const BN=T.baseName||'Из базы'; const seq=[...(key[0]==='c'?shuffle(T.base):T.base).map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
   if(!seq.length){ root.innerHTML='<p style="color:var(--muted)">Тестов к этой теме пока нет.</p>'; return; }
   const st=seq.map(()=>null); let cur=0, ok=0, all=0;
   root.innerHTML=`<div class="tcar" tabindex="0" aria-label="Тесты: стрелки влево и вправо листают вопросы">

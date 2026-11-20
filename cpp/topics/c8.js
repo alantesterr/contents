@@ -52,6 +52,26 @@ Rect arr[3] = { Rect(1,1), Rect(2,2), Rect(3,3) };   // массив объек�
       <li><b>Encapsulation</b> в классах — <i>hiding the implementation details of a class and only exposing the necessary interfaces</i> (скрыть детали реализации, наружу открыть только нужное): поля в <code>private</code>, методы для работы с ними в <code>public</code>.</li>
     </ul>
   </aside>
+  <h3 id="c8-book">Из учебника МГУ: классы глубже</h3>
+  <aside class="add"><span class="tag">книга преподавателя · главы 2, 3, 5–8 кратко</span>
+    <p><b>Отличия C++ от C:</b> операции <code>new</code>/<code>delete</code> (<code>p = new int(5); q = new int[10]; delete p; delete [] q;</code>); переменную можно объявить прямо в <code>for (int i = 0; …)</code>; <b>параметры по умолчанию</b> — только в конце списка: <code>void f(int a, int b, int c = 1);</code>; тип <code>bool</code> (true/false); <b>ссылки</b> <code>int &amp;b = a;</code> — второе имя переменной, обязательно инициализируется и потом не меняется; <code>cin &gt;&gt; x; cout &lt;&lt; x &lt;&lt; endl;</code>; <b>пространства имён</b> <code>namespace A {…}</code> и операция <code>::</code> (<code>A::x</code>, <code>::c</code> — глобальная c), <code>using namespace std;</code>.</p>
+    <div class="tw"><table><tr><th>Область доступа</th><th>Кто видит</th></tr>
+      <tr><td><code>private</code></td><td>только методы самого класса (по умолчанию в <code>class</code>)</td></tr>
+      <tr><td><code>public</code></td><td>любой код (по умолчанию в <code>struct</code>)</td></tr>
+      <tr><td><code>protected</code></td><td>методы класса и его наследников</td></tr></table></div>
+    <ul>
+      <li><b>class и struct</b> отличаются <b>только</b> доступом по умолчанию (и видом наследования по умолчанию). Порядок и число секций private/public/protected — любые.</li>
+      <li>Доступ к членам: через объект или ссылку — точка <code>x1.f()</code>; через указатель — стрелка <code>p-&gt;f()</code>.</li>
+      <li><b>Селекторы (getters) и модификаторы (setters)</b> — методы, через которые читают и меняют закрытые поля согласованно.</li>
+      <li>Метод можно определить в классе (тогда он <b>inline</b>) или вне класса через <code>::</code>: <code>int X::func1() { … }</code>. <code>inline</code> — <b>рекомендация</b> компилятору вставить код функции на место вызова.</li>
+      <li><b>this</b> — скрытый указатель на текущий объект, неявный параметр каждого метода. Вернуть сам объект: <code>return *this;</code>.</li>
+      <li><b>static-поле</b> — одно на все объекты класса (например, счётчик объектов); его обязательно ещё раз объявляют <b>вне класса</b>: <code>int B::i = 10;</code>. <b>static-метод</b> не имеет this, вызывается через класс: <code>B::f(1);</code>.</li>
+      <li><b>const-метод</b> <code>int get() const { … }</code> не может менять поля объекта. У константного объекта <code>const X x2 = x1;</code> можно вызывать только const-методы.</li>
+      <li><b>friend</b> — функция или класс, не член класса, но с доступом к его private-полям: <code>friend void func(B &amp;, D &amp;);</code>, <code>friend class X;</code>.</li>
+      <li><b>Перегрузка операций</b>: <code>complex operator+(const complex &amp;y);</code>. Нельзя перегружать <code>. :: ?: .* # sizeof typeid</code>. Операцию <code>=</code> перегружают только методом класса. Вывод <code>&lt;&lt;</code> перегружают функцией-другом: <code>friend ostream&amp; operator&lt;&lt;(ostream &amp;out, const complex c);</code>.</li>
+      <li><b>Перегрузка функций</b> — несколько функций с одним именем в одной области видимости и разными параметрами. Компилятор выбирает по порядку: точное совпадение → расширения (char → int, float → double) → стандартные преобразования → преобразования пользователя → «…».</li>
+    </ul>
+  </aside>
 </div>`;
 const T=[
  {id:'c8-z1',name:'Задание 1',cmp:'exact',text:R`<p>Описать класс «Прямоугольник» с закрытыми полями ширина и высота и открытыми методами: задать размеры (с проверкой &gt; 0), площадь, периметр, вывод. Создать два объекта, вывести их данные и сравнить площади.</p>`,

@@ -62,6 +62,112 @@ public:
   <aside class="add"><span class="tag">дополнение · для теста на английском</span>
     <p><b>protected</b> — поле или метод видит сам класс и все классы-наследники (<i>the class itself and any classes derived from it</i>). <b>private</b> — только сам класс. <b>public</b> — любой код.</p>
   </aside>
+  <h3 id="c12-l12">Слайды преподавателя: «Class Hierarchy» — базовые классы VCL</h3>
+  <aside class="fix"><span class="tag">оригинал · лекция 12 (eng) — перевод</span>
+    <p><i>The purpose of lesson is to learn the basic classes; consider the elements inherited from the ancestor classes.</i> — Цель: изучить базовые классы и элементы, которые наследуются от классов-предков.</p>
+    <p><b>Корень дерева классов VCL</b> (The root of the VCL class hierarchy tree):</p>
+<pre>TObject
+ ├ Exception    ├ TStream    ├ TPrinter    ├ TList
+ └ TPersistent
+    ├ TGraphic   ├ TGraphicObject   ├ TCanvas   ├ TPicture   ├ TStrings
+    └ TComponent
+       ├ TTimer  ├ TScreen  ├ TMenuItem  ├ TMenu  ├ TCommonDialog
+       ├ TGlobalComponent ─ TApplication
+       └ TControl
+          ├ TGraphicControl
+          └ TWinControl
+             ├ TButtonControl   ├ TCustomControl   ├ TCustomEdit
+             └ TScrollingWinControl ─ TCustomForm ─ TForm</pre>
+    <div class="tw"><table><tr><th>Класс</th><th>Что о нём на слайдах</th></tr>
+      <tr><td><b>TObject</b></td><td>общие элементы (поведение) всех объектов VCL. Если при создании класса <b>базовый класс не указан</b>, предком автоматически становится <b>TObject</b>.</td></tr>
+      <tr><td><b>TComponent</b></td><td>предок всех <b>компонентов</b> VCL; все его наследники можно добавить на <b>палитру компонентов</b>. Позволяет задать <b>родителя (parent)</b> и <b>владельца (owner)</b> компонента.</td></tr>
+      <tr><td><b>TControl</b></td><td>базовый класс всех <b>элементов управления</b> (controls), включая окно формы; видимы во время работы. Даёт положение, подсказку (hint), рисование и перемещение, события мыши.</td></tr>
+      <tr><td><b>TWinControl</b></td><td>базовый класс всех <b>оконных</b> элементов управления (window controls).</td></tr>
+      <tr><td><b>TApplication</b></td><td>объект «Windows-приложение», связь программиста со средой Windows. В каждом приложении автоматически создаётся один объект <code>Application</code>. Его нет в палитре и у него нет публикуемых свойств; чтобы ловить события приложения в IDE, кладут на форму <b>TApplicationEvents</b>.</td></tr>
+      <tr><td><b>TScreen</b></td><td>глобальная переменная <code>Screen</code>; доступа из Object Inspector нет. Даёт сведения об экране: разрешение, курсоры, шрифты, список форм и <b>активная форма</b>.</td></tr>
+      <tr><td><b>TForm</b></td><td>базовый класс окна-формы; каждая новая форма — наследник TForm (<code>class TForm1 : public TForm</code>). Форма бывает: главным окном приложения, диалоговым окном, дочерним окном MDI.</td></tr>
+      <tr><td><b>TMainMenu</b></td><td>строка меню формы и выпадающие меню.</td></tr>
+      <tr><td><b>TMenuItem</b></td><td>пункт меню; его контейнер — TMainMenu или TPopupMenu.</td></tr>
+      <tr><td><b>TPopupMenu</b></td><td>контекстное (всплывающее) меню по правой кнопке мыши; базовый класс — <b>TMenu</b>.</td></tr></table></div>
+    <p><b>Parent и Owner.</b> <b>Родитель (parent)</b> — компонент, <b>на котором непосредственно лежит</b> компонент. <b>Владелец (owner)</b> всех компонентов формы — <b>сама форма</b>; владелец всех форм — <b>приложение</b> (Application). Если компонент лежит не прямо на форме, а, например, на <b>TPanel</b>, то родитель (панель) и владелец (форма) — <b>разные</b> компоненты.</p>
+    <p><b>Свойства TComponent:</b></p>
+    <ul>
+      <li><b>ComponentCount</b> — сколько компонентов принадлежит этому компоненту;</li>
+      <li><b>ComponentIndex</b> — номер компонента в массиве Components его владельца (первый — 0);</li>
+      <li><b>Components</b> — список всех принадлежащих компонентов: обращение по номеру или перебор в цикле;</li>
+      <li><b>Name</b> — имя компонента в коде; Builder даёт его сам по имени класса (Button1, Edit1…);</li>
+      <li><b>Owner</b> — владелец. <b>Компонент всегда удаляется (память освобождается), когда удаляется его владелец.</b></li>
+    </ul>
+<pre class="cpp-code">for (int i = 0; i &lt; ComponentCount; i++)          // все компоненты формы
+  if (TEdit *e = dynamic_cast&lt;TEdit*&gt;(Components[i]))
+    e-&gt;Text = "";                                   // очистить все Edit</pre>
+    <p><b>Свойства TControl:</b></p>
+    <div class="tw"><table><tr><th>Свойство</th><th>Смысл</th></tr>
+      <tr><td>Action</td><td>действие (action), связанное с элементом</td></tr>
+      <tr><td>AutoSize</td><td>менять ли размер автоматически при изменении содержимого</td></tr>
+      <tr><td>Caption</td><td>строка-заголовок окна или надпись. Знак <b>&amp;</b> подчёркивает следующую букву — это <b>клавиша-ускоритель</b>: Alt + буква переносит фокус на элемент. <code>Caption = "&amp;Open"</code> → <u>O</u>pen</td></tr>
+      <tr><td>Color, ParentColor</td><td>цвет фона; если <b>ParentColor = true</b>, фон меняется вместе с фоном родителя</td></tr>
+      <tr><td>Enabled</td><td>доступен ли элемент</td></tr>
+      <tr><td>Font</td><td>шрифт: тип букв, размер и т. д.</td></tr>
+      <tr><td>Height, Width</td><td>высота и ширина в пикселях</td></tr>
+      <tr><td>HelpType</td><td>как задаётся тема справки: htContext → номер в HelpContext, htKeyword → слово в HelpKeyword</td></tr>
+      <tr><td>Hint, ShowHint</td><td>всплывающая подсказка; видна, только если <b>ShowHint = true</b></td></tr>
+      <tr><td>Left, Top</td><td>сколько пикселей от левого / верхнего края <b>родителя</b></td></tr>
+      <tr><td>Parent</td><td>родительский элемент</td></tr>
+      <tr><td>ParentColor, ParentFont</td><td>true — брать цвет и шрифт родителя</td></tr>
+      <tr><td>PopupMenu</td><td>контекстное меню элемента. Если у TPopupMenu <b>AutoPopup = true</b>, меню появляется само; если false — его вызывают методом Popup в обработчике OnContextPopup</td></tr>
+      <tr><td>Text</td><td>текстовая строка в элементе</td></tr>
+      <tr><td>Visible</td><td>виден ли компонент</td></tr></table></div>
+    <p><b>Методы TControl:</b> <code>Click</code> — вызывает событие OnClick (<code>Label1-&gt;Click();</code>); <code>Create</code> — создаёт экземпляр и задаёт свойства; <code>DblClick</code> — вызывает OnDblClick; <code>Hide</code> — прячет (Visible = false): <code>Button1-&gt;Visible = false;</code> то же, что <code>Button1-&gt;Hide();</code>; <code>Refresh</code> — перерисовывает элемент, вызывая Repaint; <code>Show</code> — делает видимым (Visible = true).</p>
+    <p><b>Свойства TWinControl:</b> <b>ControlCount</b> — число дочерних элементов; <b>Controls</b> — список дочерних элементов; <b>TabOrder</b> — номер элемента в порядке обхода клавишей Tab внутри родителя.</p>
+    <p><b>Свойства TApplication:</b> <b>HelpFile</b> — файл справки; <b>Icon</b> — значок в заголовке рядом с именем приложения; <b>MainForm</b> — главная форма: когда она закрывается, закрывается и приложение; <b>ShowMainForm</b> — по умолчанию true: главное окно показывается при запуске (чтобы скрыть его, в Project1.cpp до <code>Application-&gt;Run()</code> пишут <code>Application-&gt;ShowMainForm = false;</code> и у главной формы Visible = false); <b>Title</b> — заголовок приложения.</p>
+    <p><b>Свойства TForm:</b> <b>Active</b> — активна ли форма; <b>ActiveControl</b> — элемент с <b>фокусом ввода</b>; <b>ActiveMDIChild</b> — активное дочернее MDI-окно; <b>BorderStyle</b> — вид и поведение рамки; <b>FormStyle</b>:</p>
+    <ul>
+      <li><code>fsNormal</code> — обычная SDI-форма (не дочернее и не родительское MDI-окно);</li>
+      <li><code>fsMDIChild</code> — дочернее MDI-окно;</li>
+      <li><code>fsMDIForm</code> — родительское MDI-окно;</li>
+      <li><code>fsStayOnTop</code> — «всегда сверху» над формами проекта без этого стиля.</li>
+    </ul>
+    <p>Ещё: <b>HelpFile</b>; <b>Icon</b> — значок в заголовке окна; <b>MDIChildCount</b> — число открытых дочерних MDI-форм; <b>MDIChildren</b> — их список; <b>Menu / PopupMenu</b> — главное и контекстное меню; <b>Parent</b> — у формы без родителя равен <b>nil</b> (NULL); <b>Position</b> — размер и положение при первом показе; <b>WindowState</b> — свёрнута, развёрнута на весь экран или обычная.</p>
+    <p><b>Методы TForm</b> (для MDI): <b>Cascade</b> — расставить дочерние окна каскадом; <b>Next</b> / <b>Previous</b> — сделать активным следующее / предыдущее дочернее окно; <b>Tile</b> — расставить дочерние окна одинакового размера мозаикой на всю клиентскую область. Класс формы — контейнер для всех компонентов на ней.</p>
+    <p><b>TMainMenu.</b> Меню формы создают в три шага: 1) положить на форму компонент <b>TMainMenu</b>; 2) <b>двойной щелчок</b> по нему — в редакторе меню вписать заголовки пунктов строки меню и выпадающих меню; 3) написать обработчик события для каждого пункта. Свойства: <b>AutoMerge</b> — можно ли сливать меню (как именно — зависит от GroupIndex пунктов); <b>Handle</b> — дескриптор меню для функций Windows API.</p>
+    <p><b>TMenuItem.</b> При создании меню в дизайнере для каждой команды автоматически создаётся объект TMenuItem. Свойства:</p>
+    <ul>
+      <li><b>Action</b> — связанное действие. По умолчанию у пункта событие <b>OnClick</b>, имя обработчика строится из имени формы и пункта (TForm1::Item12Click); одно «действие» можно использовать для разных объектов;</li>
+      <li><b>AutoHotkeys</b> — назначать ли клавиши-ускорители подпунктам автоматически;</li>
+      <li><b>Bitmap</b> — картинка слева от заголовка; <b>Break</b> — начать ли с пункта новый столбец меню;</li>
+      <li><b>Caption</b> — текст пункта; буква после <b>&amp;</b> — ускоритель (Alt + буква);</li>
+      <li><b>Checked</b> — пункт как флажок (галочка слева); <b>Default</b> — пункт по умолчанию (выполняется по двойному щелчку на родительском подменю, выделен жирным); <b>Enabled</b> — доступен ли;</li>
+      <li><b>HelpContext</b>, <b>Hint</b> — справка и подсказка; <b>ImageIndex</b> — номер картинки из списка Images родителя;</li>
+      <li><b>Items</b> — подпункты; <b>MenuIndex</b> — номер пункта в родительском меню; <b>Parent</b> — родительское меню; <b>Visible</b> — виден ли.</li>
+    </ul>
+    <p>Методы TMenuItem: <b>Add</b> — добавить пункт(ы) в конец Items; <b>Clear</b> — удалить все подпункты; <b>Click</b> — вызвать OnClick; <b>Create</b> — создать пункт; <b>Delete</b> — удалить пункт с номером; <b>IndexOf</b> — номер пункта в Items; <b>Insert</b> — вставить пункт.</p>
+    <p><b>Общее «действие» для пункта меню и кнопки</b>: положить на форму <b>TActionList</b> → двойной щелчок → в редакторе добавить действие (TAction) → двойной щелчок по нему откроет код обработчика → у пункта меню выбрать это действие в свойстве <b>Action</b>.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · из учебника МГУ (Волкова, Иванов, Карпов) · наследование глубже</span>
+    <ul>
+      <li><b>Что не наследуется:</b> конструкторы, деструктор, операция присваивания. Конструктор базового класса с параметрами вызывают только в <b>списке инициализации</b>: <code>Dog(string n) : Animal(n) {}</code>.</li>
+      <li>Объекту базового типа можно присвоить объект наследника — скопируется только «базовая часть». Указатель на наследника <b>безопасно</b> превращается в указатель на базовый (<code>A *pa = pb;</code>); обратно — только явно и небезопасно: <code>pb = (B*)pa;</code>.</li>
+      <li>Если тип наследования не указан: у <code>class</code> — <b>private</b>, у <code>struct</code> — <b>public</b>.</li>
+      <li><b>Перекрытие имён</b>: метод наследника с тем же именем закрывает метод базового, но тот остаётся доступен через квалификатор: <code>A::f(1);</code> или <code>pc-&gt;A::f(1);</code>. Без virtual вызов через указатель решает <b>тип указателя</b>.</li>
+      <li><b>Виртуальные функции</b>: вызов через указатель/ссылку решает <b>тип объекта</b> (динамический полиморфизм). Класс хотя бы с одной virtual-функцией — <b>полиморфный</b>. Реализация — <b>таблица виртуальных методов (ТВМ, VMT)</b>: в каждом полиморфном объекте есть скрытый указатель на таблицу адресов виртуальных методов его класса; в таблице наследника адреса переопределённых методов заменены, новые дописаны в конец.</li>
+      <li><b>Виртуальный деструктор</b>: <code>A *p = new C; delete p;</code> — без <code>virtual ~A()</code> вызовется только ~A(), и память наследника не освободится; с virtual — сначала ~C(), потом ~A(). Конструктор виртуальным быть не может.</li>
+      <li><b>Абстрактный класс</b> — есть хотя бы одна <b>чистая виртуальная функция</b> <code>virtual void f() = 0;</code>. Объекты создавать нельзя, указатели — можно. <b>Интерфейс</b> — абстрактный класс без полей, только с открытыми чистыми виртуальными функциями.</li>
+      <li><b>Множественное наследование</b>: <code>class Z : public X, public Y</code>. Одинаковые имена в X и Y дают неоднозначность — пишут <code>z1.X::i1 = 5;</code>. Если X и Y унаследованы от общего W и нужен один экземпляр W — <b>виртуальное наследование</b>: <code>class X : public virtual W</code>.</li>
+      <li><b>RTTI</b>: <code>dynamic_cast&lt;B*&gt;(p)</code> — безопасное приведение в иерархии (вернёт NULL, если объект не того типа; для ссылки — исключение <code>bad_cast</code>); <code>typeid(x).name()</code> — имя типа.</li>
+    </ul>
+  </aside>
+  <aside class="add"><span class="tag">для теста на английском</span>
+    <ul>
+      <li><i>If the base class is not specified, the ancestor is</i> — <b>TObject</b>.</li>
+      <li><i>Ancestor class for all components of VCL</i> — <b>TComponent</b>; <i>base class of all controls</i> — <b>TControl</b>; <i>of all window controls</i> — <b>TWinControl</b>; <i>base class for creating a form window</i> — <b>TForm</b>.</li>
+      <li><i>The owner of all components located in the form is</i> — <b>the form itself</b>; <i>the owner of all forms is</i> — <b>the application</b>.</li>
+      <li><i>The component is always deleted when</i> — <b>its owner is deleted</b>.</li>
+      <li><i>The &amp; sign in Caption</i> — the next character is underlined and is the <b>accelerator key</b> (Alt + key).</li>
+      <li><i>fsStayOnTop</i> — the form is <b>always on top</b>; <i>fsMDIChild</i> — child MDI window; <i>fsMDIForm</i> — parent MDI window.</li>
+      <li><i>Base class of TPopupMenu</i> — <b>TMenu</b>; <i>pop-up menu appears automatically if</i> — <b>AutoPopup = True</b>.</li>
+    </ul>
+  </aside>
 </div>`;
 const T=[
  {id:'c12-z1',name:'Задание 1 (иерархия, virtual)',cmp:'exact',text:R`<p>Создать абстрактный базовый класс «Фигура» с чисто виртуальными методами площадь и имя; наследники «Круг», «Прямоугольник» и «Квадрат» (наследник прямоугольника). Хранить разные фигуры в массиве указателей на базовый класс и вывести их площади одним циклом.</p>`,

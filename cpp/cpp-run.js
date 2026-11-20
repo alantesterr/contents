@@ -8,6 +8,8 @@ const BRK={sig:'break'}, CNT={sig:'continue'};
 class RetSig{ constructor(v){ this.v=v; } }
 class GotoSig{ constructor(l,line){ this.label=l; this.line=line; } }
 class ExitSig{ constructor(c){ this.code=c; } }
+class WaitSig{}   // интерактивная консоль: программа ждёт ввод, а введённых строк больше нет
+CPP.WaitSig=WaitSig;
 const rerr=(msg,line)=>new CppError(msg,line,'runtime');
 const cerr=(msg,line,code)=>new CppError(msg,line,'compile',code);
 
@@ -168,7 +170,8 @@ class Interp{
       this.runDtors(this.globalScope);
       out.exitCode=code;
     }catch(e){
-      if(e instanceof ExitSig){ out.exitCode=e.code; }
+      if(e instanceof WaitSig){ out.waiting=true; out.waitKey=!!this.waitKey; }
+      else if(e instanceof ExitSig){ out.exitCode=e.code; }
       else if(e instanceof CppError){ out.ok=false; out.error=e; }
       else if(e instanceof RangeError&&/call stack/i.test(e.message)){ out.ok=false; out.error=rerr('Переполнение стека (Stack overflow): рекурсия не останавливается — проверь условие выхода',0); }
       else { out.ok=false; out.error=rerr('Внутренняя ошибка тренажёра: '+e.message,0); out.internal=e; }
@@ -1167,6 +1170,9 @@ class Interp{
       if(top&&top.thisPtr){
         const m=this.findMethod(top.thisPtr.obj.cls,n);
         if(m&&!this.lookup(n,sc)) return this.callMethod(top.thisPtr.obj,n,this.evArgs(e.args,sc),e.line,true,sc,true,top.ci);
+        // метод самой формы VCL без «this->»: Close(), Hide(), Show(), Repaint()…
+        const o=top.thisPtr.obj;
+        if(o.vcl&&this.vcl&&!this.lookup(n,sc)&&!this.funcs.has(n)){ const r=this.vcl.member(o,n,e.line,true); if(r&&r.vclMethod) return this.vcl.callMethod(r,this.evArgs(e.args,sc),e.line,this); }
       }
       if(this.funcs.has(n)&&!this.lookup(n,sc)){
         const args=this.evArgs(e.args,sc);
@@ -1276,7 +1282,7 @@ class Interp{
       this.echoedTo=j;
     }
   }
-  peekCh(){ if(this.ip>=this.input.length) return null; this.echoLine(); return this.input[this.ip]; }
+  peekCh(){ if(this.ip>=this.input.length){ if(this.opts.interactive) throw new WaitSig(); return null; } this.echoLine(); return this.input[this.ip]; }
   getCh(){ const c=this.peekCh(); if(c!==null) this.ip++; return c; }
   skipWs(){ while(true){ const c=this.peekCh(); if(c===null) return false; if(/\s/.test(c)) this.ip++; else return true; } }
   noInput(line){ this.inFail=true; this.warn('eof','Программа ждала ввод, а данных больше нет. Допиши значения в поле «Ввод»',line); }
@@ -1316,7 +1322,7 @@ class Interp{
     p.arr[p.i+s.length].v=0; p.arr[p.i+s.length].u=false;
   }
   readLine(){ // остаток текущей строки (для getline/gets)
-    if(this.ip>=this.input.length){ return null; }
+    if(this.ip>=this.input.length){ if(this.opts.interactive) throw new WaitSig(); return null; }
     this.echoLine();
     let j=this.input.indexOf('\n',this.ip); let s;
     if(j<0){ s=this.input.slice(this.ip); this.ip=this.input.length; } else { s=this.input.slice(this.ip,j); this.ip=j+1; }

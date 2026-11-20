@@ -696,6 +696,7 @@ td .fr{font:italic 15px "Times New Roman",serif}
       <button role="tab" id="tab-c13" aria-selected="false" data-t="c13" title="C++ · Тема 13. Конструктор и деструктор" hidden>13</button>
       <button role="tab" id="tab-c14" aria-selected="false" data-t="c14" title="C++ · Тема 14. Свойства класса" hidden>14</button>
       <button role="tab" id="tab-c15" aria-selected="false" data-t="c15" title="C++ · Тема 15. Свой компонент" hidden>15</button>
+      <button role="tab" id="tab-c16" aria-selected="false" data-t="c16" title="C++Builder 6 — среда разработки: формы, код, запуск" hidden>C++Builder</button>
       <button role="tab" id="tab-t1" aria-selected="false" data-t="t1" title="Тема 1">1</button>
       <button role="tab" id="tab-t2" aria-selected="false" data-t="t2" title="Тема 2">2</button>
       <button role="tab" id="tab-t3" aria-selected="false" data-t="t3" title="Тема 3">3</button>
@@ -2786,6 +2787,7 @@ end start</pre>
 <section id="c13" class="topic" hidden></section>
 <section id="c14" class="topic" hidden></section>
 <section id="c15" class="topic" hidden></section>
+<section id="c16" class="topic" hidden></section>
 
 </main>
 
@@ -2796,6 +2798,7 @@ end start</pre>
 <script src="cpp/cpp-ui.js"></script>
 <script src="cpp/vcl.js"></script>
 <script src="cpp/vcl-ui.js"></script>
+<script src="cpp/bcb-ide.js"></script>
 <script src="cpp/cpp-tests-base.js"></script>
 <script src="cpp/cpp-tests-pool.js"></script>
 <script src="cpp/cpp-tests-oop.js"></script>
@@ -3794,7 +3797,7 @@ t9:{ base:[
 ]}};
 
 /* ======================= Темы 1–7: инструменты ======================= */
-const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15'];
+const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'];
 Object.assign(DEFAULT_TESTS, window.CPP_TESTS||{});
 TOPICS.forEach(k=>{ if(!DEFAULT_TESTS[k]) DEFAULT_TESTS[k]={base:[],pool:[]}; });
 // вопрос с кодом: ```cpp … ``` — блок, `…` — в строке
@@ -5000,7 +5003,7 @@ function showTopic(t){
   document.querySelectorAll('.subj button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===s?'true':'false'));
   document.getElementById('brandName').textContent=SUBJ[s].name; document.getElementById('brandSub').textContent=SUBJ[s].sub;
   document.title=SUBJ[s].title;
-  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); }
+  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); }
   try{ localStorage.setItem('last-'+s,t); }catch(_){}
 }
 document.querySelector('.tabs').addEventListener('click',e=>{const b=e.target.closest('button'); if(!b) return; showTopic(b.dataset.t); try{localStorage.setItem('arch-topic',b.dataset.t);}catch(_){} window.scrollTo({top:0});});

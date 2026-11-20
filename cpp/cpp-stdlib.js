@@ -143,7 +143,8 @@ def('fscanf','stdio',{fn:(it,a,line)=>{ const f=fileOf(it,a[0],line); const txt=
 def('stdin stdout','stdio',{val:()=>({t:T.ptr({k:'p',n:'FILE'}),v:null})});
 
 /* ---------- conio ---------- */
-def('getch getche','conio',{fn:()=>int(13)});
+// в консоли среды C++Builder getch() ждёт отдельного нажатия клавиши (не берёт символы из строки, введённой для cin)
+def('getch getche','conio',{fn:(it)=>{ if(it.opts.interactive){ const ks=it.opts.keys||[]; it.ki=it.ki||0; if(it.ki<ks.length) return int(ks[it.ki++]); it.waitKey=true; throw new CPP.WaitSig(); } return int(13); }});
 def('kbhit','conio',{fn:()=>int(1)});
 def('clrscr','conio',{fn:(it)=>{ it.con.clear(); return vd(); }});
 def('clreol','conio',{fn:()=>vd()});

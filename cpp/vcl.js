@@ -128,101 +128,137 @@ const timeStr=d=>`${d.getHours()}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
 const dateStr=d=>`${pad(d.getDate())}.${pad(d.getMonth()+1)}.${d.getFullYear()}`;
 
 /* ---------------- проект: компоненты + код ---------------- */
-const UNIT_HEAD=`//---------------------------------------------------------------------------
+const SEPL='//---------------------------------------------------------------------------';
+const unitHead=(un,fn,cls)=>`${SEPL}
 
 #include <vcl.h>
 #pragma hdrstop
 
-#include "Unit1.h"
-//---------------------------------------------------------------------------
+#include "${un}.h"
+${SEPL}
 #pragma package(smart_init)
 #pragma resource "*.dfm"
-TForm1 *Form1;
-//---------------------------------------------------------------------------
-__fastcall TForm1::TForm1(TComponent* Owner)
+${cls} *${fn};
+${SEPL}
+__fastcall ${cls}::${cls}(TComponent* Owner)
         : TForm(Owner)
 {
 }
-//---------------------------------------------------------------------------
+${SEPL}
 `;
-function handlerSkeleton(name,ev){ return `void __fastcall TForm1::${name}(${sigOf(ev)})\n{\n\n}\n//---------------------------------------------------------------------------\n`; }
-function buildUnit(code){ return UNIT_HEAD+(code?String(code).replace(/^\n+/,'').replace(/\s*$/,'\n'):''); }
+function handlerSkeleton(name,ev,cls){ return `void __fastcall ${cls||'TForm1'}::${name}(${sigOf(ev)})\n{\n\n}\n${SEPL}\n`; }
+function buildUnit(code,un,fn,cls){ return unitHead(un||'Unit1',fn||'Form1',cls||'TForm1')+(code?String(code).replace(/^\n+/,'').replace(/\s*$/,'\n'):''); }
+const noComments=s=>String(s||'').replace(/\/\*[\s\S]*?\*\//g,' ').replace(/\/\/[^\n]*/g,'');
 
 class Project{
   constructor(cfg){ this.load(cfg||{}); }
   load(cfg){
-    this.form=makeComp("TForm","Form1",cfg.form||{});
+    // имя формы/модуля: Form1/Unit1 по умолчанию; в среде C++Builder (bcb-ide.js) форм может быть несколько
+    this.fn=cfg.formName||'Form1'; this.un=cfg.unitName||'Unit1'; this.cls='T'+this.fn;
+    this.hUser=Object.assign({priv:'',pub:''},cfg.hUser||{});
+    this.form=makeComp("TForm",this.fn,cfg.form||{}); this.form._proj=this;
     if(!cfg.form||cfg.form.ClientWidth==null){ this.form.p.ClientWidth=this.form.p.Width-8; this.form.p.ClientHeight=this.form.p.Height-31; }
     this.comps=[];
-    for(const c of (cfg.comps||[])){ const o=makeComp(c.type,c.Name,c); o.parent=c.parent||null; this.comps.push(o); }
-    this.code=cfg.unit||buildUnit(cfg.code||'');
+    for(const c of (cfg.comps||[])){ const o=makeComp(c.type,c.Name,c); o.parent=c.parent||null; o._proj=this; this.comps.push(o); }
+    this.code=cfg.unit||buildUnit(cfg.code||'',this.un,this.fn,this.cls);
   }
-  find(name){ if(name==='Form1') return this.form; return this.comps.find(c=>c.Name===name)||null; }
+  find(name){ if(name===this.fn) return this.form; return this.comps.find(c=>c.Name===name)||null; }
   nextName(type){ const base=type.slice(1); let k=1; while(this.find(base+k)) k++; return base+k; }
   add(type,x,y,parent){
     const d=COMP[type]; const name=this.nextName(type);
-    const o=makeComp(type,name,{}); o.parent=parent||null;
+    const o=makeComp(type,name,{}); o.parent=parent||null; o._proj=this;
     if(!d.nv){ o.p.Left=x; o.p.Top=y; if(type==='TStatusBar'){ o.p.Width=this.form.p.ClientWidth; } }
     else { o.p.Left=x; o.p.Top=y; }
     if(type==='TLabel'||type==='TStaticText') o.p.Width=Math.max(20,o.p.Caption.length*6);
     this.comps.push(o); return o;
   }
   remove(o){ this.comps=this.comps.filter(c=>c!==o&&c.parent!==o.Name); }
-  handlers(){ const r=[]; const re=/void\s+__fastcall\s+TForm1::(\w+)\s*\(([^)]*)\)/g; let m; while((m=re.exec(this.code))) r.push({name:m[1],sig:m[2]}); return r; }
+  handlers(){ const r=[]; const re=new RegExp('void\\s+__fastcall\\s+'+this.cls+'::(\\w+)\\s*\\(([^)]*)\\)','g'); let m; while((m=re.exec(this.code))) r.push({name:m[1],sig:m[2]}); return r; }
   // все события, привязанные к обработчикам (из Object Inspector)
   ensureHandler(comp,ev){
     const name=(comp.vcl==='TForm'?'Form':comp.Name)+ev.slice(2);
-    if(!this.handlers().some(h=>h.name===name)) this.code=this.code.replace(/\s*$/,'\n')+handlerSkeleton(name,ev);
+    if(!this.handlers().some(h=>h.name===name)) this.code=this.code.replace(/\s*$/,'\n')+handlerSkeleton(name,ev,this.cls);
     comp.events[ev]=name; return name;
   }
   header(){
     const hs=this.handlers();
-    let h='class TForm1 : public TForm\n{\n__published:\n';
+    let h=`class ${this.cls} : public TForm\n{\n__published:\n`;
     for(const c of this.comps) h+=`  ${c.vcl} *${c.Name};\n`;
     for(const x of hs) if(x.name!=='FormCtor__') h+=`  void __fastcall ${x.name}(${x.sig});\n`;
-    h+='public:\n  void __fastcall FormCtor__(TObject *Sender);\n};\nextern TForm1 *Form1;\n';
+    h+='private:\n'+noComments(this.hUser.priv)+'\npublic:\n'+noComments(this.hUser.pub)+`\n  void __fastcall FormCtor__(TObject *Sender);\n};\nextern ${this.cls} *${this.fn};\n`;
     return h;
   }
+  // Unit1.h как в C++Builder (секции private/public — то, что пишет пользователь)
+  unitH(){
+    const G=this.un+'H', hs=this.handlers();
+    let h=`${SEPL}\n\n#ifndef ${G}\n#define ${G}\n${SEPL}\n#include <Classes.hpp>\n#include <Controls.hpp>\n#include <StdCtrls.hpp>\n#include <Forms.hpp>\n${SEPL}\nclass ${this.cls} : public TForm\n{\n__published:\t// IDE-managed Components\n`;
+    for(const c of this.comps) h+=`        ${c.vcl} *${c.Name};\n`;
+    for(const x of hs) h+=`        void __fastcall ${x.name}(${x.sig});\n`;
+    const ind=s=>String(s||'').replace(/^\n+|\s+$/g,'');
+    h+=`private:\t// User declarations\n${ind(this.hUser.priv)?ind(this.hUser.priv)+'\n':''}public:\t\t// User declarations\n        __fastcall ${this.cls}(TComponent* Owner);\n${ind(this.hUser.pub)?ind(this.hUser.pub)+'\n':''}};\n${SEPL}\nextern PACKAGE ${this.cls} *${this.fn};\n${SEPL}\n#endif\n`;
+    return h;
+  }
+  // разобрать отредактированный Unit1.h: забрать то, что пользователь написал в private / public
+  parseUnitH(t){
+    const m=String(t).match(/\bprivate\s*:[^\n]*\n([\s\S]*?)\n\s*public\s*:[^\n]*\n([\s\S]*?)\n\s*\}\s*;/);
+    if(!m) return false;
+    const ctor=new RegExp('^\\s*__fastcall\\s+'+this.cls+'\\s*\\([^)]*\\)\\s*;\\s*$','m');
+    this.hUser={priv:m[1].replace(/\s+$/,''),pub:m[2].replace(ctor,'').replace(/^\n+|\s+$/g,'')}; return true;
+  }
+  ctorRe(){ return new RegExp('__fastcall\\s+'+this.cls+'::'+this.cls+'\\s*\\(\\s*TComponent\\s*\\*\\s*\\w+\\s*\\)\\s*:\\s*TForm\\s*\\(\\s*\\w+\\s*\\)'); }
   source(){ // текст, который реально выполняется (Unit1.h подставлен)
     let s=this.code;
-    const lines=this.header().split('\n').length-1;
-    s=s.replace(/#include\s*"Unit1\.h"/,()=>this.header().replace(/\n/g,' '));   // заголовок в одну строку — номера строк в Unit1.cpp не сдвигаются
-    s=s.replace(/__fastcall\s+TForm1::TForm1\s*\(\s*TComponent\s*\*\s*\w+\s*\)\s*:\s*TForm\s*\(\s*\w+\s*\)/,'void __fastcall TForm1::FormCtor__(TObject *Sender)');
+    s=s.replace(new RegExp('#include\\s*"'+this.un+'\\.h"'),()=>this.header().replace(/\n/g,' '));   // заголовок в одну строку — номера строк в Unit1.cpp не сдвигаются
+    s=s.replace(this.ctorRe(),m=>`void __fastcall ${this.cls}::FormCtor__(TObject *Sender)`+'\n'.repeat((m.match(/\n/g)||[]).length));   // число строк не меняется
     return s;
   }
-  toJSON(){ return {form:snap(this.form),comps:this.comps.map(c=>Object.assign(snap(c),{type:c.vcl,Name:c.Name,parent:c.parent})),unit:this.code}; }
+  toJSON(){ const r={form:snap(this.form),comps:this.comps.map(c=>Object.assign(snap(c),{type:c.vcl,Name:c.Name,parent:c.parent})),unit:this.code};
+    if(this.fn!=='Form1'||this.un!=='Unit1'){ r.formName=this.fn; r.unitName=this.un; }
+    if(this.hUser.priv||this.hUser.pub) r.hUser=Object.assign({},this.hUser);
+    return r; }
 }
 function snap(o){ const r={}; for(const k in o.p){ const v=o.p[k]; if(v&&v.vcl==='TFont') r.Font=Object.assign({},v.p); else if(v&&v.vcl==='TStrings') r[k]=v.items.slice(); else if(v&&v.vcl==='TMenuItem') r.Items=v.items.map(menuSnap); else if(v&&v.vcl==='TStatusPanels') r.Panels=v.items.map(p=>p.p.Text); else if(v&&v.vcl==='TBrush') r.Brush=Object.assign({},v.p); else if(v&&typeof v==='object') {} else r[k]=v; } r.events=Object.assign({},o.events); return r; }
 function menuSnap(m){ return {Name:m.Name,Caption:m.p.Caption,OnClick:m.events.OnClick,items:m.items.map(menuSnap)}; }
 
 /* ---------------- связь с интерпретатором ---------------- */
 class Runtime{
-  constructor(proj,ui){ this.proj=proj; this.ui=ui; this.cells=new Map(); this.fs=ui.fs||new Map(); this.answers=[]; this.ai=0; }
+  constructor(proj,ui){ this.proj=proj; this.ui=ui; this.projs=ui.projects||[proj]; this.cells=new Map(); this.fs=ui.fs||new Map(); this.answers=[]; this.ai=0; this.app={vcl:'TApplication',id:-1,p:{Title:'Project1',ShowMainForm:true}}; }
   ptrOf(o){ if(!o) return null; let c=this.cells.get(o); if(!c){ c={v:o,t:T.cls(o.vcl)}; this.cells.set(o,c); } return {arr:[c],i:0,base:c,es:4,obj:o}; }
   pval(o){ return {t:T.ptr(T.cls(o?o.vcl:'TObject')),v:this.ptrOf(o)}; }
+  findAny(n){ for(const p of this.projs){ const c=p.find(n); if(c) return c; } return null; }
+  projOf(o){ return (o&&o._proj)||this.proj; }
+  formOf(o){ return (o&&o._form)||(o&&o.vcl==='TForm'?o:o&&o._proj?o._proj.form:null)||this.form; }
   compile(){
-    const prog=CPP.parse(this.proj.source());
+    // ui.source — общий текст всех модулей проекта (среда C++Builder с несколькими формами)
+    const prog=CPP.parse(this.ui.source||this.proj.source());
     const it=new CPP.Interp(prog,{vcl:this});
     it.prepare();
-    const g=it.globalScope.vars.get('Form1'); if(g) g.cell.v=this.ptrOf(this.proj.form);
-    this.it=it; this.form=this.proj.form; this.form.cls=it.classes.get("TForm1"); this.form.f=this.form.f||{};
+    this.it=it; this.form=this.proj.form;
+    for(const p of this.projs){
+      const g=it.globalScope.vars.get(p.fn); if(g&&(!this.ui.isCreated||this.ui.isCreated(p))) g.cell.v=this.ptrOf(p.form);
+      const f=p.form; f.cls=it.classes.get(p.cls); f.f=f.f||Object.create(null);
+      // поля, которые пользователь объявил в private/public своего класса формы
+      if(f.cls) for(const fd of it.allFields(f.cls)){ if(f.f[fd.name]) continue; const fc=it.makeCell(fd.t,0); fc.name=fd.name; f.f[fd.name]=fc; if(fc.v&&fc.v.cls){ try{ it.construct(fc.v,[],0); }catch(e){} } }
+    }
     return it;
   }
   // --- хуки, которые вызывает интерпретатор ---
   hasClass(n){ return VCL_TYPES.has(n); }
-  knows(n){ return n in CONSTS||n==='Application'||n==='Sender'||!!this.proj.find(n)||['Now','Date','Time','RGB','InputBox','MessageDlg','Random','Randomize'].includes(n); }
-  knowsMember(n){ return !!this.proj.find(n)||n in COMP.TForm.props||['Close','Show','Hide','ShowModal','Repaint','Refresh','SetFocus','Canvas'].includes(n); }
+  knows(n){ return n in CONSTS||n==='Application'||n==='Sender'||!!this.findAny(n)||['Now','Date','Time','RGB','InputBox','MessageDlg','Random','Randomize','__classid','Screen'].includes(n); }
+  knowsMember(n){ return !!this.findAny(n)||n in COMP.TForm.props||['Close','Show','Hide','ShowModal','Repaint','Refresh','SetFocus','Canvas','ModalResult','ComponentCount','Components','Release','Free','BringToFront'].includes(n); }
   newObj(n){ if(n==='TDateTime') return mkDate(new Date(1899,11,30)); if(n==='TStringList') return newStrings(null,''); return {vcl:n,id:++uid,p:{}}; }
   ident(n,line){
     if(n in CONSTS) return {t:Ty().tInt,v:CONSTS[n]};
-    if(n==='Application') return this.pval({vcl:'TApplication',id:-1,p:{Title:'Project1'}});
-    const c=this.proj.find(n); if(c) return this.pval(c);
+    if(n==='Application') return this.pval(this.app);
+    if(n==='Screen') return this.pval({vcl:'TScreen',id:-2,p:{}});
+    const c=this.findAny(n); if(c) return this.pval(c);
     return null;
   }
   scope(cls,name,line){ return null; }
   call(n,argsAst,sc,line,it){
     const ev=()=>it.evArgs(argsAst,sc,true);
     switch(n){
+      case '__classid': { const a=argsAst[0]; const nm=a&&(a.name||(a.t&&a.t.name)); return {t:T.ptr(T.cls('TObject')),v:{vcl:'classid',name:nm}}; }
       case 'Now': return {t:T.cls('TDateTime'),v:mkDate(this.now())};
       case 'Date': { const d=this.now(); d.setHours(0,0,0,0); return {t:T.cls('TDateTime'),v:mkDate(d)}; }
       case 'Time': return {t:T.cls('TDateTime'),v:mkDate(this.now())};
@@ -235,7 +271,7 @@ class Runtime{
   now(){ return this.ui.clock?new Date(this.ui.clock()):new Date(); }
   showMessage(s){ this.ui.message(s); }
   // диалоги во время обработчика: ответы подаются «повтором» обработчика
-  ask(kind,data){ if(this.ai<this.answers.length) return this.answers[this.ai++]; const e=new Error('ask'); e.vclAsk={kind,data}; throw e; }
+  ask(kind,data){ if(this.ai<this.answers.length){ const a=this.answers[this.ai++]; if(a&&a.__ans){ if(a.restore) a.restore(); return a.v; } return a; } const e=new Error('ask'); e.vclAsk={kind,data}; throw e; }
   propType(o,k){
     const d=(COMP[o.vcl]||{}).props||{}; const pd=d[k];
     if(!pd) return null;
@@ -271,12 +307,24 @@ class Runtime{
       case 'TDateTime': { const d=o.d; const s=x=>({t:T.str(true),v:x});
         const m={TimeString:()=>s(timeStr(d)),DateString:()=>s(dateStr(d)),DateTimeString:()=>s(dateStr(d)+' '+timeStr(d)),FormatString:a=>s(fmtDate(it.toJsStr(a[0],line),d))};
         if(m[n]) return meth(m[n]); break; }
-      case 'TApplication': if(n==='Terminate') return meth(()=>self.ui.close()); if(n==='Title') return this.lv(T.str(true),()=>'Project1',()=>{});
+      case 'TApplication': if(n==='Terminate') return meth(()=>self.ui.close()); if(n==='Title') return this.lv(T.str(true),()=>o.p.Title||'Project1',v=>{ o.p.Title=String(v); });
+        if(n==='Initialize'||n==='Run'||n==='Minimize'||n==='Restore') return meth(()=>{});
+        if(n==='ShowMainForm') return this.lv(Ty().tBool,()=>o.p.ShowMainForm?1:0,v=>{ o.p.ShowMainForm=!!v; });
+        if(n==='MainForm') return ro(T.ptr(T.cls('TForm')),()=>this.ptrOf(this.ui.mainForm?this.ui.mainForm():this.form));
+        if(n==='CreateForm') return meth(a=>{ const cid=a[0].v, dst=a[1]&&a[1].v; const p=cid&&this.projs.find(x=>x.cls===cid.name);
+          if(!p) throw rerr(`CreateForm: класс формы ${cid&&cid.name} не найден в проекте`,line);
+          if(!dst||!dst.arr) throw rerr('CreateForm: второй параметр — адрес переменной формы, например &Form2',line);
+          dst.arr[dst.i].v=this.ptrOf(p.form); if(this.ui.createForm) this.ui.createForm(p); });
         if(n==='MessageBox') return meth(a=>{ const ans=self.ask('confirm',{text:it.toJsStr(a[0],line),caption:a[1]?it.toJsStr(a[1],line):'',flags:a[2]?a[2].v:0}); return {t:Ty().tInt,v:ans}; });
         if(n==='ProcessMessages') return meth(()=>{}); break;
       case 'TShiftState': if(n==='Contains') return meth(a=>({t:Ty().tBool,v:(o.v&(a[0].v))?1:0})); break;
     }
-    if(o.vcl==='TForm'&&n!=='Font'){ const c=this.proj.find(n); if(c&&c!==o) return {t:T.ptr(T.cls(c.vcl)),v:this.ptrOf(c)}; }
+    if(o.vcl==='TForm'&&n!=='Font'){ const P=this.projOf(o); const c=P.find(n); if(c&&c!==o) return {t:T.ptr(T.cls(c.vcl)),v:this.ptrOf(c)};
+      if(!c&&!(n in COMP.TForm.props)&&this.projs.length>1&&this.findAny(n)&&!quiet) throw cerr(`На форме ${P.fn} нет компонента ${n} (он есть на другой форме)`,line,'E2316');
+      if(n==='ModalResult') return this.lv(Ty().tInt,()=>o.modalResult||0,v=>{ o.modalResult=v; if(v&&this.ui.modalResult) this.ui.modalResult(o,v); });
+      if(n==='ComponentCount') return ro(Ty().tInt,()=>P.comps.length);
+      if(n==='Components') return {t:Ty().tVoid,v:{vcl:'idx',index:(i,l)=>{ const x=P.comps[i]; if(!x) throw rerr(`List index out of bounds (${i}) — компонентов ${P.comps.length}`,l); return {t:T.ptr(T.cls('TComponent')),v:self.ptrOf(x)}; }}};
+      if(n==='Active') return ro(Ty().tBool,()=>this.ui.activeForm&&this.ui.activeForm()===o?1:0); }
     const d=COMP[o.vcl];
     if(d){
       if(n==='Name') return ro(T.str(true),()=>o.Name);
@@ -295,12 +343,12 @@ class Runtime{
   setProp(o,n,v,line){
     if(n==='Checked'&&o.vcl==='TCheckBox'){ o.p.Checked=!!v; o.p.State=v?1:0; this.changed(o); this.fire(o,'OnClick'); return; }
     if(n==='State'&&o.vcl==='TCheckBox'){ o.p.State=v; o.p.Checked=v===1; this.changed(o); this.fire(o,'OnClick'); return; }
-    if(n==='Checked'&&o.vcl==='TRadioButton'){ o.p.Checked=!!v; if(v) this.proj.comps.forEach(c=>{ if(c!==o&&c.vcl==='TRadioButton'&&c.parent===o.parent) c.p.Checked=false; }); this.changed(o); return; }
+    if(n==='Checked'&&o.vcl==='TRadioButton'){ o.p.Checked=!!v; if(v) this.projOf(o).comps.forEach(c=>{ if(c!==o&&c.vcl==='TRadioButton'&&c.parent===o.parent) c.p.Checked=false; }); this.changed(o); return; }
     if(n==='Text'&&(o.vcl==='TEdit'||o.vcl==='TComboBox')){ const old=o.p.Text; o.p.Text=String(v); this.changed(o); if(old!==o.p.Text) this.fire(o,'OnChange'); return; }
     if(n==='Position'&&o.vcl==='TScrollBar'){ v=Math.max(o.p.Min,Math.min(o.p.Max,v)); const old=o.p.Position; o.p.Position=v; this.changed(o); if(old!==v) this.fire(o,'OnChange'); return; }
     if(n==='Enabled'&&o.vcl==='TTimer'){ o.p.Enabled=!!v; this.ui.timers&&this.ui.timers(); return; }
     if(n==='Interval'&&o.vcl==='TTimer'){ o.p.Interval=v; this.ui.timers&&this.ui.timers(); return; }
-    if(n==='Visible'&&o.vcl==='TForm'){ o.p.Visible=!!v; this.changed(o); return; }
+    if(n==='Visible'&&o.vcl==='TForm'){ if(this.ui.formShow){ if(v) this.ui.formShow(o); else this.ui.formHide(o); return; } o.p.Visible=!!v; this.changed(o); return; }
     if(n==='ItemIndex'&&o.p.Items&&o.p.Items.vcl==='TStrings'){ if(v<-1||v>=o.p.Items.items.length) throw rerr(`List index out of bounds (${v})`,line); o.p.ItemIndex=v; if(o.vcl==='TComboBox') o.p.Text=v>=0?o.p.Items.items[v]:''; this.changed(o); return; }
     if(n==='Caption'&&(o.vcl==='TLabel'||o.vcl==='TStaticText')&&o.p.AutoSize){ o.p.Caption=String(v); this.changed(o); return; }
     o.p[n]=typeof o.p[n]==='boolean'?!!v:v;
@@ -309,6 +357,14 @@ class Runtime{
   compMethod(o,n,line){
     const self=this;
     const ret=(t,v)=>({t,v});
+    const U=this.ui;
+    if(o.vcl==='TForm'&&U.formShow) switch(n){   // несколько форм: окнами управляет среда
+      case 'Show': return ()=>{ U.formShow(o); };
+      case 'Hide': return ()=>{ U.formHide(o); };
+      case 'ShowModal': return ()=>{ if(U.isShowing&&U.isShowing(o)) throw rerr('Cannot make a visible window modal — форма уже показана (EInvalidOperation)',line); return ret(Ty().tInt,self.ask('modal',{form:o})); };
+      case 'Close': return ()=>{ U.formClose(o); };
+      case 'Release': case 'Free': return ()=>{ U.formHide(o); };
+    }
     switch(n){
       case 'Show': return ()=>{ if(o.vcl==='TForm') { o.p.Visible=true; self.changed(o); } else { o.p.Visible=true; self.changed(o); } };
       case 'Hide': return ()=>{ o.p.Visible=false; self.changed(o); };
@@ -333,8 +389,9 @@ class Runtime{
   fire(o,ev,extra){
     const name=o.events&&o.events[ev]; if(!name) return false;
     if(this.firing>20) return false;
-    const ci=this.form.cls; const m=ci&&ci.methods.get(name);
-    if(!m||!m[0].body) throw rerr(`Обработчик ${name} указан в Events, но его нет в Unit1.cpp`,0);
+    const fo=this.formOf(o);
+    const ci=fo.cls; const m=ci&&ci.methods.get(name);
+    if(!m||!m[0].body) throw rerr(`Обработчик ${name} указан в Events, но его нет в ${this.projOf(fo).un}.cpp`,0);
     const f=m[0]; const it=this.it;
     const args=[{t:T.ptr(T.cls('TObject')),v:this.ptrOf(o)}];
     const ps=f.params;
@@ -347,12 +404,12 @@ class Runtime{
       else args.push({t:Ty().tInt,v:extra&&extra[pname]!=null?extra[pname]:0});
     }
     this.firing=(this.firing||0)+1;
-    try{ it.steps=0; it.callFunc(f,args,this.ptrOf(this.form),f.line); }
+    try{ it.steps=0; it.callFunc(f,args,this.ptrOf(fo),f.line); }
     finally{ this.firing--; }
     return true;
   }
 }
 function fmtDate(f,d){ return f.replace(/yyyy/g,d.getFullYear()).replace(/mm/g,pad(d.getMonth()+1)).replace(/dd/g,pad(d.getDate())).replace(/hh/g,pad(d.getHours())).replace(/nn/g,pad(d.getMinutes())).replace(/ss/g,pad(d.getSeconds())); }
-CPP.VCL={COMP,COLORS,CONSTS,ENUMS,TABS,ICON,Project,Runtime,colorCss,colorName,sigOf,makeComp,buildUnit,handlerSkeleton,CURSOR_CSS};
+CPP.VCL={COMP,COLORS,CONSTS,ENUMS,TABS,ICON,Project,Runtime,colorCss,colorName,sigOf,makeComp,buildUnit,handlerSkeleton,CURSOR_CSS,unitHead,SEPL,noComments};
 })(typeof window!=='undefined'?window:globalThis);
 CPP.VCL.Runtime.prototype.callMethod=function(fx,args,line,it){ const r=fx.vclMethod.fn(args.map(a=>it.rv(a)),line); return r||{t:CPP.types.tVoid,v:0}; };

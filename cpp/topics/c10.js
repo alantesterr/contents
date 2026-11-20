@@ -67,6 +67,98 @@ extern PACKAGE TForm1 *Form1;    // extern: переменная Form1 опре�
       <li>В тестах встречается <b>FireMonkey (FMX)</b> — другая библиотека новых версий C++Builder (там форма — TForm из FMX, свойства Fill-&gt;Color, Opacity). В Builder 6 её нет.</li>
     </ul>
   </aside>
+  <h3 id="c10-l11">Слайды преподавателя: «A project creation. Working with forms. A Form designer»</h3>
+  <aside class="fix"><span class="tag">оригинал · лекция 11 (eng) — перевод</span>
+    <p><i>The purpose of lesson is to give a description of the files that make up the project, and the window in which you edit the forms of the program being developed.</i> — Цель: описать файлы, из которых состоит проект, и окно, в котором редактируют формы программы.</p>
+    <p><b>1. Создание проекта.</b> Первый шаг — создать <b>проект</b> (project). Файлы проекта содержат <b>автоматически сгенерированный код</b> (automatically generated source code), который становится частью программы при компиляции.</p>
+    <ul>
+      <li>Borland C++Builder 6: <b>File → New → Application</b></li>
+      <li>Embarcadero C++Builder: <b>File → New → VCL Forms Application</b></li>
+      <li>Если уже открыт другой проект, сначала <b>File → Close All</b>, иначе имена файлов проектов могут конфликтовать.</li>
+    </ul>
+    <p><b>2. Файл проекта Project1.cpp.</b> Builder сам создаёт файл с именем по умолчанию <code>Project1.cpp</code> и сам его меняет, когда ты меняешь проект (например, добавляешь форму).</p>
+<pre class="cpp-code">#include &lt;vcl.h&gt;
+#pragma hdrstop
+//---------------------------------------------------------------------------
+USEFORM("Unit1.cpp", Form1);      // форма Form1 и модуль Unit1.cpp, где её обработчики
+USEFORM("Unit2.cpp", Form2);
+//---------------------------------------------------------------------------
+WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+{
+    try
+    {
+        Application-&gt;Initialize();
+        Application-&gt;CreateForm(__classid(TForm1), &amp;Form1);   // первая созданная = главная форма
+        Application-&gt;CreateForm(__classid(TForm2), &amp;Form2);
+        Application-&gt;Run();                                   // запуск цикла сообщений
+    }
+    catch (Exception &amp;exception)
+    {
+        Application-&gt;ShowException(&amp;exception);
+    }
+    return 0;
+}</pre>
+    <ul>
+      <li><code>USEFORM("Unit2.cpp", Form2);</code> — называет форму проекта и модуль (файл), в котором лежат все её обработчики событий, функции и т. д.</li>
+      <li><code>#include "Unit2.h"</code> — подключает заголовок, где описаны прототипы обработчиков и функций, а также глобальные идентификаторы.</li>
+    </ul>
+    <p><b>3. Работа с формами. Дизайнер форм.</b> Главный элемент любого приложения — <b>форма</b>: <i>a container which other visual and non-visual components are placed in</i> (контейнер для визуальных и невизуальных компонентов). В проекте может быть <b>несколько форм</b>. У каждой новой формы свой <b>модуль</b> (unit): в нём форма описана как <b>класс</b>, а также, если нужно, константы, переменные, функции и процедуры.</p>
+    <ul>
+      <li>Добавить форму: <b>File → New → Form</b>. Появятся форма и модуль: <code>Unit2.cpp</code>, <code>Unit2.h</code>, <code>Unit2.dfm</code>.</li>
+      <li>В <b>Project Manager</b> видно дерево: Project1.exe → Project1.cpp, Project1.res, Unit1.cpp (Unit1.cpp, Unit1.dfm, Unit1.h), Unit2.cpp (…).</li>
+      <li>Быстро переключаться между формами — кнопка <b>View Form (Shift+F12)</b>: откроется список форм «Form1 (Unit1.cpp), Form2 (Unit2.cpp)». Между модулями — <b>View Unit (Ctrl+F12)</b>, форма ↔ код — <b>F12</b>.</li>
+    </ul>
+    <p><b>4. Главная форма.</b> В проекте может быть <b>только одна главная форма</b> (only one main form):</p>
+    <ul>
+      <li>по умолчанию главная — форма, созданная <b>первой</b>;</li>
+      <li>приложение <b>начинается</b> с главной формы — пользователь видит её первой;</li>
+      <li>если закрыть главную форму, закроется всё приложение;</li>
+      <li>назначить другую главную форму: <b>Project → Options → Forms</b>, список <b>Main form</b>.</li>
+    </ul>
+    <p>В окне Project Options → Forms два списка:</p>
+    <ol>
+      <li><b>Auto-create forms</b> — формы, которые будут <b>созданы в памяти автоматически</b> при запуске (видимые они или нет — не важно).</li>
+      <li><b>Available forms</b> — формы, которые автоматически <b>не создаются</b>, но доступны проекту. Такую форму надо создать в памяти вручную:
+        <pre class="cpp-code">Application-&gt;CreateForm(__classid(TForm2), &amp;Form2);   // создать в памяти
+Form2-&gt;Show();                                          // показать на экране</pre>
+        Пока форма не создана, <code>Form2</code> = NULL, и <code>Form2-&gt;Show()</code> даст ошибку <b>Access violation</b>.</li>
+    </ol>
+    <p><b>5. Связь форм.</b> Как бы форма ни была создана (автоматически или динамически), чтобы работать с ней из другой формы, нужно <b>подключить её заголовок *.h</b> к той форме, откуда её вызывают:</p>
+<pre class="cpp-code">#include &lt;vcl.h&gt;
+#pragma hdrstop
+#include "Unit2.h"   // модуль главной формы
+#include "Unit1.h"   // модуль подключаемой (зависимой) формы
+//---------------------------------------------------------------------------
+#pragma package(smart_init)
+#pragma resource "*.dfm"
+TForm2 *Form2;</pre>
+    <p>В C++Builder 6 строку <code>#include</code> вставляет команда <b>File → Include Unit Hdr…</b> (Alt+F11). Без неё компилятор скажет <code>[C++ Error] Unit1.cpp: E2451 Undefined symbol 'Form2'</code>.</p>
+  </aside>
+  <aside class="add"><span class="tag">дополнение · Show, ShowModal, Close, Hide</span>
+    <div class="tw"><table><tr><th>Код</th><th>Что делает</th></tr>
+      <tr><td><code>Form2-&gt;Show();</code></td><td>показать форму; можно дальше работать с обеими (немодальная)</td></tr>
+      <tr><td><code>Form2-&gt;ShowModal();</code></td><td>показать <b>модально</b>: пока Form2 не закрыта, Form1 недоступна; возвращает <code>ModalResult</code> (mrOk, mrCancel…)</td></tr>
+      <tr><td><code>Form2-&gt;Hide();</code> / <code>Visible = false</code></td><td>спрятать форму (в памяти она остаётся)</td></tr>
+      <tr><td><code>Close();</code></td><td>закрыть текущую форму; если это главная — закрывается всё приложение</td></tr>
+      <tr><td><code>ModalResult = mrOk;</code></td><td>в модальной форме: закрыть её и вернуть mrOk в ShowModal. То же делает кнопка со свойством <code>ModalResult = mrOk</code></td></tr></table></div>
+<pre class="cpp-code">void __fastcall TForm1::Button1Click(TObject *Sender)
+{
+  if (Form2-&gt;ShowModal() == mrOk)           // ждём, пока Form2 закроют
+    Label1-&gt;Caption = Form2-&gt;Edit1-&gt;Text;    // берём то, что ввели на Form2
+}</pre>
+    <p>Всё это можно попробовать во вкладке <b>C++Builder</b> (после темы 15): там есть File → New → Form, Project → Options → Forms и запуск нескольких форм.</p>
+  </aside>
+  <aside class="add"><span class="tag">для теста на английском</span>
+    <ul>
+      <li><i>The first step in developing a C++ Builder application is</i> — <b>to create a project</b>.</li>
+      <li><i>Project files contain</i> — <b>automatically generated source code</b>.</li>
+      <li><i>Default name of the project file</i> — <b>Project1.cpp</b>.</li>
+      <li><i>USEFORM("Unit2.cpp", Form2) indicates</i> — the name of the project's form and the unit in which its event handlers are located.</li>
+      <li><i>How many main forms can a project have?</i> — <b>only one</b>; by default the form created <b>first</b>.</li>
+      <li><i>Forms that are created in memory automatically</i> — <b>Auto-create forms</b>; <i>not created automatically but available</i> — <b>Available forms</b>.</li>
+      <li><i>To reassign the main form</i> — <b>Project → Options → Forms</b>. <i>Switch between forms</i> — <b>View Form (Shift+F12)</b>.</li>
+    </ul>
+  </aside>
 </div>`;
 const BG={form:{Caption:'Мигалка',Width:320,Height:200},comps:[],code:'',
   ref:{form:{Caption:'Мигалка',Width:320,Height:200},comps:[{type:'TTimer',Name:'Timer1',Left:16,Top:16,Interval:500,events:{OnTimer:'Timer1Timer'}}],

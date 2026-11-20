@@ -447,4 +447,5 @@ function initVcl(el){
   redraw();
 }
 CPP.initVcl=function(root){ (root||document).querySelectorAll('.vclw').forEach(initVcl); };
+CPP.VCLUI={compHTML,treeHTML,menuBarHTML,fontCss,amp,esc,layout};
 })(typeof window!=='undefined'?window:globalThis);

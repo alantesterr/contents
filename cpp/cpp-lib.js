@@ -152,6 +152,8 @@ const HDR={
   'stdbool.h':['x',true],'limits.h':['limits',true],'climits':['limits',true],'float.h':['x',true],'values.h':['limits',true],
   'iso646.h':['x',true],'assert.h':['x',true],'algorithm':['algorithm',false],'locale.h':['x',true],'process.h':['stdlib',true],'alloc.h':['stdlib',true],'malloc.h':['stdlib',true],
 };
+// заголовки VCL, которые C++Builder пишет в Unit1.h
+['classes.hpp','controls.hpp','stdctrls.hpp','forms.hpp','extctrls.hpp','buttons.hpp','comctrls.hpp','menus.hpp','dialogs.hpp','graphics.hpp','sysutils.hpp','system.hpp','tchar.h'].forEach(h=>{ HDR[h]=['vcl',true]; });
 CPP.HDR=HDR;
 // какие группы открывает каждый заголовок (vcl.h подтягивает windows, stdlib, sysutils)
 const IMPLIES={iostream:['iostream','string'],fstream:['iostream','fstream','string'],vcl:['vcl','windows','stdlib','sysutils','stdio','cstring','string'],

@@ -361,6 +361,14 @@ const CSS=`
 .st-kon textarea{width:100%;min-height:52px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--fix-bg);color:var(--ink);margin-top:4px}
 .st-cloud{font-size:12.5px;color:var(--muted)}
 .st-lab .cppw,.st-lab .vclw{margin:10px 0}
+.st-cnt{font-size:13px;color:var(--muted);margin-left:auto}
+.st-why{font-size:15px;line-height:1.55;margin-top:6px;white-space:pre-line}
+details.st-help>summary.h{list-style:none}
+.st-help .lc{max-height:340px;overflow:auto}
+.st-note textarea{min-height:0}
+.st-back{position:fixed;right:16px;bottom:20px;z-index:60;font-size:15px;padding:10px 18px;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+.st-lecflash{animation:st-lf 3.2s ease-out;border-radius:6px}
+@keyframes st-lf{0%,50%{box-shadow:0 0 0 4px var(--fix);background:var(--fix-bg)}100%{box-shadow:none}}
 .st-why,.st-kon .w,.why-block .w{white-space:pre-line}
 .btn.sm{font-size:12.5px;padding:4px 10px}
 .st-help .lh,.st-kon .lh{font:700 12px var(--f-body);color:var(--muted);margin:6px 0 2px}
@@ -434,7 +442,7 @@ function nextRoundInfo(){
   const seen=Object.keys(S.items).length;
   if((S.rounds+1)%4===0&&seen>=30) return '🎓 Следующий раунд — контрольная: 15 вопросов как на экзамене, без подсказок';
   const w=!S.days[today()]?Math.min(7,S.set.work):S.set.work;
-  return `Раунд ${w} мин${!S.days[today()]?' (разгон дня — коротко)':''} → 👾 босс из твоих ошибок → ☕ перерыв ${S.set.rest} мин`;
+  return `Раунд ${w} мин${!S.days[today()]?' (разгон дня — коротко)':''} → 🔁 повтор ошибок → ☕ перерыв ${S.set.rest} мин`;
 }
 function home(){
   stopTick(); SESS=null; closeOver(); clearInterval(FLASH); if(TITLE0) document.title=TITLE0;
@@ -447,9 +455,9 @@ function home(){
   SEC.innerHTML=`<div class="read st-wrap"><div class="st-home">
     <div class="st-hi">
       <div class="st-ring" style="--p:${ready}"><div><span><b>${ready}%</b><br><small>к экзамену</small></span></div></div>
-      <div class="st-lv"><b>Ур. ${lv.L} · ${lv.rank}</b><div class="st-bar"><i style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div>
-        <small>⭐ ${lv.cur}/${lv.need} до следующего ранга · 🔥 ${streak()} дн. подряд · ❄ ${S.freeze||0}</small>
-        <small>изучено вопросов: ${Object.values(db.items).filter(it=>it.type==='test'&&st(it.key)&&st(it.key).ok).length} из ${db.total} · сегодня раундов: ${rdToday()}${rdToday()?' ✅':''}${dueN?` · ждут повторения: ${dueN}`:''}${goal}</small></div>
+      <div class="st-lv"><b>Изучено вопросов: ${Object.values(db.items).filter(it=>it.type==='test'&&st(it.key)&&st(it.key).ok).length} из ${db.total}</b>
+        <small>🔥 ${streak()} дн. подряд</small>
+        <small>сегодня раундов: ${rdToday()}${rdToday()?' ✅':''}${dueN?` · ждут повторения: ${dueN}`:''}${goal}</small></div>
     </div>
     <button class="st-start" data-a="go">▶ НАЧАТЬ</button>
     <div class="st-sub">${nextRoundInfo()}</div>
@@ -460,16 +468,13 @@ function home(){
   </div></div>`;
   UI.cloudBadge(); SEC.onclick=onHomeClick;
 }
-function howHTML(){ return `<details class="st-how lab-orig"><summary>Что внутри и почему так</summary><div class="body"><ul>
-  <li><b>Сразу задача</b>, теория — только если застрял. Кнопка 💡 сначала показывает кусочек лекции, где искать (подсвечены слова из вопроса), потом ответ. Никаких «убрать неверные» — это читы: попытка вспомнить даже с ошибкой запоминается сильнее, чем чтение.</li>
-  <li><b>🧠 Почему так</b> — после каждого ответа: верный ответ, простое объяснение и кусочек лекции с подсвеченным ответом. Google ищет вопрос вместе с вариантами. Те же объяснения есть в каждой лекции (блок «Вопросы теста по этой лекции»).</li>
-  <li><b>Повторение по графику</b>: верно → вернётся через 1, 3, 7, 14, 30 дней; ошибка → через 3 карточки и завтра. Новое из двух самых важных тем (80/20) идёт вперемешку с повторами.</li>
-  <li><b>Проверка, что знаешь сам</b>: вопрос засчитан выученным, только когда ответил верно в двух разных видах — выбор, «верно/неверно», вписать ответ руками. Слишком быстрый ответ на новый вопрос = угадывание, проверю ещё раз.</li>
-  <li><b>Ставка ×3</b>: если уверен — ставь. Уверенная ошибка запоминается лучше всего (эффект гиперкоррекции), поэтому после неё сразу показываю почему.</li>
-  <li><b>Чтобы не надоедало</b>: комбо, опыт и ранги, случайные сундуки, ⚡ молния (5 вопросов по 10 секунд), 👾 босс из ошибок раунда, каждый 4-й раунд — контрольная.</li>
-  <li><b>Таймер</b>: 15 минут работы и 5 минут отдыха, первый раунд дня — 7 минут, чтобы легко начать. Серия дней с заморозкой: пропустил день — серия не сгорает.</li>
-  <li><b>Как 5-летнему</b>: на любой карточке — «✍ Объяснить» (после ошибки поле открыто сразу), 1–2 строки своими словами = +15 ⭐, скопированное не считается. Заметка всплывёт при следующей встрече. «Мой конспект» собирает их по темам и шагам: вопрос → конспект → ответ, а «🔁 Проверь себя» прячет ответы для самопроверки.</li>
-</ul><p class="st-cloud">Опора: Dunlosky и др., 2013; Weinstein, Madan, Sumeracki, 2018; про пробные вопросы и ошибки — Pan & Carpenter, 2023; про гиперкоррекцию — Butterfield & Metcalfe, 2001; про серии — Silverman & Barasch, 2023.</p></div></details>`; }
+function howHTML(){ return `<details class="st-how lab-orig"><summary>Как это устроено</summary><div class="body"><ul>
+  <li><b>Сразу вопрос.</b> Не знаешь — 💡 покажет кусок лекции, где искать (слова из вопроса подсвечены), потом ответ.</li>
+  <li><b>После ответа</b>: правильный ответ, 🧠 почему так, кусок лекции с подсвеченным ответом и кнопка «📖 Открыть эту часть лекции» — читаешь дальше с этого места, потом «← Назад к вопросу».</li>
+  <li><b>Заметка</b> — поле сразу под ответом: 1–2 строки своими словами. Всплывёт при следующей встрече и попадёт в «📘 Конспект».</li>
+  <li><b>Повторение по графику</b>: верно → через 1, 3, 7, 14, 30 дней; ошибка → через 3 карточки и завтра. Выученным вопрос считается, когда ответил верно в двух разных видах (выбор, верно/неверно, вписать).</li>
+  <li><b>Раунд</b> = таймер (15 мин, первый за день — 7), в конце — повтор ошибок раунда, потом перерыв. Каждый 4-й раунд — контрольная 15 вопросов без подсказок.</li>
+</ul></div></details>`; }
 function panelHTML(){
   const s=S.set; const seg=(name,opts,cur)=>`<span class="st-seg" data-set="${name}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(cur)===String(v)?'on':''}">${l}</button>`).join('')}</span>`;
   const all=!s.topics.length;
@@ -508,8 +513,7 @@ function startRound(){
   const seen=Object.keys(S.items).length, first=!S.days[today()];
   const exam=(S.rounds+1)%4===0&&seen>=30;
   const mins=first?Math.min(7,S.set.work):S.set.work;
-  SESS={n:S.rounds+1,exam,mins,q:exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,xp:0,log:[],errs:[],combo:0,best:0,dbl:0,since:0,
-        light:null,lightDone:false,boss:null,timeUp:false,start:now(),ready0:examReady(),lv0:level(S.xp||0).L,queue:[]};
+  SESS={n:S.rounds+1,exam,mins,q:exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,log:[],errs:[],boss:null,timeUp:false,start:now(),ready0:examReady(),queue:[]};
   if(!SESS.q.length){ toast('В выбранных темах нет вопросов — проверь «Настроить»'); SESS=null; return; }
   phase='work'; T0=now(); PLEN=exam?36e5:mins*60000; startTick();
   next();
@@ -519,35 +523,27 @@ function next(){
   if(SESS.queue.length){ const f=SESS.queue.shift(); return f(); }      // уровень, сундук
   if(SESS.boss) return bossNext();
   if(SESS.exam){ if(SESS.qi>=SESS.q.length) return roundEnd(); const it=SESS.q[SESS.qi++]; return card(it,'mcq','exam'); }
-  if(SESS.timeUp&&!SESS.light) return startBoss();
-  if(!SESS.lightDone&&SESS.cards>=6&&!SESS.light){ SESS.lightDone=true;
-    const pool=Object.values(build().items).filter(it=>it.type==='test'&&st(it.key)&&scopeTopics().includes(it.topic));
-    if(pool.length>=5){ SESS.light={list:shuffle(pool).slice(0,5),i:0,ok:0}; return lightIntro(); } }
-  if(SESS.light){ const L=SESS.light; if(L.i<L.list.length) return card(L.list[L.i++],'tf','light');
-    SESS.light=null; const bonus=L.ok===5?40:L.ok*5; if(bonus) addXP(bonus); toast(`⚡ Молния: ${L.ok}/5${L.ok===5?' — идеально! +40 ⭐':bonus?' · +'+bonus+' ⭐':''}`);
-    if(SESS.timeUp) return startBoss(); }
+  if(SESS.timeUp) return startBoss();
   if(SESS.qi>=SESS.q.length){ const rest=new Set(SESS.q.slice(SESS.qi)); SESS.q=SESS.q.concat(buildQueue(30).filter(x=>!rest.has(x))); }
   const it=SESS.q[SESS.qi++]; if(!it) return startBoss();
   card(it,chooseFmt(it),'normal');
 }
 function requeue(it){ if(!SESS||SESS.exam||SESS.boss) return; if(SESS.q.slice(SESS.qi,SESS.qi+6).includes(it)) return; SESS.q.splice(Math.min(SESS.q.length,SESS.qi+3),0,it); }
 function topBar(){
-  const lv=level(S.xp||0);
   return `<div class="st-top"><button class="btn" data-a="quit" title="Закончить раунд">✕</button><span class="st-pill${SESS.timeUp?' up':''}" data-timer>${timerText()}</span>
-    <span class="st-combo" data-combo>${SESS.combo>=2?'🔥×'+SESS.combo:''}</span><span class="st-xp" data-xp>⭐ +${SESS.xp}</span>
-    <div class="st-tlv">ур. ${lv.L} · ${lv.rank}<div class="st-bar"><i data-lvbar style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div></div></div>`; }
-function helpSteps(it,fm){ if(it.type==='lab') return ['first','kon'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
-  return fm==='type'?['opts','kon','ans']:['kon','ans']; }
-const HELP_LBL={kon:'кусок конспекта',lec:'где искать в лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
+    <span class="st-cnt">вопрос ${SESS.cards}${SESS.ok+SESS.bad?` · верно ${SESS.ok} из ${SESS.ok+SESS.bad}`:''}</span></div>`; }
+function helpSteps(it,fm){ if(it.type==='lab') return ['first','lec'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
+  return fm==='type'?['opts','lec','ans']:['lec','ans']; }
+const HELP_LBL={kon:'кусок конспекта',lec:'кусок лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
 function helpBtn(){ const C=SESS.cur; const hs=C.hs; if(C.hi>=hs.length) return ''; return `💡 Помощь: ${HELP_LBL[hs[C.hi]]} <small>(${C.hi+1}/${hs.length})</small>`; }
 function card(it,fm,ctx){
   SESS.cur={it,fm,ctx,help:0,hi:0,hs:helpSteps(it,fm),answered:false,t0:now(),bet:false,chunkIdx:0};
   if(ctx==='normal'||ctx==='exam') SESS.cards++;
   const C=SESS.cur, s=st(it.key), T=build().topics[it.topic];
-  C.canBet=ctx==='normal'&&fm==='mcq'&&!!s&&SESS.cards%5===3;
+  C.canBet=false;
   const FM={mcq:'выбери ответ',tf:'верно или нет?',type:'впиши сам',lab:'лаба'};
   let tag;
-  if(ctx==='boss') tag=`<span class="st-tag boss">👾 Босс</span><span class="st-hp">${'❤'.repeat(SESS.boss.q.length)}${'🖤'.repeat(SESS.boss.max-SESS.boss.q.length)}</span>`;
+  if(ctx==='boss') tag=`<span class="st-tag rev">🔁 Повтор ошибок · осталось ${SESS.boss.q.length}</span>`;
   else if(ctx==='light') tag=`<span class="st-tag rev">⚡ Молния ${SESS.light.i}/5</span>`;
   else if(ctx==='exam') tag=`<span class="st-tag">🎓 Контрольная ${SESS.qi}/${SESS.q.length}</span>`;
   else tag=!s?'<span class="st-tag new">новое</span>':isDue(it.key)?'<span class="st-tag rev">повтор</span>':'<span class="st-tag">ещё раз</span>';
@@ -563,7 +559,7 @@ function card(it,fm,ctx){
   if(fm==='type') setTimeout(()=>{ const i=SEC.querySelector('.st-type input'); if(i) i.focus({preventScroll:true}); },30);
 }
 function tools(){ const C=SESS.cur; if(C.ctx==='exam'||C.ctx==='light') return '';
-  return `<div class="st-tools">${C.canBet?'<button class="st-bet" data-a="bet">🎰 Ставлю ×3 — уверен! <small>(ошибка −20)</small></button>':''}<button class="btn" data-a="help">${helpBtn()}</button></div>`; }
+  return `<div class="st-tools"><button class="btn" data-a="help">${helpBtn()}</button></div>`; }
 function mcqBody(it,body){ const q=it.q; const C=SESS.cur; C.opts=shuffle(q.a.map((a,i)=>({a,ok:i===0})));
   body.innerHTML=`<div class="st-q">${fmt(q.q)}</div><div class="st-os">${C.opts.map((o,i)=>`<button class="st-opt" data-o="${i}"><kbd>${i+1}</kbd><span>${fmtInline(o.a)}</span></button>`).join('')}</div>${tools()}`; }
 function tfBody(it,body){ const q=it.q, C=SESS.cur; const t=q.a.length<2||Math.random()<.5; C.tfTrue=t; C.claim=t?q.a[0]:pick(q.a.slice(1));
@@ -615,6 +611,40 @@ function lecChunkHTML(it,idx,mode){
   const terms=it.type!=='test'?[]:mode==='a'?termsOf(it.q.a[0],'a'):termsOf(it.q.q,'q');
   const lbl=it.type!=='test'?'📖 Лекция':mode==='a'?'📖 Где это в лекции — <span class="mk-a">ответ подсвечен</span>':'📖 Где искать — <span class="mk-q">слова из вопроса</span> подсвечены';
   return `<div class="h">${lbl} · ${esc(c.head)}${ids.length>1?`<button data-a="morelec">ещё кусочек (${idx%ids.length+1}/${ids.length})</button>`:''}<button data-a="openlec">вся лекция</button></div><div class="lc">${markTerms(c.html,terms,mode==='a'?'mk-a':'mk-q')}</div>`; }
+// лучшие кусочки СВОЕЙ лекции для вопроса/лабы: по словам вопроса, ответа и объяснения (без вводных «о материалах»)
+function ownChunks(it){ if(it._own) return it._own; const T=build().topics[it.topic];
+  const cs=T.chunks.filter(c=>!c.umkd&&!/^о материалах/i.test(c.text));
+  const txt=it.type==='test'?it.q.q+' '+it.q.a[0]+' '+it.q.a[0]+' '+whyOf(it):textOf(it.t.text||'')+' '+it.t.name+' '+textOf(it.lab.title||'');
+  const ws=new Set(words(txt)); const df=new Map(); cs.forEach(c=>{ for(const w of c.w) df.set(w,(df.get(w)||0)+1); });
+  const sc=cs.map(c=>{ let v=0; for(const w of ws) if(c.w.has(w)) v+=Math.log(1+cs.length/df.get(w)); return {c,v:v/Math.sqrt(c.w.size+30)}; }).filter(x=>x.v>0).sort((x,y)=>y.v-x.v);
+  return it._own=sc.slice(0,3).map(x=>x.c.id); }
+// кусок лекции к вопросу: подсветка (до ответа — слова вопроса, после — ответ) и кнопка «открыть эту часть лекции»
+function lecPieceHTML(it,idx,mode){
+  const db=build(); const ids=[...new Set([...ownChunks(it),...it.chunks])].slice(0,4); if(!ids.length) return '<div class="h">📖 Кусок лекции</div><p>Подходящего куска не нашлось.</p>';
+  const c=db.chunkById.get(ids[idx%ids.length]), T=db.topics[c.topic];
+  const terms=it.type!=='test'?[]:mode==='a'?termsOf(it.q.a[0],'a'):termsOf(it.q.q,'q');
+  const lbl=it.type!=='test'?'':mode==='a'?' · <span class="mk-a">ответ подсвечен</span>':' · <span class="mk-q">слова из вопроса</span> подсвечены';
+  return `<div class="h">📖 Лекция ${T.n} · ${esc(stepT(c.head))}${lbl}</div><div class="lc">${markTerms(c.html,terms,mode==='a'?'mk-a':'mk-q')}</div>
+    <div class="st-tools"><button class="btn pri sm" data-a="openat" data-c="${c.id}">📖 Открыть эту часть лекции</button>${ids.length>1?`<button class="btn sm" data-a="morelec">другой кусок (${idx%ids.length+1}/${ids.length})</button>`:''}${googleA(it).replace('class="btn"','class="btn sm"')}</div>`; }
+// открыть лекцию на нужном месте: ищем в настоящей лекции элемент с текстом кусочка, прокручиваем и подсвечиваем
+const normT=s=>String(s).replace(/\s+/g,' ').trim().toLowerCase();
+function openLectureAt(chunkId){
+  const c=build().chunkById.get(chunkId); if(!c) return; const t=c.topic;
+  const tab=document.querySelector(`.tabs [data-t="${t}"]`)||document.getElementById('tab-'+t); if(!tab) return; tab.click();
+  setTimeout(()=>{
+    const d=document.getElementById(t+'-lecture'); if(!d) return; d.open=true;
+    d.querySelectorAll('details').forEach(x=>{ if(normT(x.textContent).includes(normT(c.text).slice(0,45))) x.open=true; });
+    const full=normT(c.text); let target=null;
+    for(const off of [0,60,120,200]){ const snip=full.slice(off,off+45); if(snip.length<20) break;
+      let best=null; d.querySelectorAll('p,li,pre,td,th,h2,h3,h4,aside,blockquote,div,table,ul,ol').forEach(el=>{ const tx=normT(el.textContent); if(tx.includes(snip)&&(!best||tx.length<normT(best.textContent).length)) best=el; });
+      if(best){ target=best; break; } }
+    if(!target){ const h=[...d.querySelectorAll('h2,h3,h4')].find(x=>normT(c.head).includes(normT(x.textContent))); target=h||d; }
+    target.scrollIntoView({block:'center'}); target.classList.add('st-lecflash'); setTimeout(()=>target.classList.remove('st-lecflash'),3500);
+    backBtn();
+  },150); }
+function backBtn(){ if(document.querySelector('.st-back')) return; if(!SESS) return; const b=document.createElement('button'); b.className='btn pri st-back'; b.innerHTML='← Назад к вопросу';
+  b.onclick=()=>{ b.remove(); const tb=document.getElementById('tab-c17'); if(tb) tb.click(); setTimeout(()=>{ const a=SEC&&SEC.querySelector('.st-after'); if(a) a.scrollIntoView({block:'start'}); },150); };
+  document.body.appendChild(b); }
 // кусок конспекта к вопросу/лабе: раздел УМКД, к которому он привязан, + откуда взято (кусочки лекции с подсветкой)
 function konPieceHTML(it,mode){
   konBuild(); const s=it.sec; if(!s) return lecChunkHTML(it,0,mode);
@@ -628,8 +658,8 @@ function konPieceHTML(it,mode){
 const whyOf=it=>it.type==='test'?((CPP.WHY||{})[it.key]||it.q.e||''):'';
 function useHelp(){
   const C=SESS.cur, it=C.it; if(C.answered||C.hi>=C.hs.length) return; const h=C.hs[C.hi++];
-  if(h==='opts'){ C.help=Math.max(C.help,1); C.fm='mcq'; C.hs=['kon','ans']; C.hi=0; const body=SEC.querySelector('.st-body'); mcqBody(it,body); C.t0=now(); return; }
-  if(h==='lec'){ C.help=Math.max(C.help,2); C.lecMode='q'; addHelp('lec',lecChunkHTML(it,0,'q')); }
+  if(h==='opts'){ C.help=Math.max(C.help,1); C.fm='mcq'; C.hs=['lec','ans']; C.hi=0; const body=SEC.querySelector('.st-body'); mcqBody(it,body); C.t0=now(); return; }
+  if(h==='lec'){ C.help=Math.max(C.help,2); C.lecMode='q'; C.chunkIdx=0; addHelp('lec',lecPieceHTML(it,0,'q')); }
   if(h==='kon'){ C.help=Math.max(C.help,2); C.lecMode='q'; addHelp('lec',konPieceHTML(it,'q')); }
   if(h==='ans'){ C.help=3; answer(false,{shown:true}); return; }
   if(h==='first'){ C.help=Math.max(C.help,1); addHelp('hint',`<div class="h">💡 Первый шаг</div>${it.t.steps?firstStep(it.t.steps):'<p>Что дано и что нужно вывести? Начни с переменных и ввода.</p>'}`); }
@@ -648,90 +678,57 @@ function answer(ok,info){
   const fast=ok&&C.help===0&&C.ctx!=='light'&&C.fm!=='type'&&C.fm!=='lab'&&(!s0||(s0.b||0)<2)&&dt<fastLimit(C);
   const help=C.fm==='lab'?(ok?(info.auto?Math.min(C.help,1):Math.max(1,Math.min(C.help,2))):3):C.help;
   grade(it,ok,help,{fmt:C.fm,fast});
-  let xp=0;
-  if(ok&&help===0){ SESS.combo++; SESS.best=Math.max(SESS.best,SESS.combo); xp=10+Math.min(SESS.combo,10)+(C.fm==='type'?10:0)+(C.ctx==='boss'?5:0)+(C.fm==='lab'?30:0); if(C.bet) xp*=3; if(SESS.dbl>0){ xp*=2; SESS.dbl--; } if(fast) xp=Math.round(xp/2); }
-  else if(ok){ SESS.combo=0; xp=C.fm==='lab'?10:4; }
-  else { SESS.combo=0; xp=C.bet?-20:1; }
-  addXP(xp);
   SESS.log.push({it,ok,help,ctx:C.ctx}); if(ok&&!help) SESS.ok++; else if(!ok) SESS.bad++;
-  if(C.ctx==='light'&&ok) SESS.light.ok++;
   if(C.ctx==='boss'){ const B=SESS.boss; B.q.shift(); if(!ok){ if(!B.retry.has(it.key)){ B.retry.add(it.key); B.q.push(it); } else B.lost++; } }
   else if(!ok||help>=2){ if(C.ctx!=='exam'&&!SESS.errs.includes(it)) SESS.errs.push(it); requeue(it); }
   // разметка
   if(C.opts) SEC.querySelectorAll('[data-o]').forEach((b,i)=>{ b.disabled=true; if(C.opts[i].ok) b.classList.add('right'); else if(i===info.picked) b.classList.add('wrong'); });
   if(C.fm==='tf') SEC.querySelectorAll('[data-tf]').forEach(b=>{ b.disabled=true; const v=b.dataset.tf==='1'; if(v===C.tfTrue) b.classList.add('right'); else if(info.tf!=null&&v===info.tf) b.classList.add('wrong'); });
-  SEC.querySelectorAll('[data-lab],[data-a="bet"]').forEach(b=>b.disabled=true);
+  SEC.querySelectorAll('[data-lab]').forEach(b=>b.disabled=true);
   const hb=SEC.querySelector('[data-a="help"]'); if(hb) hb.remove();
   const after=SEC.querySelector('.st-after'); let h='';
-  const comboEl=SEC.querySelector('[data-combo]'); if(comboEl){ comboEl.textContent=SESS.combo>=2?'🔥×'+SESS.combo:''; if(SESS.combo>=2){ comboEl.classList.remove('hot'); void comboEl.offsetWidth; comboEl.classList.add('hot'); } }
-  const lab=C.fm==='lab';
-  if(ok){ h+=`<div class="st-res ok">✔ ${C.bet?'🎰 Ставка сыграла! ':''}${info.auto?'Автопроверка пройдена! ':''}${pick(PRAISE)} <span style="color:var(--fix)">+${xp} ⭐</span>${help?'<small>с подсказкой — вернётся скоро</small>':''}${fast?'<small>⚡ Слишком быстро для нового вопроса — засчитал наполовину и проверю ещё раз в другом виде</small>':''}${C.fm==='type'?'<small>✍ вписал сам — это самая честная проверка</small>':''}</div>`; }
-  else h+=`<div class="st-res bad">${info.shown?'👁 Ответ показан':info.timeout?'⏰ Время вышло':lab?'Пропущено':'✖ Мимо'}${C.bet?' · −20 ⭐':''}<small>${C.ctx==='boss'?'Босс отбился — этот вопрос ещё вернётся в бою':C.ctx==='exam'?'':'Вернётся через 3 карточки и завтра — так и запоминается'}</small></div>`;
-  if(C.bet&&!ok) h+=`<div class="st-help hc"><div class="h">🎯 Ты был уверен — это ловушка</div><p>Уверенные ошибки исправляются и запоминаются лучше всего, если прямо сейчас понять почему. Прочитай ответ ниже.</p></div>`;
-  const why=whyOf(it), full=C.ctx!=='light'&&C.ctx!=='exam';
-  if(!lab&&(full||!ok)){
-    h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p><b>${fmtInline(it.q.a[0])}</b></p>${why&&(full||!ok)?`<div class="st-why">🧠 ${fmtInline(why)}</div>`:''}</div>`; }
-  const stay=!ok||help>=2||lab;
+  const lab=C.fm==='lab', full=C.ctx!=='exam', why=whyOf(it);
+  if(ok) h+=`<div class="st-res ok">✔ Верно${info.auto?' — автопроверка пройдена':''}${help?'<small>с подсказкой — вопрос вернётся скоро</small>':''}${fast?'<small>ответ был очень быстрым — проверю этот вопрос ещё раз в другом виде</small>':''}</div>`;
+  else h+=`<div class="st-res bad">${info.shown?'Ответ':lab?'Пропущено':'✖ Неверно'}<small>${C.ctx==='exam'?'':'вернётся через 3 карточки и завтра'}</small></div>`;
+  if(!lab&&(full||!ok)) h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p><b>${fmtInline(it.q.a[0])}</b></p>${why&&full?`<div class="st-why">${fmtInline(why)}</div>`:''}</div>`;
   if(full){
-    if(stay){ const ex=SEC.querySelector('.st-help[data-kind="lec"]'); C.lecMode='a';
-      if(ex) ex.innerHTML=konPieceHTML(it,'a'); else h+=`<div class="st-help" data-kind="lec">${konPieceHTML(it,'a')}</div>`; }
-    else if(it.sec) h+=`<div class="st-tools"><button class="btn sm" data-a="openkon">📘 Где это в конспекте</button></div>`;
-    if(lab&&it.t.steps&&!SEC.querySelector('.st-help[data-kind="steps"]')) h+=`<details class="st-help ans"><summary class="h">🧠 Почему так — разбор по шагам</summary><div class="solve">${it.t.steps}</div></details>`;
-    if(stay) h+=`<div class="st-tools">${googleA(it)}<span class="st-cloud">ищет вопрос вместе с вариантами ответа</span></div>`;
-    h+=noteBox(it,stay);
+    if(lab&&it.t.steps&&!SEC.querySelector('.st-help[data-kind="steps"]')) h+=`<details class="st-help ans"${ok?'':' open'}><summary class="h">🧠 Почему так — разбор по шагам</summary><div class="solve">${it.t.steps}</div></details>`;
+    const ex=SEC.querySelector('.st-help[data-kind="lec"]'); C.lecMode='a';
+    if(ex) ex.innerHTML=lecPieceHTML(it,C.chunkIdx||0,'a');
+    else h+=`<details class="st-help st-lecd" data-kind="lecd"${ok&&!help?'':' open'}><summary class="h">📖 Кусок лекции</summary>${lecPieceHTML(it,0,'a')}</details>`;
+    h+=noteArea(it,noteOf(it.key));
   }
-  const auto=!stay||C.ctx==='light'||C.ctx==='exam';
-  const ms=C.ctx==='light'?(ok?700:2200):C.ctx==='exam'?(ok?700:1600):Math.min(7000,(fast||info.typed!=null?2400:1600)+why.length*30);
-  h+=`<div class="st-nav"><span class="st-cloud">${auto?'нажми на карточку, чтобы задержаться':''}</span><button class="btn pri" data-a="next">Дальше → <kbd>Enter</kbd></button></div>${auto?`<div class="st-auto" style="--d:${ms}ms"><i></i></div>`:''}`;
+  const auto=C.ctx==='exam';
+  const ms=ok?700:1600;
+  h+=`<div class="st-nav"><span></span><button class="btn pri" data-a="next">Дальше → <kbd>Enter</kbd></button></div>`;
   after.innerHTML=h; bindNotes(after);
   if(auto) C.auto=setTimeout(next,ms);
-  if(ok&&help===0&&C.ctx!=='exam') maybeChest();
 }
-// карточка «объясни как 5-летнему»: после ошибки открыта сразу, после верного ответа — одна кнопка (не мешает идти дальше)
-function noteBox(it,open){ const v=noteOf(it.key), xp=S.nx[it.key]?'':'<span class="st-xpb">+15 ⭐</span>';
-  if(!open&&!v) return `<div class="st-note-b"><button class="btn" data-a="note">✍ Объяснить как 5-летнему ${xp}</button></div>`;
-  return noteArea(it,v,xp); }
-function noteArea(it,v,xp){ const lab=it.type==='lab';
-  return `<div class="st-note"><label>✍ Объясни ${lab?'эту лабу':'этот вопрос'} как 5-летнему ${xp} <small>— своими словами, 1–2 строки. Попадёт в «Мой конспект» и всплывёт при следующей встрече</small></label>
-    <textarea data-note="${it.key}" placeholder="${lab?'Например: «Берём число из Edit, переводим StrToInt, считаем и пишем в Label через IntToStr»':'Например: «Это как… / Запомнить так: …»'}">${esc(v)}</textarea></div>`; }
+// заметка своими словами — поле сразу под ответом (не обязательно)
+function noteBox(it){ return noteArea(it,noteOf(it.key)); }
+function noteArea(it,v){ const lab=it.type==='lab';
+  return `<div class="st-note"><label>✍ Запиши своими словами <small>— 1–2 строки, как объяснил бы другу. Необязательно. Сохранится в «📘 Конспект» и покажется, когда вопрос попадётся снова</small></label>
+    <textarea rows="2" data-note="${it.key}" placeholder="${lab?'Например: «Берём число из Edit, StrToInt, считаем, пишем в Label через IntToStr»':'Например: «Запомнить так: …»'}">${esc(v||'')}</textarea></div>`; }
 function holdAuto(){ const C=SESS&&SESS.cur; if(C&&C.auto){ clearTimeout(C.auto); C.auto=null; const a=SEC.querySelector('.st-auto'); if(a) a.remove(); const s=SEC.querySelector('.st-nav .st-cloud'); if(s) s.textContent=''; } }
-function noteXP(C){ if(!C||!C.answered||C.noted) return; C.noted=true; const ta=SEC&&SEC.querySelector(`textarea[data-note="${C.it.key}"]`); if(!ta) return; const v=ta.value.trim().toLowerCase(); if(v.length<12||S.nx[C.it.key]) return;
-  const ans=C.it.type==='test'?(plain(C.it.q.a[0])+' '+(C.it.q.e||'')).toLowerCase():'';
-  if(ta.dataset.pasted||(ans&&ans.includes(v))){ toast('Скопированное не засчитываю — своими словами 😉'); return; }
-  S.nx[C.it.key]=1; addXP(15); toast('✍ +15 ⭐ за заметку своими словами'); }
+function noteXP(C){}
 function bindNotes(root){ root.querySelectorAll('textarea[data-note]').forEach(ta=>{ ta.addEventListener('input',()=>setNote(ta.dataset.note,ta.value)); ta.addEventListener('paste',()=>{ ta.dataset.pasted='1'; }); ta.addEventListener('focus',holdAuto); }); }
 
 /* ---------- опыт, сундуки, уровень ---------- */
-function addXP(n){ if(!n) return; const L0=level(S.xp||0).L; S.xp=Math.max(0,(S.xp||0)+n); if(SESS) SESS.xp+=n; persist();
-  const x=SEC&&SEC.querySelector('[data-xp]'); if(x){ x.textContent='⭐ +'+SESS.xp; const r=x.getBoundingClientRect(); const f=document.createElement('div'); f.className='st-float'; f.textContent=(n>0?'+':'')+n; f.style.left=r.left+'px'; f.style.top=(r.top+4)+'px'; if(n<0) f.style.color='var(--bad)'; document.body.appendChild(f); setTimeout(()=>f.remove(),1000); }
-  const lv=level(S.xp); const bar=SEC&&SEC.querySelector('[data-lvbar]'); if(bar) bar.style.width=Math.round(lv.cur/lv.need*100)+'%';
-  if(lv.L>L0&&SESS) SESS.queue.push(()=>over('🏆',`Уровень ${lv.L}!`,`Новый ранг: <b>${lv.rank}</b>. ${lv.L%3===0?'Бонус: ❄ заморозка серии.':''}`,'Дальше →',()=>{ if(lv.L%3===0) S.freeze=Math.min(3,(S.freeze||0)+1); persist(); next(); })); }
-function maybeChest(){ SESS.since++; const p=.07+Math.min(SESS.combo,10)*.012; if(Math.random()<p||SESS.since>=12){ SESS.since=0; SESS.queue.push(chest); } }
-function chest(){
-  over('🎁','Сундук!','Случайная награда за правильные ответы подряд','Открыть',()=>{
-    const r=Math.random(); let em,t,d;
-    if(r<.45){ const n=20+Math.floor(Math.random()*41); addXP(n); em='⭐'; t=`+${n} опыта`; d='Неплохо!'; }
-    else if(r<.7){ SESS.dbl+=5; em='✖2'; t='Двойной опыт'; d='на следующие 5 верных ответов'; }
-    else if(r<.88&&(S.freeze||0)<3){ S.freeze=(S.freeze||0)+1; persist(); em='❄'; t='Заморозка серии'; d='пропустишь день — серия не сгорит'; }
-    else { addXP(150); em='💎'; t='ДЖЕКПОТ +150'; d='Вот это удача!'; }
-    over(em,t,d,'Забрать →',next);
-  },true);
-}
+function addXP(n){}
 function over(em,title,txt,btn,fn,wob){ closeOver(); const o=document.createElement('div'); o.className='st-over';
   o.innerHTML=`<div><div class="em${wob?' wob':''}">${em}</div><h2>${title}</h2><p>${txt}</p><button class="btn pri" style="font-size:16px;padding:10px 26px">${btn} <kbd>Enter</kbd></button></div>`;
   o.querySelector('button').onclick=()=>{ closeOver(); fn(); }; document.body.appendChild(o); OVER=o; setTimeout(()=>o.querySelector('button').focus({preventScroll:true}),50); }
 function closeOver(){ if(OVER){ OVER.remove(); OVER=null; } }
 
 /* ---------- молния и босс ---------- */
-function lightIntro(){ over('⚡','Молния!','5 вопросов «верно или нет», по 10 секунд на каждый. Все 5 верно — +40 ⭐','Погнали',next); }
 function startBoss(){
   const errs=SESS.errs.filter(x=>x.type==='test').slice(-5);
-  if(!errs.length||SESS.exam){ if(!SESS.exam) addXP(30); return roundEnd(); }
+  if(!errs.length||SESS.exam) return roundEnd();
   SESS.boss={q:shuffle(errs),max:errs.length,retry:new Set(),lost:0};
-  over('👾','Босс раунда!',`Баг-монстр собран из твоих ошибок за раунд: ${errs.length} ❤. Ответь на каждый правильно — и он повержен (+50 ⭐).`,'В бой',next,true);
+  over('🔁','Повтор ошибок',`Ещё раз вопросы, где ты ошибся в этом раунде (${errs.length}). Так они лучше запомнятся.`,'Начать',next);
 }
 function bossNext(){ const B=SESS.boss; if(B.q.length) return card(B.q[0],B.retry.has(B.q[0].key)?'mcq':chooseFmt(B.q[0])==='type'?'type':'mcq','boss');
-  const win=!B.lost; SESS.boss=null; SESS.bossWin=win; if(win) addXP(50); roundEnd(); }
+  SESS.boss=null; SESS.bossWin=!B.lost; roundEnd(); }
 
 /* ---------- конец раунда и перерыв ---------- */
 function roundEnd(quit){
@@ -741,19 +738,16 @@ function roundEnd(quit){
   if(counted){ S.rounds++; S.rd=S.rd||{}; S.rd[today()]=(S.rd[today()]||0)+1; persist(); }
   const n=R.log.filter(x=>x.ctx!=='boss'&&x.ctx!=='light').length, ok=R.ok, bad=R.bad;
   const ready=Math.round(examReady()*100), d=ready-Math.round(R.ready0*100);
-  const lv=level(S.xp||0);
   const examRes=R.exam?Math.round(R.log.filter(x=>x.ok&&!x.help).length/Math.max(1,R.log.length)*100):null;
   const head=R.exam?(examRes>=85?['🏆','Контрольная: '+examRes+'%','Отличный результат — на экзамене так же!']:examRes>=60?['💪','Контрольная: '+examRes+'%','Хорошо. Ошибки вернутся в следующих раундах.']:['🧱','Контрольная: '+examRes+'%','Нормально для начала — каждый раунд закрывает дыры.'])
     :quit&&!counted?['👋','Раунд прерван','Ничего страшного — продолжим, когда захочешь.']
-    :R.bossWin===true?['🏆','Раунд '+R.n+' пройден! Босс повержен','Все ошибки раунда исправлены.']
-    :R.bossWin===false?['🛡','Раунд '+R.n+' пройден','Босс ушёл, но его вопросы вернутся завтра.']
-    :['🌟','Раунд '+R.n+' — без ошибок!','Босса нет: ты чистый. +30 ⭐'];
+    :R.bossWin===false?['✅','Раунд '+R.n+' пройден','Ошибки вернутся завтра — так они и запоминаются.']
+    :['✅','Раунд '+R.n+' пройден',R.bad?'Ошибки раунда повторены.':'Без ошибок.'];
   const recall=R.log.filter(x=>x.it.type==='test'&&x.ok).slice(-1)[0];
   const teaseQ=buildQueue(1)[0];
   SESSEND={teaseQ};
   SEC.innerHTML=`<div class="read st-wrap"><div class="st-big"><div class="em">${head[0]}</div><h1>${head[1]}</h1><p>${head[2]}</p></div>
-    <div class="st-stats"><div><b>${ok}</b><span>сам и верно</span></div><div><b>${bad}</b><span>ошибок</span></div><div><b>🔥${R.best}</b><span>лучшее комбо</span></div><div><b>+${R.xp}</b><span>⭐ опыта</span></div></div>
-    <p style="text-align:center">Готовность к экзамену: <b>${ready}%</b>${d>0?` <span style="color:var(--ok)">(+${d}%)</span>`:''} · ур. ${lv.L} ${lv.rank} · 🔥 ${streak()} дн.</p>
+    <div class="st-stats"><div><b>${ok}</b><span>верно сам</span></div><div><b>${bad}</b><span>ошибок</span></div><div><b>${ready}%</b><span>готовность к экзамену${d>0?` (+${d}%)`:''}</span></div><div><b>${streak()}</b><span>дней подряд</span></div></div>
     ${counted&&!quit?`<div class="st-brk"><div class="eyebrow">☕ Перерыв</div><div class="t" data-timer>${fmtLeft(S.set.rest*60000)}</div>
       <p>Встань, пройдись, попей воды. Телефон не трогай — мозг сейчас раскладывает выученное по полкам.</p>
       ${recall?`<p class="st-cloud">По желанию: вспомни без подглядывания ответ на «${esc(String(recall.it.q.q).replace(/```[\s\S]*?```/g,'…').slice(0,100))}…»</p>`:''}</div>`:''}
@@ -771,7 +765,7 @@ function startTick(){ stopTick(); TIMER=setInterval(tick,500); }
 function stopTick(){ clearInterval(TIMER); TIMER=null; }
 const left=()=>Math.max(0,PLEN-(now()-T0));
 const fmtLeft=l=>Math.floor(l/60000)+':'+String(Math.floor(l/1000)%60).padStart(2,'0');
-function timerText(){ if(!SESS) return ''; if(SESS.exam) return '🎓 '+SESS.qi+'/'+SESS.q.length; if(SESS.boss) return '👾 босс'; if(SESS.timeUp) return '⏰ последний'; return '⏱ '+fmtLeft(left()); }
+function timerText(){ if(!SESS) return ''; if(SESS.exam) return '🎓 '+SESS.qi+'/'+SESS.q.length; if(SESS.boss) return '🔁 повтор'; if(SESS.timeUp) return '⏰ последний'; return '⏱ '+fmtLeft(left()); }
 function tick(){
   const el=SEC&&SEC.querySelector('[data-timer]');
   if(phase==='work'&&SESS){ if(!SESS.exam&&!SESS.timeUp&&left()<=0){ SESS.timeUp=true; if(el) el.classList.add('up'); } if(el) el.textContent=timerText(); return; }
@@ -789,10 +783,9 @@ function onCardClick(e){
   if(b.dataset.a==='next'){ next(); return; }
   if(b.dataset.a==='help'){ useHelp(); return; }
   if(b.dataset.a==='openkon'){ openKonDrawer(C.it); return; }
-  if(b.dataset.a==='note'){ holdAuto(); const box=b.closest('.st-note-b'); box.outerHTML=noteArea(C.it,noteOf(C.it.key),S.nx[C.it.key]?'':'<span class="st-xpb">+15 ⭐</span>'); const ta=SEC.querySelector(`textarea[data-note="${C.it.key}"]`); bindNotes(ta.parentElement); ta.focus(); return; }
   if(b.dataset.a==='check'){ checkType(); return; }
-  if(b.dataset.a==='bet'){ if(C.answered) return; C.bet=!C.bet; b.classList.toggle('on',C.bet); return; }
-  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); C.chunkIdx++; box.innerHTML=lecChunkHTML(C.it,C.chunkIdx,C.lecMode||'q'); holdAuto(); return; }
+  if(b.dataset.a==='openat'){ holdAuto(); openLectureAt(b.dataset.c); return; }
+  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); C.chunkIdx++; box.innerHTML=lecPieceHTML(C.it,C.chunkIdx,C.lecMode||'q'); holdAuto(); return; }
   if(b.dataset.a==='openlec'){ const t=C.it.topic; const btn=document.querySelector(`.tabs [data-t="${t}"]`); holdAuto(); if(btn){ btn.click(); setTimeout(()=>{ const d=document.getElementById(t+'-lecture'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth'}); } },120); } return; }
   if(b.dataset.o!=null){ if(C.answered) return; const i=+b.dataset.o; answer(C.opts[i].ok,{picked:i}); return; }
   if(b.dataset.tf!=null){ if(C.answered) return; const v=b.dataset.tf==='1'; answer(v===C.tfTrue,{tf:v}); return; }
@@ -919,7 +912,7 @@ function initWhy(sec){
 
 /* ---------- вход ---------- */
 function init(sec){
-  SEC=sec; css(); if(!TITLE0) TITLE0=document.title;
+  SEC=sec; css(); if(!TITLE0) TITLE0=document.title; document.querySelectorAll('.st-back').forEach(b=>b.remove());
   if(!S){ loadLocal(); Cloud.init(); }
   if(!sec.dataset.ready){ sec.dataset.ready='1'; document.addEventListener('keydown',keys); sec.addEventListener('change',onHomeChange); }
   if(!SESS&&phase!=='rest') home();

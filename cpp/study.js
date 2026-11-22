@@ -11,7 +11,8 @@
 const CPP=G.CPP;
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const fmt=s=>typeof G.qfmt==='function'?G.qfmt(s):esc(s);
-const fmtInline=s=>esc(s).replace(/`([^`\n]+)`/g,'<code>$1</code>');
+// ответы/варианты: «English (Русский)» → английский сверху, русский ниже (через общий qfmt сайта)
+const fmtInline=s=>typeof G.qfmt==='function'&&!/```/.test(String(s))?G.qfmt(s):esc(s).replace(/`([^`\n]+)`/g,'<code>$1</code>');
 const hash=s=>{ let h=5381; s=String(s); for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); };
 const shuffle=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
 const pick=a=>a[Math.floor(Math.random()*a.length)];
@@ -573,7 +574,8 @@ function lev(a,b){ const m=a.length,n=b.length; if(Math.abs(m-n)>1) return 9; co
   for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
 function checkType(){ const C=SESS.cur; if(C.answered) return; const inp=SEC.querySelector('.st-type input'); const v=nrm(inp.value), a=nrm(C.it.q.a[0]);
   if(!v){ inp.focus(); return; }
-  const ok=v===a||(a.length>=6&&lev(v,a)<=1); inp.disabled=true; inp.classList.add(ok?'right':'wrong'); answer(ok,{typed:inp.value}); }
+  const bs=(typeof G.biSplit==='function'&&G.biSplit(C.it.q.a[0]))||[]; const alts=[a,...bs.map(nrm)];
+  const ok=alts.some(x=>x&&(v===x||(x.length>=6&&lev(v,x)<=1))); inp.disabled=true; inp.classList.add(ok?'right':'wrong'); answer(ok,{typed:inp.value}); }
 function labBody(it,body){
   const t=it.t, lab=it.lab, id=t.id; let w='';
   if(t.vcl) w=`<div class="vclw" data-id="${esc(id)}" data-title="${esc(t.wtitle||t.name)}"><script type="application/json" data-role="vcl">${JSON.stringify(t.vcl).replace(/</g,'\\u003c')}<\/script></div>`;

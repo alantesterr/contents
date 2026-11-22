@@ -401,6 +401,9 @@ body.editing main{padding-bottom:140px}
 .qform label{display:block;font-size:13px;color:var(--muted);margin-top:6px}
 .qform .err{color:var(--bad);font-size:13.5px;margin-top:4px}
 .q .qt{white-space:pre-line}
+.en{display:block}
+.ru{display:block;color:var(--muted);font-weight:400;font-size:.92em;line-height:1.45;margin-top:.3em;padding-top:.3em;border-top:1px dashed var(--line)}
+.opt .ru,.st-opt .ru,.st-claim .ru,.ki .a .ru,.st-help .ru{border-top:0;padding-top:0;margin-top:.1em}
 .modal{position:fixed;inset:0;z-index:30;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}
 .modal .box{background:var(--surface);border-radius:10px;padding:14px;max-width:720px;width:100%;max-height:90%;display:flex;flex-direction:column;gap:8px}
 .modal textarea{flex:1;min-height:260px;font:12.5px var(--f-mono);background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:6px;padding:8px}
@@ -4627,9 +4630,16 @@ const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t1
 Object.assign(DEFAULT_TESTS, window.CPP_TESTS||{});
 TOPICS.forEach(k=>{ if(!DEFAULT_TESTS[k]) DEFAULT_TESTS[k]={base:[],pool:[]}; });
 // вопрос с кодом: ```cpp … ``` — блок, `…` — в строке
+// «English text (Русский перевод)» → английский сверху, русский отдельной строкой ниже (только если основная часть латиницей)
+function biSplit(t){ const s=String(t).replace(/\s+$/,''); if(!s.endsWith(')')) return null;
+  let d=0,i=s.length-1; for(;i>=0;i--){ if(s[i]===')') d++; else if(s[i]==='('){ d--; if(d===0) break; } }
+  if(i<=0) return null; const en=s.slice(0,i).replace(/\s+$/,''), ru=s.slice(i+1,-1);
+  if(!/[А-Яа-яЁё]/.test(ru)||!/[A-Za-z]/.test(en)||/[А-Яа-яЁё]/.test(en.replace(/\(НЕ ТОЧНО\)/g,''))) return null; return [en,ru]; }
 function qfmt(s){
   const parts=String(s).split(/```(?:cpp)?\n?([\s\S]*?)```/);
-  return parts.map((p,i)=> i%2 ? `<pre class="cpp-code qcode">${window.CPP&&CPP.highlight?CPP.highlight(p.replace(/\n$/,'')):esc(p)}</pre>` : esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/^\n+|\n+$/g,'')).join('');
+  const tx=p=>esc(p).replace(/`([^`\n]+)`/g,'<code>$1</code>').replace(/^\n+|\n+$/g,'');
+  return parts.map((p,i)=>{ if(i%2) return `<pre class="cpp-code qcode">${window.CPP&&CPP.highlight?CPP.highlight(p.replace(/\n$/,'')):esc(p)}</pre>`;
+    const b=biSplit(p); return b?`<span class="en">${tx(b[0])}</span><span class="ru">${tx(b[1])}</span>`:tx(p); }).join('');
 }
 const ovl = s => `<span class="ov">${s}</span>`;
 const grp4 = s => s.replace(/(.{4})(?=.)/g,'$1 ');

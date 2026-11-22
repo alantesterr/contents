@@ -331,6 +331,27 @@ const CSS=`
 .st-kon textarea{width:100%;min-height:52px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--fix-bg);color:var(--ink);margin-top:4px}
 .st-cloud{font-size:12.5px;color:var(--muted)}
 .st-lab .cppw,.st-lab .vclw{margin:10px 0}
+.st-why{margin-top:6px;font-size:15px;color:var(--ink)}
+mark.mk-q,.mk-q{background:var(--accent-soft);color:inherit;border-radius:3px;padding:0 2px;box-shadow:inset 0 -2px 0 var(--accent)}
+mark.mk-a,.mk-a{background:var(--ok-bg);color:inherit;border-radius:3px;padding:0 2px;box-shadow:inset 0 -2px 0 var(--ok);font-weight:600}
+.st-help .h .mk-q,.st-help .h .mk-a{text-transform:none;letter-spacing:0}
+details.st-help>summary{cursor:pointer;list-style:none}
+.st-note-b{margin-top:10px}
+.st-kon .toc{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.st-kon .toc a{font:600 12.5px var(--f-body);text-decoration:none;border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--surface)}
+.st-kon .st-search{width:100%;font:15px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink);margin:6px 0}
+.st-kon .stp,.why-block .stp{font:700 13px var(--f-body);color:var(--accent);margin:14px 0 4px}
+.st-kon .it .lb{font:700 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.st-kon .it .q{font-size:14.5px;color:var(--ink);white-space:pre-line;background:none;border:0;padding:0;border-radius:0}
+.st-kon .it .a{font-size:14.5px;color:var(--ok);font-weight:600}
+.st-kon .it .w,.why-block .w{font-size:14px;color:var(--ink);background:var(--bg);border-radius:6px;padding:4px 8px;margin-top:4px}
+.st-kon.quiz .it{cursor:pointer}
+.st-kon.quiz .it:not(.open) .hid{filter:blur(6px);pointer-events:none;user-select:none}
+.st-kon.quiz .it:not(.open)::after{content:"нажми, чтобы проверить себя";display:block;font-size:12px;color:var(--accent);margin-top:4px}
+.why-block details.why-q{border-bottom:1px solid var(--line);padding:6px 0}
+.why-block details.why-q>summary{cursor:pointer;font-weight:600;white-space:pre-line}
+.why-block details.why-q>summary pre{white-space:pre;font-weight:400}
+.why-block details.why-q p{margin:.3em 0}
 @media (max-width:640px){.st-start{padding:20px 40px;font-size:23px}.st-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.st-tlv{display:none}.st-row>b{min-width:100%}}
 `;
 function css(){ if(document.getElementById('study-css')) return; const s=document.createElement('style'); s.id='study-css'; s.textContent=CSS; document.head.appendChild(s); }
@@ -372,13 +393,14 @@ function home(){
   UI.cloudBadge(); SEC.onclick=onHomeClick;
 }
 function howHTML(){ return `<details class="st-how lab-orig"><summary>Что внутри и почему так</summary><div class="body"><ul>
-  <li><b>Сразу задача</b>, теория — только если застрял (одна кнопка 💡: убрать 2 неверных → кусочек лекции → ответ и Google). Попытка вспомнить даже с ошибкой запоминается сильнее, чем чтение.</li>
+  <li><b>Сразу задача</b>, теория — только если застрял. Кнопка 💡 сначала показывает кусочек лекции, где искать (подсвечены слова из вопроса), потом ответ. Никаких «убрать неверные» — это читы: попытка вспомнить даже с ошибкой запоминается сильнее, чем чтение.</li>
+  <li><b>🧠 Почему так</b> — после каждого ответа: верный ответ, простое объяснение и кусочек лекции с подсвеченным ответом. Google ищет вопрос вместе с вариантами. Те же объяснения есть в каждой лекции (блок «Вопросы теста по этой лекции»).</li>
   <li><b>Повторение по графику</b>: верно → вернётся через 1, 3, 7, 14, 30 дней; ошибка → через 3 карточки и завтра. Новое из двух самых важных тем (80/20) идёт вперемешку с повторами.</li>
   <li><b>Проверка, что знаешь сам</b>: вопрос засчитан выученным, только когда ответил верно в двух разных видах — выбор, «верно/неверно», вписать ответ руками. Слишком быстрый ответ на новый вопрос = угадывание, проверю ещё раз.</li>
   <li><b>Ставка ×3</b>: если уверен — ставь. Уверенная ошибка запоминается лучше всего (эффект гиперкоррекции), поэтому после неё сразу показываю почему.</li>
   <li><b>Чтобы не надоедало</b>: комбо, опыт и ранги, случайные сундуки, ⚡ молния (5 вопросов по 10 секунд), 👾 босс из ошибок раунда, каждый 4-й раунд — контрольная.</li>
   <li><b>Таймер</b>: 15 минут работы и 5 минут отдыха, первый раунд дня — 7 минут, чтобы легко начать. Серия дней с заморозкой: пропустил день — серия не сгорает.</li>
-  <li><b>Как 5-летнему</b>: после ошибки 1 строка своими словами = +15 ⭐ (скопированное не считается). Заметка всплывёт при следующей встрече и попадёт в «Мой конспект».</li>
+  <li><b>Как 5-летнему</b>: на любой карточке — «✍ Объяснить» (после ошибки поле открыто сразу), 1–2 строки своими словами = +15 ⭐, скопированное не считается. Заметка всплывёт при следующей встрече. «Мой конспект» собирает их по темам и шагам: вопрос → конспект → ответ, а «🔁 Проверь себя» прячет ответы для самопроверки.</li>
 </ul><p class="st-cloud">Опора: Dunlosky и др., 2013; Weinstein, Madan, Sumeracki, 2018; про пробные вопросы и ошибки — Pan & Carpenter, 2023; про гиперкоррекцию — Butterfield & Metcalfe, 2001; про серии — Silverman & Barasch, 2023.</p></div></details>`; }
 function panelHTML(){
   const s=S.set; const seg=(name,opts,cur)=>`<span class="st-seg" data-set="${name}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(cur)===String(v)?'on':''}">${l}</button>`).join('')}</span>`;
@@ -446,8 +468,8 @@ function topBar(){
     <span class="st-combo" data-combo>${SESS.combo>=2?'🔥×'+SESS.combo:''}</span><span class="st-xp" data-xp>⭐ +${SESS.xp}</span>
     <div class="st-tlv">ур. ${lv.L} · ${lv.rank}<div class="st-bar"><i data-lvbar style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div></div></div>`; }
 function helpSteps(it,fm){ if(it.type==='lab') return ['first','lec'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
-  return fm==='mcq'?['half','lec','ans']:fm==='type'?['opts','lec','ans']:['lec','ans']; }
-const HELP_LBL={half:'убрать 2 неверных',lec:'кусочек лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
+  return fm==='type'?['opts','lec','ans']:['lec','ans']; }
+const HELP_LBL={lec:'где искать в лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
 function helpBtn(){ const C=SESS.cur; const hs=C.hs; if(C.hi>=hs.length) return ''; return `💡 Помощь: ${HELP_LBL[hs[C.hi]]} <small>(${C.hi+1}/${hs.length})</small>`; }
 function card(it,fm,ctx){
   SESS.cur={it,fm,ctx,help:0,hi:0,hs:helpSteps(it,fm),answered:false,t0:now(),bet:false,chunkIdx:0};
@@ -503,17 +525,32 @@ function labBody(it,body){
   if(wd&&G.MutationObserver){ const mo=new MutationObserver(()=>{ if(wd.classList.contains('solved')&&SESS&&SESS.cur&&SESS.cur.it===it&&!SESS.cur.answered){ mo.disconnect(); answer(true,{auto:true}); } }); mo.observe(wd,{attributes:true,attributeFilter:['class']}); }
 }
 function addHelp(kind,html,cls){ const h=SEC.querySelector('.st-helps'); const box=document.createElement('div'); box.className='st-help'+(cls?' '+cls:''); box.dataset.kind=kind; box.innerHTML=html; h.appendChild(box); return box; }
-const gq=it=>it.type==='test'?it.q.q.replace(/```[\s\S]*?```/g,' ').slice(0,300):'C++ Builder '+textOf(it.t.text||it.t.name).slice(0,200);
+const gq=it=>it.type==='test'?(plain(it.q.q.replace(/```[\s\S]*?```/g,' '))+' '+it.q.a.map(plain).join(' | ')).replace(/\s+/g,' ').slice(0,420):'C++ Builder '+textOf(it.t.text||it.t.name).slice(0,200);
 const googleA=it=>`<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(gq(it))}">🔎 Google</a>`;
-function lecChunkHTML(it,idx){
+// подсветка слов в кусочке лекции: до ответа — слова из вопроса (где искать), после — слова верного ответа
+let CTX=null; const chunkTexts=()=>CTX||(CTX=[...build().chunkById.values()].map(c=>(c.head+' '+c.text).toLowerCase()));
+function termsOf(s,mode){ s=plain(String(s).replace(/```[\s\S]*?```/g,' ').replace(/\(НЕ ТОЧНО\)/g,'')); const out=new Set(); const re=/[A-Za-z_][A-Za-z0-9_]*|[А-Яа-яЁё]+/g; let m;
+  while((m=re.exec(s))){ let w=m[0]; if(w.length<3||STOP.has(w.toLowerCase())||/^(which|what|that|this|when|how|component|property|used|the|value|call|called|true|false|correct|answer|ответ|правильн|свойство|компонент|какой|какое|какая|каким|используется|называется|верн|дела|зада|элеме|испол|получ|нужн|можн|котор|через|всег|кажд|друг|чтоб|случа)/i.test(w)) continue;
+    if(/[а-яё]/i.test(w)) w=w.slice(0,Math.max(4,Math.min(6,w.length-2))); out.add(w); }
+  // только «редкие» слова, которые есть в лекциях: частые (который, свойство…) не помогают искать
+  const TX=chunkTexts(), lim=TX.length*(mode==='a'?.4:.1);
+  return [...out].filter(w=>{ const lw=w.toLowerCase(); let n=0; for(const t of TX) if(t.includes(lw)) n++; return n>0&&n<=lim; }).sort((a,b)=>b.length-a.length).slice(0,10); }
+function markTerms(html,terms,cls){ if(!terms.length) return html; const d=document.createElement('div'); d.innerHTML=html;
+  const re=new RegExp('('+terms.map(t=>t.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')).join('|')+')','gi');
+  const tw=document.createTreeWalker(d,NodeFilter.SHOW_TEXT); const ns=[]; while(tw.nextNode()) ns.push(tw.currentNode);
+  for(const n of ns){ re.lastIndex=0; if(!re.test(n.nodeValue)) continue; re.lastIndex=0; const sp=document.createElement('span'); sp.innerHTML=esc(n.nodeValue).replace(re,`<mark class="${cls}">$1</mark>`); n.replaceWith(...sp.childNodes); }
+  return d.innerHTML; }
+function lecChunkHTML(it,idx,mode){
   const db=build(); const ids=it.chunks; if(!ids.length) return '<div class="h">📖 Кусочек лекции</div><p>Подходящего кусочка не нашлось.</p>';
   const c=db.chunkById.get(ids[idx%ids.length]);
-  return `<div class="h">📖 Лекция · ${esc(c.head)}${ids.length>1?`<button data-a="morelec">ещё (${idx%ids.length+1}/${ids.length})</button>`:''}<button data-a="openlec">вся лекция</button></div><div class="lc">${c.html}</div>`; }
+  const terms=it.type!=='test'?[]:mode==='a'?termsOf(it.q.a[0],'a'):termsOf(it.q.q,'q');
+  const lbl=it.type!=='test'?'📖 Лекция':mode==='a'?'📖 Где это в лекции — <span class="mk-a">ответ подсвечен</span>':'📖 Где искать — <span class="mk-q">слова из вопроса</span> подсвечены';
+  return `<div class="h">${lbl} · ${esc(c.head)}${ids.length>1?`<button data-a="morelec">ещё кусочек (${idx%ids.length+1}/${ids.length})</button>`:''}<button data-a="openlec">вся лекция</button></div><div class="lc">${markTerms(c.html,terms,mode==='a'?'mk-a':'mk-q')}</div>`; }
+const whyOf=it=>it.type==='test'?((CPP.WHY||{})[it.key]||it.q.e||''):'';
 function useHelp(){
   const C=SESS.cur, it=C.it; if(C.answered||C.hi>=C.hs.length) return; const h=C.hs[C.hi++];
-  if(h==='half'){ C.help=Math.max(C.help,1); const wrong=C.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0); shuffle(wrong).slice(0,Math.min(2,wrong.length-1)).forEach(i=>{ const b=SEC.querySelector(`[data-o="${i}"]`); if(b){ b.classList.add('gone'); b.disabled=true; } }); }
   if(h==='opts'){ C.help=Math.max(C.help,1); C.fm='mcq'; C.hs=['lec','ans']; C.hi=0; const body=SEC.querySelector('.st-body'); mcqBody(it,body); C.t0=now(); return; }
-  if(h==='lec'){ C.help=Math.max(C.help,2); addHelp('lec',lecChunkHTML(it,0)); }
+  if(h==='lec'){ C.help=Math.max(C.help,2); C.lecMode='q'; addHelp('lec',lecChunkHTML(it,0,'q')); }
   if(h==='ans'){ C.help=3; answer(false,{shown:true}); return; }
   if(h==='first'){ C.help=Math.max(C.help,1); addHelp('hint',`<div class="h">💡 Первый шаг</div>${it.t.steps?firstStep(it.t.steps):'<p>Что дано и что нужно вывести? Начни с переменных и ввода.</p>'}`); }
   if(h==='steps'){ C.help=3; addHelp('steps',`<div class="h">🧩 Разбор по шагам</div><div class="solve">${it.t.steps}</div>`); }
@@ -551,23 +588,31 @@ function answer(ok,info){
   if(ok){ h+=`<div class="st-res ok">✔ ${C.bet?'🎰 Ставка сыграла! ':''}${info.auto?'Автопроверка пройдена! ':''}${pick(PRAISE)} <span style="color:var(--fix)">+${xp} ⭐</span>${help?'<small>с подсказкой — вернётся скоро</small>':''}${fast?'<small>⚡ Слишком быстро для нового вопроса — засчитал наполовину и проверю ещё раз в другом виде</small>':''}${C.fm==='type'?'<small>✍ вписал сам — это самая честная проверка</small>':''}</div>`; }
   else h+=`<div class="st-res bad">${info.shown?'👁 Ответ показан':info.timeout?'⏰ Время вышло':lab?'Пропущено':'✖ Мимо'}${C.bet?' · −20 ⭐':''}<small>${C.ctx==='boss'?'Босс отбился — этот вопрос ещё вернётся в бою':C.ctx==='exam'?'':'Вернётся через 3 карточки и завтра — так и запоминается'}</small></div>`;
   if(C.bet&&!ok) h+=`<div class="st-help hc"><div class="h">🎯 Ты был уверен — это ловушка</div><p>Уверенные ошибки исправляются и запоминаются лучше всего, если прямо сейчас понять почему. Прочитай ответ ниже.</p></div>`;
-  if(!lab&&(!ok||C.fm==='tf'&&!C.tfTrue||info.typed!=null||it.q.e)&&C.ctx!=='light'){
-    h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p>${fmtInline(it.q.a[0])}</p>${it.q.e?`<p class="st-cloud" style="color:inherit">${fmtInline(it.q.e)}</p>`:''}</div>`; }
-  else if(C.ctx==='light'&&!ok) h+=`<div class="st-help ans"><div class="h">✔ Ответ</div><p>${fmtInline(it.q.a[0])}</p></div>`;
-  const stay=!ok||help>=2;
-  if(stay&&C.ctx!=='exam'&&C.ctx!=='light'){
-    if(!lab&&!SEC.querySelector('.st-help[data-kind="lec"]')) h+=`<div class="st-help" data-kind="lec">${lecChunkHTML(it,0)}</div>`;
-    h+=`<div class="st-tools">${googleA(it)}</div>`;
-    const v=noteOf(it.key);
-    h+=`<div class="st-note"><label>✍ Объясни себе как 5-летнему — одна строка ${S.nx[it.key]?'':'<span class="st-xpb">+15 ⭐</span>'}</label><textarea data-note="${it.key}" placeholder="Например: «Caption — надпись на кнопке, а Text — то, что печатают в Edit»">${esc(v)}</textarea></div>`;
+  const why=whyOf(it), full=C.ctx!=='light'&&C.ctx!=='exam';
+  if(!lab&&(full||!ok)){
+    h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p><b>${fmtInline(it.q.a[0])}</b></p>${why&&(full||!ok)?`<div class="st-why"><b>🧠 Почему так:</b> ${fmtInline(why)}</div>`:''}</div>`; }
+  const stay=!ok||help>=2||lab;
+  if(full){
+    if(!lab&&stay){ const ex=SEC.querySelector('.st-help[data-kind="lec"]'); C.lecMode='a';
+      if(ex) ex.innerHTML=lecChunkHTML(it,C.chunkIdx,'a'); else h+=`<div class="st-help" data-kind="lec">${lecChunkHTML(it,0,'a')}</div>`; }
+    if(lab&&it.t.steps&&!SEC.querySelector('.st-help[data-kind="steps"]')) h+=`<details class="st-help ans"><summary class="h">🧠 Почему так — разбор по шагам</summary><div class="solve">${it.t.steps}</div></details>`;
+    if(stay) h+=`<div class="st-tools">${googleA(it)}<span class="st-cloud">ищет вопрос вместе с вариантами ответа</span></div>`;
+    h+=noteBox(it,stay);
   }
   const auto=!stay||C.ctx==='light'||C.ctx==='exam';
-  const ms=C.ctx==='light'?(ok?700:1800):C.ctx==='exam'?(ok?700:1600):(it.q&&it.q.e||info.typed!=null||fast?2600:1300);
+  const ms=C.ctx==='light'?(ok?700:2200):C.ctx==='exam'?(ok?700:1600):Math.min(7000,(fast||info.typed!=null?2400:1600)+why.length*30);
   h+=`<div class="st-nav"><span class="st-cloud">${auto?'нажми на карточку, чтобы задержаться':''}</span><button class="btn pri" data-a="next">Дальше → <kbd>Enter</kbd></button></div>${auto?`<div class="st-auto" style="--d:${ms}ms"><i></i></div>`:''}`;
   after.innerHTML=h; bindNotes(after);
   if(auto) C.auto=setTimeout(next,ms);
   if(ok&&help===0&&C.ctx!=='exam') maybeChest();
 }
+// карточка «объясни как 5-летнему»: после ошибки открыта сразу, после верного ответа — одна кнопка (не мешает идти дальше)
+function noteBox(it,open){ const v=noteOf(it.key), xp=S.nx[it.key]?'':'<span class="st-xpb">+15 ⭐</span>';
+  if(!open&&!v) return `<div class="st-note-b"><button class="btn" data-a="note">✍ Объяснить как 5-летнему ${xp}</button></div>`;
+  return noteArea(it,v,xp); }
+function noteArea(it,v,xp){ const lab=it.type==='lab';
+  return `<div class="st-note"><label>✍ Объясни ${lab?'эту лабу':'этот вопрос'} как 5-летнему ${xp} <small>— своими словами, 1–2 строки. Попадёт в «Мой конспект» и всплывёт при следующей встрече</small></label>
+    <textarea data-note="${it.key}" placeholder="${lab?'Например: «Берём число из Edit, переводим StrToInt, считаем и пишем в Label через IntToStr»':'Например: «Это как… / Запомнить так: …»'}">${esc(v)}</textarea></div>`; }
 function holdAuto(){ const C=SESS&&SESS.cur; if(C&&C.auto){ clearTimeout(C.auto); C.auto=null; const a=SEC.querySelector('.st-auto'); if(a) a.remove(); const s=SEC.querySelector('.st-nav .st-cloud'); if(s) s.textContent=''; } }
 function noteXP(C){ if(!C||!C.answered||C.noted) return; C.noted=true; const ta=SEC&&SEC.querySelector(`textarea[data-note="${C.it.key}"]`); if(!ta) return; const v=ta.value.trim().toLowerCase(); if(v.length<12||S.nx[C.it.key]) return;
   const ans=C.it.type==='test'?(plain(C.it.q.a[0])+' '+(C.it.q.e||'')).toLowerCase():'';
@@ -662,9 +707,10 @@ function onCardClick(e){
   if(b.dataset.a==='quit'){ roundEnd(true); return; }
   if(b.dataset.a==='next'){ next(); return; }
   if(b.dataset.a==='help'){ useHelp(); return; }
+  if(b.dataset.a==='note'){ holdAuto(); const box=b.closest('.st-note-b'); box.outerHTML=noteArea(C.it,noteOf(C.it.key),S.nx[C.it.key]?'':'<span class="st-xpb">+15 ⭐</span>'); const ta=SEC.querySelector(`textarea[data-note="${C.it.key}"]`); bindNotes(ta.parentElement); ta.focus(); return; }
   if(b.dataset.a==='check'){ checkType(); return; }
   if(b.dataset.a==='bet'){ if(C.answered) return; C.bet=!C.bet; b.classList.toggle('on',C.bet); return; }
-  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); C.chunkIdx++; box.innerHTML=lecChunkHTML(C.it,C.chunkIdx); holdAuto(); return; }
+  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); C.chunkIdx++; box.innerHTML=lecChunkHTML(C.it,C.chunkIdx,C.lecMode||'q'); holdAuto(); return; }
   if(b.dataset.a==='openlec'){ const t=C.it.topic; const btn=document.querySelector(`.tabs [data-t="${t}"]`); holdAuto(); if(btn){ btn.click(); setTimeout(()=>{ const d=document.getElementById(t+'-lecture'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth'}); } },120); } return; }
   if(b.dataset.o!=null){ if(C.answered) return; const i=+b.dataset.o; answer(C.opts[i].ok,{picked:i}); return; }
   if(b.dataset.tf!=null){ if(C.answered) return; const v=b.dataset.tf==='1'; answer(v===C.tfTrue,{tf:v}); return; }
@@ -685,31 +731,62 @@ function keys(e){
   if(e.key==='Enter'){ e.preventDefault(); next(); }
 }
 
-/* ---------- Мой конспект ---------- */
+/* ---------- Мой конспект: по темам и шагам лекции; вопрос → мой конспект → ответ и почему ---------- */
+const stepT=t=>{ t=String(t||''); const i=t.indexOf(' · '); return i>0?t.slice(i+3):t; };
+const qText=s=>String(s).replace(/```[\s\S]*?```/g,'[код]');
+function konspektItems(T){ return T.steps.map((sp,si)=>({sp,si,its:sp.items.filter(it=>noteOf(it.key))})).filter(x=>x.its.length); }
 function konspekt(){
-  stopTick(); const db=build(); const q=s=>String(s).replace(/```[\s\S]*?```/g,'[код]');
-  let h=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><button class="btn" data-a="export">⬇ Скачать (.txt)</button></div>
+  stopTick(); const db=build();
+  let h=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-a="quiz">🔁 Проверь себя</button><button class="btn" data-a="export">⬇ Скачать (.txt)</button></span></div>
     <div class="topic-head"><div class="eyebrow">всё, что ты объяснил своими словами</div><h1>📝 Мой конспект</h1></div>
-    <p>Перед экзаменом читай это, а не лекции. Заметки можно править прямо здесь.</p>
-    <input class="st-search" placeholder="Поиск по заметкам…" style="width:100%;font:15px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">`;
-  let any=false;
-  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const its=T.items.filter(it=>noteOf(it.key)); if(!its.length) continue; any=true;
-    h+=`<h3>Тема ${T.n}. ${esc(T.title)}</h3>`;
-    for(const it of its) h+=`<div class="it"><div class="q">${it.type==='test'?esc(q(it.q.q)).slice(0,400):'💻 '+esc(it.t.name)}</div>${it.type==='test'?`<div class="a">✔ ${esc(it.q.a[0])}</div>`:''}<textarea data-note="${it.key}">${esc(noteOf(it.key))}</textarea></div>`; }
-  if(!any) h+=`<p><i>Пока пусто. Заметки появляются, когда после ошибки пишешь строчку «как 5-летнему».</i></p>`;
+    <p>Разложено по темам и по порядку лекции. В каждой карточке: вопрос → твой конспект → ответ и почему так. Перед экзаменом читай это, а не лекции.</p>
+    <p class="st-cloud">«🔁 Проверь себя» прячет конспект и ответы: прочитай вопрос, вспомни сам, потом нажми на карточку.</p>
+    <input class="st-search" placeholder="Поиск по вопросам и заметкам…">`;
+  let any=false; const toc=[];
+  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const groups=konspektItems(T); const tn=noteOf('topic-'+t);
+    if(!groups.length&&!tn) continue; any=true; const n=groups.reduce((a,g)=>a+g.its.length,0); toc.push(`<a href="#kon-${t}">Тема ${T.n} · ${n}</a>`);
+    h+=`<h3 id="kon-${t}">Тема ${T.n}. ${esc(T.title)}</h3>`;
+    if(tn) h+=`<div class="it"><div class="lb">Тема своими словами</div><textarea data-note="topic-${t}">${esc(tn)}</textarea></div>`;
+    for(const g of groups){ h+=`<div class="stp">Шаг ${g.si+1}: ${esc(stepT(g.sp.title))}</div>`;
+      for(const it of g.its){ const test=it.type==='test', why=whyOf(it);
+        h+=`<div class="it"><div class="lb">${test?'❓ Вопрос':'💻 Лаба'}</div><div class="q">${test?esc(qText(it.q.q)).slice(0,500):esc(it.t.name)}</div>
+          <div class="hid"><div class="lb">✍ Мой конспект</div><textarea data-note="${it.key}">${esc(noteOf(it.key))}</textarea>
+          ${test?`<div class="lb">✔ Ответ</div><div class="a">${fmtInline(it.q.a[0])}</div>${why?`<div class="w">🧠 ${fmtInline(why)}</div>`:''}`:''}</div></div>`; } }
+  }
+  if(!any) h+=`<p><i>Пока пусто. Конспект появляется, когда на карточке нажимаешь «✍ Объяснить как 5-летнему» (после ошибки поле открывается само).</i></p>`;
+  else h=h.replace('<input class="st-search"',`<nav class="toc">${toc.join('')}</nav><input class="st-search"`);
   h+='</div>'; SEC.innerHTML=h; bindNotes(SEC); scrollTop();
-  SEC.querySelector('.st-search').addEventListener('input',e=>{ const v=e.target.value.toLowerCase(); SEC.querySelectorAll('.it').forEach(x=>{ x.hidden=v&&!x.textContent.toLowerCase().includes(v)&&!x.querySelector('textarea').value.toLowerCase().includes(v); }); });
-  SEC.onclick=async e=>{ const b=e.target.closest('button'); if(!b) return;
+  const kon=SEC.querySelector('.st-kon');
+  SEC.querySelector('.st-search').addEventListener('input',e=>{ const v=e.target.value.toLowerCase(); SEC.querySelectorAll('.it').forEach(x=>{ const ta=x.querySelector('textarea'); x.hidden=v&&!x.textContent.toLowerCase().includes(v)&&!(ta&&ta.value.toLowerCase().includes(v)); }); });
+  SEC.onclick=async e=>{ const it=e.target.closest('.it'); if(it&&kon.classList.contains('quiz')&&!it.classList.contains('open')){ it.classList.add('open'); return; }
+    const b=e.target.closest('button'); if(!b) return;
     if(b.dataset.a==='home'){ home(); return; }
+    if(b.dataset.a==='quiz'){ kon.classList.toggle('quiz'); SEC.querySelectorAll('.it.open').forEach(x=>x.classList.remove('open')); b.classList.toggle('on',kon.classList.contains('quiz')); return; }
     if(b.dataset.a==='export'){ const txt=exportText(); const name='Мой конспект C++.txt';
       try{ const dl=G.claude&&G.claude.use?await G.claude.use('downloads'):null; if(dl){ await dl.save({filename:name,data:txt}); return; } }catch(err){ if(err&&err.code&&err.code!=='unavailable') return; }
       const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); } };
 }
 function exportText(){ const db=build(); const L=['МОЙ КОНСПЕКТ ПО C++',''];
-  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const its=T.items.filter(it=>noteOf(it.key)); if(!its.length) continue;
-    L.push('=== Тема '+T.n+'. '+T.title+' ===');
-    for(const it of its){ if(it.type==='test') L.push('Вопрос: '+String(it.q.q).replace(/```[\s\S]*?```/g,'[код]'),'Ответ: '+it.q.a[0]); else L.push('Лаба: '+it.t.name); L.push('Моя заметка: '+noteOf(it.key),''); } }
+  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const groups=konspektItems(T); const tn=noteOf('topic-'+t); if(!groups.length&&!tn) continue;
+    L.push('=== Тема '+T.n+'. '+T.title+' ==='); if(tn) L.push('Тема своими словами: '+tn,'');
+    for(const g of groups){ L.push('--- Шаг '+(g.si+1)+': '+stepT(g.sp.title));
+      for(const it of g.its){ if(it.type==='test') L.push('Вопрос: '+qText(it.q.q)); else L.push('Лаба: '+it.t.name);
+        L.push('Мой конспект: '+noteOf(it.key)); if(it.type==='test'){ L.push('Ответ: '+it.q.a[0]); const w=whyOf(it); if(w) L.push('Почему: '+w); } L.push(''); } } }
   return L.join('\n'); }
+
+/* ---------- лекции: блок «Вопросы теста по этой лекции — ответ и почему так» (добавляется после лекции, саму лекцию не меняет) ---------- */
+function initWhy(sec){
+  if(!sec||!/^c([1-9]|1[0-5])$/.test(sec.id)||sec.querySelector('.why-block')) return;
+  const lec=sec.querySelector('details.lec'); if(!lec) return;
+  css(); let T; try{ T=build().topics[sec.id]; }catch(e){ return; } if(!T||!T.tests) return;
+  let h=`<details class="lab-orig why-block"><summary>🧠 Вопросы теста по этой лекции — ответ и почему так (${T.tests})</summary><div class="body">
+    <p class="st-cloud">Вопросы идут по порядку лекции, шаг за шагом. Сначала подумай сам, потом открой вопрос — увидишь ответ и простое объяснение.</p>`;
+  T.steps.forEach((sp,si)=>{ const ts=sp.items.filter(x=>x.type==='test'); if(!ts.length) return;
+    h+=`<div class="stp">Шаг ${si+1}: ${esc(stepT(sp.title))}</div>`;
+    for(const it of ts){ const why=whyOf(it); h+=`<details class="why-q"><summary>${fmt(it.q.q)}</summary><p>✔ <b>${fmtInline(it.q.a[0])}</b></p>${why?`<p class="w">🧠 ${fmtInline(why)}</p>`:''}</details>`; } });
+  h+='</div></details>';
+  lec.insertAdjacentHTML('afterend',h);
+}
 
 /* ---------- вход ---------- */
 function init(sec){
@@ -719,5 +796,6 @@ function init(sec){
   if(!SESS&&phase!=='rest') home();
 }
 CPP.initStudy=function(sec){ if(sec&&sec.id==='c17') init(sec); };
+CPP.initWhy=initWhy;
 CPP.STUDY_TEST={build,buildQueue,grade,examReady,level,chooseFmt,typable,state:()=>S,sess:()=>SESS};
 })(typeof window!=='undefined'?window:globalThis);

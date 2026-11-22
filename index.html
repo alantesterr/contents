@@ -3641,6 +3641,7 @@ DDR4-3200:             8 Б × 1600 М × 2 = 25 600 МБ/с</pre>
 <script src="cpp/topics/c13.js"></script>
 <script src="cpp/topics/c14.js"></script>
 <script src="cpp/topics/c15.js"></script>
+<script src="cpp/why.js"></script>
 <script src="cpp/study.js"></script>
 <script src="cpp/cpp-boot.js"></script>
 <script src="arch/arch-circuits.js"></script>
@@ -5827,7 +5828,7 @@ function showTopic(t){
   document.querySelectorAll('.subj button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===s?'true':'false'));
   document.getElementById('brandName').textContent=SUBJ[s].name; document.getElementById('brandSub').textContent=SUBJ[s].sub;
   document.title=SUBJ[s].title;
-  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); if(CPP.initStudy) CPP.initStudy(sec); }
+  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); if(CPP.initStudy) CPP.initStudy(sec); if(CPP.initWhy) CPP.initWhy(sec); }
   if(t==='t16'&&window.ARCH&&ARCH.initTab) ARCH.initTab();
   try{ localStorage.setItem('last-'+s,t); }catch(_){}
 }

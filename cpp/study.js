@@ -1,9 +1,11 @@
-/* Вкладка «🎯 Учиться» (C++): учёба кусочками по проверенным методам.
-   Задача сначала → лесенка помощи (подсказка → кусочек лекции → ответ/эталон → Google) → своя заметка «как 5-летнему».
-   Интервальное повторение (коробки Лейтнера 1-3-7-14-30 дней), ошибка возвращается через 3 карточки, чередование тем,
-   приоритет 80/20 (темы с наибольшим числом тестовых вопросов), таймер 17/8, «Шерлок» (быстро листать лекции),
-   «Мой конспект», «Мои ошибки», «Пробный экзамен». Прогресс и заметки — localStorage + личный раздел базы артефакта
-   (data/users/<id>/study, заметки — по документу), чтобы были видны с любого устройства. */
+/* Вкладка «🎯 Учиться» (C++): одна кнопка «Начать» — дальше всё само.
+   Раунд = рабочий отрезок таймера (по умолчанию 15 мин, первый раунд дня — короткий разгон 7 мин), потом босс из ошибок раунда,
+   потом перерыв (5 мин) с тизером следующего вопроса. Внутри: задача сначала → одна кнопка помощи (50/50 → кусочек лекции → ответ+Google),
+   интервальное повторение (коробки 1-3-7-14-30 дней), вопрос считается выученным, только если отвечен верно в двух разных видах
+   (выбор / верно-неверно / вписать), «слишком быстро» = угадал, ставка ×3 (эффект гиперкоррекции), молния-раунд, комбо, опыт и ранги,
+   сундуки со случайной наградой, серия дней с заморозкой, каждый 4-й раунд — контрольная без подсказок. Заметки «как 5-летнему»
+   (+опыт, скопированное не засчитывается) всплывают при следующей встрече и собираются в «Мой конспект».
+   Прогресс и заметки — localStorage + личный раздел базы артефакта (data/users/<id>/study, заметки — по документу). */
 (function(G){
 'use strict';
 const CPP=G.CPP;
@@ -12,17 +14,24 @@ const fmt=s=>typeof G.qfmt==='function'?G.qfmt(s):esc(s);
 const fmtInline=s=>esc(s).replace(/`([^`\n]+)`/g,'<code>$1</code>');
 const hash=s=>{ let h=5381; s=String(s); for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))|0; return (h>>>0).toString(36); };
 const shuffle=a=>{ a=a.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+const pick=a=>a[Math.floor(Math.random()*a.length)];
 const DAY=864e5, now=()=>Date.now();
-const today=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
-const BOX_DAYS=[0,1,3,7,14,30];                         // интервалы повторения по коробкам
+const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const today=()=>dkey(new Date());
+const BOX_DAYS=[0,1,3,7,14,30];
 const ORDER_8020=['c11','c2','c10','c1','c15','c4','c6','c3','c7','c9','c5','c8','c12','c13','c14'];   // по числу вопросов в тестах
 const TOPIC_IDS=Array.from({length:15},(_,i)=>'c'+(i+1));
+const DEF_SET={v:2,work:15,rest:5,topics:[],labs:false,examDate:''};
 
 /* ================= хранилище ================= */
 const LS='study:v1';
-let S=null;                 // {items:{key:{b,due,seen,ok,bad,last,help}}, notes:{key:{t,ts}}, days:{date:n}, set:{}, ts}
-function loadLocal(){ try{ S=JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ S=null; }
-  S=Object.assign({items:{},notes:{},days:{},set:{}},S||{}); S.set=Object.assign({kind:'mix',scope:'8020',size:20,work:17,rest:8,topics:[],recall:false},S.set); }
+let S=null;   // {items:{key:{b,due,seen,ok,bad,last,help,fm[]}}, notes:{key:{t,ts}}, days:{date:n}, set, xp, freeze, rounds, nx:{key:1}, ts}
+function norm(){
+  S=Object.assign({items:{},notes:{},days:{},set:{},xp:0,freeze:1,rounds:0,nx:{}},S||{});
+  if(S.set.v!==2) S.set=Object.assign({},DEF_SET,{topics:[]});
+  S.set=Object.assign({},DEF_SET,S.set);
+}
+function loadLocal(){ try{ S=JSON.parse(localStorage.getItem(LS)||'null'); }catch(e){ S=null; } norm(); }
 function saveLocal(){ try{ localStorage.setItem(LS,JSON.stringify(S)); }catch(e){} }
 const Cloud={db:null,uid:null,ref:null,ok:false,t:null,noteT:{},
   async init(){
@@ -32,12 +41,14 @@ const Cloud={db:null,uid:null,ref:null,ok:false,t:null,noteT:{},
       this.db=db; this.uid=uid; this.ref=db.doc('data/users/'+uid+'/study');
       const timer=new Promise((_,rj)=>setTimeout(()=>rj(new Error('timeout')),10000));
       const [snap,notes]=await Promise.race([Promise.all([this.ref.get(),this.ref.collection('notes').get()]),timer]);
-      if(snap.exists){ const d=snap.data()||{}; mergeItems(d.items||{}); for(const k in (d.days||{})) S.days[k]=Math.max(S.days[k]||0,d.days[k]); if(d.set&&!(S.ts>d.ts)) S.set=Object.assign(S.set,d.set); }
+      if(snap.exists){ const d=snap.data()||{}; mergeItems(d.items||{}); for(const k in (d.days||{})) S.days[k]=Math.max(S.days[k]||0,d.days[k]);
+        if(d.set&&d.set.v===2&&!(S.ts>d.ts)) S.set=Object.assign({},DEF_SET,d.set);
+        S.xp=Math.max(S.xp||0,d.xp||0); S.rounds=Math.max(S.rounds||0,d.rounds||0); if(d.ts>(S.ts||0)) S.freeze=d.freeze??S.freeze; Object.assign(S.nx,d.nx||{}); }
       (notes.docs||[]).forEach(dn=>{ const v=dn.data(); const k=dn.id; if(v&&(!S.notes[k]||(v.ts||0)>(S.notes[k].ts||0))) S.notes[k]={t:String(v.t||''),ts:v.ts||0}; });
       this.ok=true; saveLocal(); this.pushProgress(); UI.refresh&&UI.refresh(); UI.cloudBadge&&UI.cloudBadge();
     }catch(e){ this.ok=false; UI.cloudBadge&&UI.cloudBadge(); }
   },
-  pushProgress(){ if(!this.ok) return; clearTimeout(this.t); this.t=setTimeout(()=>{ this.ref.set({items:S.items,days:S.days,set:S.set,ts:now()}).catch(()=>{}); },2500); },
+  pushProgress(){ if(!this.ok) return; clearTimeout(this.t); this.t=setTimeout(()=>{ this.ref.set({items:S.items,days:S.days,set:S.set,xp:S.xp,freeze:S.freeze,rounds:S.rounds,nx:S.nx,ts:now()}).catch(()=>{}); },2500); },
   pushNote(k){ if(!this.ok) return; clearTimeout(this.noteT[k]); this.noteT[k]=setTimeout(()=>{ const n=S.notes[k]; const r=this.ref.collection('notes').doc(k); (n&&n.t.trim()?r.set({t:n.t,ts:n.ts}):r.delete()).catch(()=>{}); },1500); }
 };
 function mergeItems(o){ for(const k in o){ const a=S.items[k], b=o[k]; if(!a||(b.last||0)>(a.last||0)) S.items[k]=b; } }
@@ -138,283 +149,346 @@ function build(){
   return DB;
 }
 
-/* ================= интервальное повторение ================= */
+/* ================= повторение, опыт, ранги ================= */
 const st=k=>S.items[k]||null;
-// help: 0 — сам, 1 — подсказка/50-50, 2 — лекция, 3 — ответ/эталон/Google
-function grade(it,ok,help,conf){
-  const s=S.items[it.key]=Object.assign({b:0,due:0,seen:0,ok:0,bad:0},S.items[it.key]||{});
-  s.seen++; s.last=now(); s.help=help;
-  if(ok&&help===0&&conf!=='guess'){ s.ok++; s.b=Math.min(5,(s.b||0)+1); }
+// help: 0 — сам, 1 — 50/50, 2 — лекция, 3 — ответ. fast — ответил подозрительно быстро (похоже на угадывание)
+function grade(it,ok,help,o){
+  o=o||{}; const s=S.items[it.key]=Object.assign({b:0,due:0,seen:0,ok:0,bad:0},S.items[it.key]||{});
+  s.seen++; s.last=now(); s.help=help; s.fm=s.fm||[];
+  if(ok&&help===0&&!o.fast){ s.ok++; if(o.fmt&&!s.fm.includes(o.fmt)) s.fm.push(o.fmt);
+    let nb=(s.b||0)+1; if(nb>2&&s.fm.length<2&&it.type==='test') nb=2;   // «выучено» — только после верного ответа в двух разных видах
+    s.b=Math.min(5,nb); }
   else if(ok){ s.ok++; s.b=Math.max(1,Math.min(s.b||1,2)); }
   else { s.bad++; s.b=1; }
-  s.due=now()+BOX_DAYS[s.b]*DAY-3600e3;     // чуть раньше, чтобы повтор попал в «сегодня» нужного дня
+  s.due=now()+BOX_DAYS[s.b]*DAY-3600e3;
   const d=today(); S.days[d]=(S.days[d]||0)+1;
   persist();
 }
 const mastery=k=>{ const s=st(k); if(!s) return 0; return s.b>=3?1:s.b===2?.6:s.b===1?.25:0; };
 const isDue=k=>{ const s=st(k); return !!s&&s.due<=now(); };
-function topicReady(t){ const ts=t.items.filter(x=>x.type==='test'); if(!ts.length) return 0; return ts.reduce((a,x)=>a+mastery(x.key),0)/ts.length; }
 function examReady(){ const db=build(); let s=0,n=0; for(const t of Object.values(db.topics)) for(const x of t.items) if(x.type==='test'){ s+=mastery(x.key); n++; } return n?s/n:0; }
-function streak(){ let n=0; const d=new Date(); for(;;){ const k=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); if(S.days[k]) n++; else if(n||k!==today()) break; d.setDate(d.getDate()-1); if(n>999) break; } return n; }
+function streak(){ let n=0; const d=new Date(); for(let i=0;i<1000;i++){ const k=dkey(d); if(S.days[k]) n++; else if(i>0) break; d.setDate(d.getDate()-1); } return n; }
+// пропустил вчера — сгорает заморозка, серия не рвётся (немного «слабины» мотивирует сильнее жёстких правил)
+function useFreeze(){ const y=new Date(); y.setDate(y.getDate()-1); const b=new Date(); b.setDate(b.getDate()-2);
+  if(!S.days[dkey(y)]&&S.days[dkey(b)]&&S.freeze>0){ S.days[dkey(y)]=-1; S.freeze--; persist(); return true; } return false; }
+const RANKS=['Стажёр','Джун','Джун+','Мидл','Мидл+','Сеньор','Тимлид','Архитектор','Гуру C++Builder','Легенда кафедры'];
+function level(xp){ let L=1, need=250, acc=0; while(xp>=acc+need){ acc+=need; L++; need=250*L; } return {L,cur:xp-acc,need,rank:RANKS[Math.min(RANKS.length-1,L-1)]}; }
 
-/* ================= очередь сессии ================= */
-function scopeTopics(){ const s=S.set; if(s.scope==='pick'&&s.topics.length) return ORDER_8020.filter(t=>s.topics.includes(t)); if(s.scope==='order') return TOPIC_IDS.slice(); return ORDER_8020.slice(); }
-function okKind(it,kind){ return kind==='mix'||(kind==='tests'?it.type==='test':it.type==='lab'); }
-function buildQueue(opts){
-  const db=build(); const kind=opts.kind||S.set.kind, size=opts.size||S.set.size, tps=opts.topics||scopeTopics();
-  if(opts.items) return opts.items.slice(0,size);
-  const pool=tps.flatMap(t=>db.topics[t]?db.topics[t].items:[]).filter(it=>okKind(it,kind));
+/* ================= очередь ================= */
+function scopeTopics(){ const t=S.set.topics; return t&&t.length?ORDER_8020.filter(x=>t.includes(x)):ORDER_8020.slice(); }
+function okItem(it){ return it.type==='test'||(S.set.labs&&it.type==='lab'&&(it.t.ref||it.t.vcl||it.t.start)); }
+function buildQueue(size){
+  const db=build(); const tps=scopeTopics();
+  const pool=tps.flatMap(t=>db.topics[t]?db.topics[t].items:[]).filter(okItem);
   const due=shuffle(pool.filter(it=>isDue(it.key))).sort((a,b)=>st(a.key).b-st(b.key).b);
-  const nDue=Math.min(due.length,Math.ceil(size*(opts.reviewShare||0.4)));
-  const fresh=[];
-  // новые — по шагам: тема за темой (80/20), внутри темы — шаг за шагом; лабы — примерно 1 на 4 вопроса в смешанном режиме
-  for(const t of tps){ const T=db.topics[t]; if(!T) continue;
-    for(const sp of T.steps) for(const it of sp.items) if(!st(it.key)&&okKind(it,kind)) fresh.push(it);
-    if(fresh.length>=size*3) break; }
-  let news=fresh;
-  if(kind==='mix'){ const tests=fresh.filter(x=>x.type==='test'), labs=fresh.filter(x=>x.type==='lab'); news=[]; let li=0; tests.forEach((x,i)=>{ news.push(x); if(i%4===3&&labs[li]) news.push(labs[li++]); }); news.push(...labs.slice(li)); }
-  const q=[]; const di=due.slice(0,nDue);
-  const nn=news.slice(0,size-di.length);
-  // чередуем: новое, новое, повтор …
-  let a=0,b=0; while(q.length<size&&(a<nn.length||b<di.length)){ if(a<nn.length) q.push(nn[a++]); if(a<nn.length&&q.length<size) q.push(nn[a++]); if(b<di.length&&q.length<size) q.push(di[b++]); }
-  if(q.length<size){ const rest=due.slice(nDue).concat(shuffle(pool.filter(it=>st(it.key)&&!isDue(it.key)&&!q.includes(it)).sort((x,y)=>(st(x.key).b-st(y.key).b)))); for(const it of rest){ if(q.length>=size) break; if(!q.includes(it)) q.push(it); } }
+  // новые: две первые незаконченные темы по важности (80/20) идут вперемешку, внутри темы — шаг за шагом
+  const per=[]; for(const t of tps){ const T=db.topics[t]; if(!T) continue; const f=T.steps.flatMap(sp=>sp.items).filter(it=>!st(it.key)&&okItem(it)&&it.type==='test'); if(f.length) per.push(f); if(per.length>=2) break; }
+  const fresh=[]; for(let i=0;fresh.length<size&&per.some(f=>i<f.length);i++) for(const f of per) if(f[i]) fresh.push(f[i]);
+  const labs=S.set.labs?shuffle(pool.filter(it=>it.type==='lab'&&(!st(it.key)||isDue(it.key)))):[];
+  const nDue=Math.min(due.length,Math.ceil(size*.4)); const di=due.filter(x=>x.type==='test').slice(0,nDue);
+  const q=[]; let a=0,b=0,l=0;
+  while(q.length<size&&(a<fresh.length||b<di.length)){
+    if(b<di.length) q.push(di[b++]);                     // начинаем с повтора — это легче, разгон
+    if(a<fresh.length) q.push(fresh[a++]); if(a<fresh.length) q.push(fresh[a++]);
+    if(labs[l]&&q.length%7>=5) q.push(labs[l++]); }
+  if(q.length<size){ const rest=pool.filter(it=>it.type==='test'&&st(it.key)&&!q.includes(it)).sort((x,y)=>st(x.key).b-st(y.key).b||st(x.key).due-st(y.key).due); for(const it of rest){ if(q.length>=size) break; q.push(it); } }
+  if(q.length<size){ for(const it of shuffle(pool.filter(x=>x.type==='test'&&!q.includes(x)))){ if(q.length>=size) break; q.push(it); } }
   return q;
+}
+// вид карточки: новое — выбор; дальше — тот вид, в котором ещё не отвечал верно
+const plain=s=>String(s).replace(/`/g,'').trim();
+function typable(it){ if(it.type!=='test') return false; const a=plain(it.q.a[0]);
+  return a.length>=2&&a.length<=22&&a.split(/\s+/).length<=2&&!/^(все|ни |нет|да$|оба|верно|неверно|никак)/i.test(a)&&!/[«»]/.test(a); }
+function chooseFmt(it){
+  if(it.type==='lab') return 'lab';
+  const s=st(it.key); if(!s||!s.seen) return 'mcq';
+  if(s.b<=1&&s.bad&&s.last>now()-DAY) return 'mcq';
+  const all=['mcq','tf'].concat(typable(it)?['type']:[]); const fm=s.fm||[];
+  const fresh=all.filter(f=>!fm.includes(f));
+  if(s.b>=2&&typable(it)&&Math.random()<.6) return 'type';
+  return pick(fresh.length?fresh:all);
 }
 
 /* ================= интерфейс ================= */
 const UI={};
-let SEC=null, SESS=null, TIMER=null;
+let SEC=null, SESS=null, TIMER=null, OVER=null;
+let phase='idle', T0=0, PLEN=0, TITLE0='', FLASH=null;
 const CSS=`
-.st-wrap{max-width:860px}
-.st-hero{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
-.st-kpi{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
-.st-kpi b{display:block;font:700 26px var(--f-display);line-height:1.1}
-.st-kpi span{font-size:13px;color:var(--muted)}
-.st-bar{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
-.st-bar i{display:block;height:100%;background:var(--ok)}
-.st-go{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0 14px}
-.st-go .btn.big{font-size:17px;padding:12px 22px}
-.st-opts{display:grid;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:12px;margin:10px 0}
+.st-wrap{max-width:780px}
+.st-home{text-align:center;padding:18px 0 8px}
+.st-hi{display:flex;gap:18px;align-items:center;justify-content:center;flex-wrap:wrap;margin:8px 0 22px}
+.st-ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--ok) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.st-ring>div{width:78px;height:78px;border-radius:50%;background:var(--bg);display:grid;place-items:center;line-height:1.05}
+.st-ring b{font:700 24px var(--f-display)} .st-ring small{font-size:10.5px;color:var(--muted)}
+.st-lv{text-align:left;min-width:220px}
+.st-lv b{font-size:17px}
+.st-lv small{display:block;color:var(--muted);font-size:13px;margin-top:4px}
+.st-bar{height:7px;border-radius:4px;background:var(--line);overflow:hidden;margin-top:6px}
+.st-bar i{display:block;height:100%;background:var(--accent);transition:width .4s}
+.st-bar.ok i{background:var(--ok)}
+.st-start{font:800 26px var(--f-display);letter-spacing:.04em;color:var(--surface);background:var(--accent);border:0;border-radius:18px;padding:22px 64px;cursor:pointer;box-shadow:0 6px 0 color-mix(in srgb,var(--accent) 60%,#000);transition:transform .08s,box-shadow .08s;animation:st-breath 2.6s ease-in-out infinite}
+.st-start:active{transform:translateY(5px);box-shadow:0 1px 0 color-mix(in srgb,var(--accent) 60%,#000)}
+@keyframes st-breath{50%{transform:scale(1.035)}}
+.st-sub{color:var(--muted);font-size:14px;margin:14px 0 6px}
+.st-setb{font:600 14px var(--f-body);background:none;border:1px solid var(--line);color:var(--ink);border-radius:10px;padding:8px 16px;cursor:pointer;margin-top:10px}
+.st-panel{text-align:left;display:grid;gap:12px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;margin:14px 0}
 .st-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
-.st-row>b{min-width:92px;font-size:14px}
+.st-row>b{min-width:110px;font-size:14px}
+.st-row small{color:var(--muted)}
 .st-seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 .st-seg button{font:600 13.5px var(--f-body);border:0;background:var(--surface);color:var(--ink);padding:6px 12px;cursor:pointer}
 .st-seg button+button{border-left:1px solid var(--line)}
 .st-seg button.on{background:var(--accent);color:var(--surface)}
 .st-chips{display:flex;flex-wrap:wrap;gap:4px}
-.st-chips button{font:600 12.5px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer}
+.st-chips button{font:600 12.5px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);border-radius:999px;padding:3px 10px;cursor:pointer;min-width:34px}
 .st-chips button.on{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
-.st-modes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
-.st-mode{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;color:var(--ink);font:14px var(--f-body)}
-.st-mode:hover{border-color:var(--accent)}
-.st-mode b{display:block;font-size:15px;margin-bottom:2px}
-.st-mode small{color:var(--muted)}
-.st-map{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:8px 0}
-.st-tp{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:9px 11px;cursor:pointer;text-align:left;color:var(--ink);font:13.5px var(--f-body)}
-.st-tp:hover{border-color:var(--accent)}
-.st-tp .n{font:700 12px var(--f-body);color:var(--accent);letter-spacing:.06em}
-.st-tp .w{float:right;font-size:11.5px;color:var(--muted)}
-.st-tp .tt{display:block;font-weight:600;line-height:1.3;margin:2px 0 4px;min-height:2.6em}
-.st-tp small{color:var(--muted)}
-.st-tp.hot{border-color:color-mix(in srgb,var(--fix) 55%,var(--line))}
-.st-how{margin:16px 0}
-.st-top{position:sticky;top:var(--hdrh,64px);z-index:5;background:var(--bg);padding:8px 0;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
-.st-top .pg{flex:1;min-width:140px}
-.st-top .pg small{color:var(--muted);font-size:12.5px}
-.st-pill{font:700 14px var(--f-mono);border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--surface)}
+.st-panel input[type=date]{font:14px var(--f-body);padding:4px 8px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink)}
+.st-how{text-align:left;margin:22px 0 6px}
+.st-top{position:sticky;top:var(--hdrh,64px);z-index:5;background:var(--bg);padding:8px 0;display:flex;gap:8px;align-items:center;border-bottom:1px solid var(--line)}
+.st-pill{font:700 14px var(--f-mono);border:1px solid var(--line);border-radius:999px;padding:4px 12px;background:var(--surface);white-space:nowrap}
 .st-pill.rest{background:var(--ok-bg);color:var(--ok)}
-.st-card{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin:12px 0}
-.st-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+.st-pill.up{background:var(--fix-bg);color:var(--fix)}
+.st-combo{font:800 15px var(--f-body);color:var(--fix);min-width:48px}
+.st-combo.hot{animation:st-pop .35s}
+.st-xp{font:700 14px var(--f-body);white-space:nowrap}
+.st-tlv{flex:1;min-width:90px;font-size:12px;color:var(--muted);text-align:right}
+.st-tlv .st-bar{height:5px;margin-top:3px}
+.st-card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin:12px 0;position:relative}
+.st-card.boss{border:2px solid var(--bad);box-shadow:0 0 0 4px var(--bad-bg)}
+.st-card.light{border:2px solid var(--fix)}
+.st-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--muted);margin-bottom:8px}
 .st-tag{font:700 11px var(--f-body);letter-spacing:.08em;text-transform:uppercase;border-radius:999px;padding:2px 9px;background:var(--accent-soft);color:var(--accent)}
-.st-tag.rev{background:var(--fix-bg);color:var(--fix)}
-.st-tag.new{background:var(--ok-bg);color:var(--ok)}
+.st-tag.rev{background:var(--fix-bg);color:var(--fix)} .st-tag.new{background:var(--ok-bg);color:var(--ok)} .st-tag.boss{background:var(--bad-bg);color:var(--bad)}
+.st-hp{font-size:15px;letter-spacing:2px}
 .st-q{font-size:17px;font-weight:600;white-space:pre-line;margin:4px 0 12px}
 .st-q pre{white-space:pre;font-weight:400}
-.st-opts2{display:grid;gap:7px}
-.st-opt{text-align:left;font:15.5px var(--f-body);background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:9px;padding:9px 12px;cursor:pointer;display:flex;gap:10px}
+.st-claim{font-size:16px;background:var(--bg);border:1.5px dashed var(--line);border-radius:9px;padding:10px 12px;margin:0 0 12px}
+.st-os{display:grid;gap:7px}
+.st-tf{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st-opt{text-align:left;font:15.5px var(--f-body);background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+.st-tf .st-opt{justify-content:center;font-weight:700;font-size:17px}
 .st-opt kbd{flex:none}
 .st-opt:hover:not(:disabled){border-color:var(--accent)}
 .st-opt:disabled{cursor:default}
 .st-opt.right{background:var(--ok-bg);border-color:var(--ok)}
-.st-opt.wrong{background:var(--bad-bg);border-color:var(--bad)}
+.st-opt.wrong{background:var(--bad-bg);border-color:var(--bad);animation:st-shake .3s}
 .st-opt.gone{opacity:.25;text-decoration:line-through}
-.st-ladder{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 4px}
-.st-ladder .btn{font-size:13px;padding:6px 11px}
-.st-ladder .btn.used{opacity:.55}
+.st-type{display:flex;gap:8px;flex-wrap:wrap}
+.st-type input{flex:1;min-width:180px;font:16px var(--f-mono);padding:9px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink)}
+.st-type input.right{border-color:var(--ok);background:var(--ok-bg)} .st-type input.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.st-tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 2px}
+.st-bet{font:700 13.5px var(--f-body);border:1.5px dashed var(--fix);background:none;color:var(--fix);border-radius:9px;padding:6px 12px;cursor:pointer}
+.st-bet.on{background:var(--fix);color:var(--surface);border-style:solid}
+.st-lt{height:5px;border-radius:3px;background:var(--line);overflow:hidden;margin:-4px 0 10px}
+.st-lt i{display:block;height:100%;background:var(--fix);width:100%}
 .st-help{border-left:3px solid var(--accent);background:var(--accent-soft);border-radius:0 8px 8px 0;padding:8px 12px;margin:10px 0;font-size:15px}
-.st-help>.h{font:700 11.5px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;display:flex;gap:8px;align-items:center}
+.st-help>.h{font:700 11.5px var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .st-help>.h button{margin-left:auto;font:600 12px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:2px 8px;cursor:pointer}
-.st-help aside{margin:.4em 0}
-.st-help.ans{border-color:var(--ok);background:var(--ok-bg)}
-.st-help.ans>.h{color:var(--ok)}
-.st-res{font-weight:700;margin:10px 0 4px}
+.st-help>.h button+button{margin-left:0}
+.st-help.ans{border-color:var(--ok);background:var(--ok-bg)} .st-help.ans>.h{color:var(--ok)}
+.st-help.hc{border-color:var(--fix);background:var(--fix-bg)} .st-help.hc>.h{color:var(--fix)}
+.st-res{font-weight:800;font-size:17px;margin:12px 0 4px;animation:st-pop .3s}
 .st-res.ok{color:var(--ok)} .st-res.bad{color:var(--bad)}
-.st-conf{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:8px 0}
+.st-res small{font-weight:500;font-size:13.5px;color:var(--muted);display:block;margin-top:2px}
 .st-note{margin-top:12px;background:var(--fix-bg);border-radius:8px;padding:8px 10px}
-.st-note label{display:block;font:600 13px var(--f-body);margin-bottom:4px}
-.st-note label small{font-weight:400;color:var(--muted)}
-.st-note textarea{width:100%;min-height:64px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--surface);color:var(--ink);resize:vertical}
-.st-note.old{background:color-mix(in srgb,var(--fix-bg) 70%,var(--surface))}
-.st-oldnote{background:var(--fix-bg);border-radius:8px;padding:8px 10px;margin:0 0 10px;font-size:14.5px}
-.st-oldnote b{color:var(--fix)}
+.st-note label{display:block;font:600 13.5px var(--f-body);margin-bottom:4px}
+.st-note textarea{width:100%;min-height:56px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--surface);color:var(--ink);resize:vertical}
+.st-xpb{font:700 12px var(--f-body);color:var(--fix);background:var(--surface);border-radius:999px;padding:1px 8px;margin-left:4px}
+.st-old{background:var(--fix-bg);border-radius:8px;padding:6px 10px;margin:0 0 10px;font-size:14.5px}
+.st-old summary{cursor:pointer;font-weight:600;color:var(--fix)}
 .st-nav{display:flex;gap:8px;justify-content:space-between;align-items:center;margin-top:12px}
 .st-nav .btn.pri{font-size:15px;padding:9px 18px}
-.st-break{text-align:center;padding:30px 16px}
-.st-break .big{font:700 56px var(--f-mono);margin:8px 0}
-.st-done ul{padding-left:1.2em}
-.st-sher{min-height:220px}
-.st-sher .h{font:700 13px var(--f-body);color:var(--accent);letter-spacing:.04em;margin-bottom:6px}
-.st-sher .bd{max-height:240px;overflow:hidden;position:relative}
-.st-sher .bd.open{max-height:none}
-.st-sher .bd:not(.open)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:60px;background:linear-gradient(transparent,var(--surface))}
+.st-auto{height:3px;background:var(--line);border-radius:2px;overflow:hidden;margin-top:10px}
+.st-auto i{display:block;height:100%;background:var(--ok);width:0;animation:st-fill var(--d,1.4s) linear forwards}
+@keyframes st-fill{to{width:100%}}
+.st-float{position:fixed;z-index:60;font:800 18px var(--f-body);color:var(--fix);pointer-events:none;animation:st-up 1s ease-out forwards}
+@keyframes st-up{to{transform:translateY(-46px);opacity:0}}
+@keyframes st-pop{0%{transform:scale(.7)}60%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes st-shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes st-wob{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.st-over{position:fixed;inset:0;z-index:70;background:color-mix(in srgb,var(--ink) 45%,transparent);display:grid;place-items:center;padding:16px}
+.st-over>div{background:var(--surface);color:var(--ink);border-radius:18px;padding:26px 28px;max-width:380px;width:100%;text-align:center;animation:st-pop .35s}
+.st-over .em{font-size:64px;line-height:1.1}
+.st-over .em.wob{animation:st-wob .5s ease-in-out infinite}
+.st-over h2{margin:.3em 0 .2em;font-size:22px}
+.st-over p{color:var(--muted);margin:.3em 0 1em}
+.st-big{text-align:center;padding:24px 10px}
+.st-big .em{font-size:64px}
+.st-big h1{margin:.2em 0}
+.st-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.st-stats div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 6px;text-align:center}
+.st-stats b{display:block;font:700 24px var(--f-display)}
+.st-stats span{font-size:12.5px;color:var(--muted)}
+.st-brk{background:var(--ok-bg);border-radius:14px;padding:16px;margin:14px 0;text-align:center}
+.st-brk .t{font:700 44px var(--f-mono);color:var(--ok)}
+.st-tease{margin:12px 0;color:var(--muted);font-size:14px}
+.st-tease span{filter:blur(4px);user-select:none}
+.st-go2{animation:st-breath 1.6s ease-in-out infinite}
 .st-kon h3{margin-top:1.4em}
 .st-kon .it{border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin:6px 0;background:var(--surface)}
 .st-kon .it .q{font-size:13.5px;color:var(--muted);white-space:pre-line}
 .st-kon .it .a{font-size:13px;color:var(--ok);margin-top:2px}
-.st-kon .it textarea,.st-kon .tn textarea{width:100%;min-height:52px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--fix-bg);color:var(--ink);margin-top:4px}
-.st-kon .tn textarea{min-height:90px}
+.st-kon textarea{width:100%;min-height:52px;font:14.5px var(--f-body);border:1px solid var(--line);border-radius:6px;padding:6px 8px;background:var(--fix-bg);color:var(--ink);margin-top:4px}
 .st-cloud{font-size:12.5px;color:var(--muted)}
 .st-lab .cppw,.st-lab .vclw{margin:10px 0}
-@media (max-width:700px){.st-hero,.st-modes{grid-template-columns:repeat(2,minmax(0,1fr))}.st-map{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:640px){.st-start{padding:20px 40px;font-size:23px}.st-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.st-tlv{display:none}.st-row>b{min-width:100%}}
 `;
 function css(){ if(document.getElementById('study-css')) return; const s=document.createElement('style'); s.id='study-css'; s.textContent=CSS; document.head.appendChild(s); }
 const scrollTop=()=>{ const hd=document.querySelector('header.top'); const y=SEC.getBoundingClientRect().top+G.scrollY-(hd?hd.offsetHeight:0)-6; if(G.scrollY>y) G.scrollTo({top:Math.max(0,y)}); };
+function toast(msg){ const p=document.createElement('div'); p.className='toast'; p.textContent=msg; document.body.appendChild(p); setTimeout(()=>p.remove(),2600); }
+const PRAISE=['Чётко!','Красава!','Огонь!','Так держать!','Мозг качается 💪','Без шансов для экзамена','Вот это да','Изи','Ты в потоке','Лучший!'];
+const rdToday=()=>(S.rd&&S.rd[today()])||0;
 
-/* ---------- главный экран ---------- */
-function home(){
-  stopTimer(); SESS=null;
-  const db=build(), s=S.set, ready=examReady();
-  const dueN=Object.values(db.items).filter(it=>isDue(it.key)).length;
-  const todayN=S.days[today()]||0, seenN=Object.keys(S.items).filter(k=>db.items[k]).length;
-  const seg=(name,opts,cur)=>`<span class="st-seg" data-set="${name}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(cur)===String(v)?'on':''}">${l}</button>`).join('')}</span>`;
-  SEC.innerHTML=`<div class="read st-wrap">
-  <div class="topic-head"><div class="eyebrow">C++ · учёба кусочками · подготовка к тестам экзамена</div><h1>🎯 Учиться</h1></div>
-  <p>Здесь ты не читаешь лекции подряд, а сразу решаешь вопросы. Если не получается, открываешь помощь по шагам: подсказка → кусочек лекции → ответ → Google. Сайт сам решит, что повторить и когда. Твои заметки сохраняются и всплывут, когда вопрос попадётся снова.</p>
-  <div class="st-hero">
-    <div class="st-kpi"><b>${Math.round(ready*100)}%</b><span>готовность к тестам экзамена</span><div class="st-bar"><i style="width:${Math.round(ready*100)}%"></i></div></div>
-    <div class="st-kpi"><b>${dueN}</b><span>повторить сегодня</span></div>
-    <div class="st-kpi"><b>${todayN}</b><span>решено сегодня</span></div>
-    <div class="st-kpi"><b>${streak()} 🔥</b><span>дней подряд · пройдено ${seenN} из ${Object.keys(db.items).length}</span></div>
-  </div>
-  <div class="st-go"><button class="btn pri big" data-a="go">▶ ${seenN?'Продолжить':'Начать'} · ${s.size} задач · ${s.work} мин</button>
-    ${dueN?`<button class="btn" data-a="due">🔁 Только повторение (${Math.min(dueN,s.size)})</button>`:''}<span class="st-cloud"></span></div>
-  <div class="st-opts">
-    <div class="st-row"><b>Что решать</b>${seg('kind',[['tests','✅ Тесты'],['labs','💻 Лабы'],['mix','🔀 Вперемешку']],s.kind)}</div>
-    <div class="st-row"><b>Темы</b>${seg('scope',[['8020','⭐ Сначала важные (80/20)'],['order','По порядку 1→15'],['pick','Выбрать сам']],s.scope)}</div>
-    ${s.scope==='pick'?`<div class="st-row"><b></b><span class="st-chips">${TOPIC_IDS.map(t=>`<button data-tp="${t}" class="${s.topics.includes(t)?'on':''}">${t.slice(1)}</button>`).join('')}</span></div>`:''}
-    <div class="st-row"><b>Порция</b>${seg('size',[[10,'10'],[20,'20'],[30,'30']],s.size)}<b style="min-width:auto;margin-left:10px">Таймер</b>${seg('timer',[['17/8','17/8'],['25/5','25/5'],['50/10','50/10']],s.work+'/'+s.rest)}</div>
-    <div class="st-row"><b>Сложнее</b><label style="font-size:14px"><input type="checkbox" data-a="recall"${s.recall?' checked':''}> сначала вспомни ответ сам, потом покажу варианты</label></div>
-  </div>
-  <div class="st-modes">
-    <button class="st-mode" data-a="sherlock"><b>🔍 Шерлок</b><small>быстро листай кусочки лекций, отмечай, что зацепило — по этому сразу будут вопросы</small></button>
-    <button class="st-mode" data-a="konspekt"><b>📝 Мой конспект</b><small>все твои заметки «своими словами» по темам и шагам, плюс объяснение каждой темы</small></button>
-    <button class="st-mode" data-a="mistakes"><b>❌ Мои ошибки</b><small>вопросы, где ошибался, — прорешать ещё раз</small></button>
-    <button class="st-mode" data-a="exam"><b>🎓 Пробный экзамен</b><small>40 вопросов как на экзамене, без подсказок, с разбором по темам</small></button>
-  </div>
-  <h2>Карта тем</h2>
-  <p class="st-cloud">⭐ — темы, где больше всего тестовых вопросов. Нажми на тему, чтобы пройти её по шагам.</p>
-  <div class="st-map">${ORDER_8020.concat().sort((a,b)=>+a.slice(1)-+b.slice(1)).map(t=>{ const T=db.topics[t]; if(!T) return ''; const r=topicReady(T); const hot=ORDER_8020.indexOf(t)<7;
-    const done=T.steps.filter(sp=>sp.items.every(it=>st(it.key))).length;
-    return `<button class="st-tp${hot?' hot':''}" data-topic="${t}"><span class="n">ТЕМА ${T.n}${hot?' ⭐':''}</span><span class="w">${T.tests} тест.</span><span class="tt">${esc(T.title)}</span><small>шаги ${done}/${T.steps.length} · готово ${Math.round(r*100)}%</small><div class="st-bar"><i style="width:${Math.round(r*100)}%"></i></div></button>`; }).join('')}</div>
-  <details class="st-how lab-orig"><summary>Как это работает и почему (методы)</summary><div class="body">
-    <ul>
-      <li><b>Сначала задача, потом теория</b> (retrieval practice): пытаться вспомнить и ошибаться полезнее, чем перечитывать. Перечитывание и выделение маркером — одни из самых слабых способов.</li>
-      <li><b>Лесенка помощи</b>: подсказка (убирает 2 неверных варианта) → кусочек лекции именно про этот вопрос → ответ с пояснением → Google. Чем меньше ступенек понадобилось, тем позже вопрос вернётся.</li>
-      <li><b>Интервальное повторение</b> (коробки Лейтнера): верно сам → через 1, потом 3, 7, 14, 30 дней. Ошибся → вопрос вернётся через 3 карточки и завтра. Готовность темы считается по коробкам.</li>
-      <li><b>«Угадал» ≠ «знал»</b>: если угадал, честно нажми «Угадал» — вопрос вернётся скоро.</li>
-      <li><b>Чередование тем</b>: новые вопросы идут вперемешку с повторами из других тем — так тест на экзамене не застанет врасплох.</li>
-      <li><b>80/20</b>: 7 тем (11, 2, 10, 1, 15, 4, 6) дают 82% всех вопросов. С них и начинаем.</li>
-      <li><b>Шаги</b>: тема поделена на шаги по 3–6 вопросов вокруг одного кусочка лекции. Учишь не тему, а шаг.</li>
-      <li><b>Объясни как 5-летнему</b> (метод Фейнмана): после ошибки напиши 1–2 предложения своими словами. Заметка всплывёт при следующей встрече и соберётся в «Мой конспект».</li>
-      <li><b>Таймер 17/8</b>: короткие блоки работы и настоящий отдых. После перерыва — снова в бой.</li>
-      <li><b>Шерлок</b>: быстро листаешь лекцию и цепляешься за то, что заинтересовало, — любопытство помогает запоминать.</li>
-    </ul>
-    <p class="st-cloud">Источники: Dunlosky и др., 2013 (обзор 10 техник учёбы); Weinstein, Madan, Sumeracki, 2018, «Teaching the science of learning» (Cognitive Research); мета-анализ про интервальное повторение Latimier и др., 2021.</p>
-  </div></details>
-  </div>`;
-  UI.cloudBadge();
+/* ---------- главный экран: две кнопки ---------- */
+function daysToExam(){ if(!S.set.examDate) return null; const d=Math.ceil((new Date(S.set.examDate+'T09:00')-now())/DAY); return d>=0?d:null; }
+function nextRoundInfo(){
+  const seen=Object.keys(S.items).length;
+  if((S.rounds+1)%4===0&&seen>=30) return '🎓 Следующий раунд — контрольная: 15 вопросов как на экзамене, без подсказок';
+  const w=!S.days[today()]?Math.min(7,S.set.work):S.set.work;
+  return `Раунд ${w} мин${!S.days[today()]?' (разгон дня — коротко)':''} → 👾 босс из твоих ошибок → ☕ перерыв ${S.set.rest} мин`;
 }
-UI.cloudBadge=()=>{ const el=SEC&&SEC.querySelector('.st-cloud'); if(el&&!SESS) el.textContent=Cloud.ok?'☁ прогресс и заметки сохраняются в твоём аккаунте':'💾 прогресс и заметки сохраняются в этом браузере'; };
-UI.refresh=()=>{ if(SEC&&!SESS&&SEC.querySelector('.st-hero')) home(); };
-
+function home(){
+  stopTick(); SESS=null; closeOver(); clearInterval(FLASH); if(TITLE0) document.title=TITLE0;
+  useFreeze();
+  const ready=Math.round(examReady()*100), lv=level(S.xp||0), db=build();
+  const dueN=Object.values(db.items).filter(it=>it.type==='test'&&isDue(it.key)).length;
+  const dte=daysToExam();
+  let goal='';
+  if(dte!=null){ const left=Object.values(db.items).filter(it=>it.type==='test'&&mastery(it.key)<1).length; goal=` · до экзамена <b>${dte} дн.</b> · в день ~${Math.ceil(left/Math.max(1,dte-1))} вопросов`; }
+  SEC.innerHTML=`<div class="read st-wrap"><div class="st-home">
+    <div class="st-hi">
+      <div class="st-ring" style="--p:${ready}"><div><span><b>${ready}%</b><br><small>к экзамену</small></span></div></div>
+      <div class="st-lv"><b>Ур. ${lv.L} · ${lv.rank}</b><div class="st-bar"><i style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div>
+        <small>⭐ ${lv.cur}/${lv.need} до следующего ранга · 🔥 ${streak()} дн. подряд · ❄ ${S.freeze||0}</small>
+        <small>изучено вопросов: ${Object.values(db.items).filter(it=>it.type==='test'&&st(it.key)&&st(it.key).ok).length} из ${db.total} · сегодня раундов: ${rdToday()}${rdToday()?' ✅':''}${dueN?` · ждут повторения: ${dueN}`:''}${goal}</small></div>
+    </div>
+    <button class="st-start" data-a="go">▶ НАЧАТЬ</button>
+    <div class="st-sub">${nextRoundInfo()}</div>
+    <button class="st-setb" data-a="set">⚙ Настроить</button>
+    <div class="st-panel" hidden></div>
+    <p class="st-cloud" data-cloud></p>
+    ${howHTML()}
+  </div></div>`;
+  UI.cloudBadge(); SEC.onclick=onHomeClick;
+}
+function howHTML(){ return `<details class="st-how lab-orig"><summary>Что внутри и почему так</summary><div class="body"><ul>
+  <li><b>Сразу задача</b>, теория — только если застрял (одна кнопка 💡: убрать 2 неверных → кусочек лекции → ответ и Google). Попытка вспомнить даже с ошибкой запоминается сильнее, чем чтение.</li>
+  <li><b>Повторение по графику</b>: верно → вернётся через 1, 3, 7, 14, 30 дней; ошибка → через 3 карточки и завтра. Новое из двух самых важных тем (80/20) идёт вперемешку с повторами.</li>
+  <li><b>Проверка, что знаешь сам</b>: вопрос засчитан выученным, только когда ответил верно в двух разных видах — выбор, «верно/неверно», вписать ответ руками. Слишком быстрый ответ на новый вопрос = угадывание, проверю ещё раз.</li>
+  <li><b>Ставка ×3</b>: если уверен — ставь. Уверенная ошибка запоминается лучше всего (эффект гиперкоррекции), поэтому после неё сразу показываю почему.</li>
+  <li><b>Чтобы не надоедало</b>: комбо, опыт и ранги, случайные сундуки, ⚡ молния (5 вопросов по 10 секунд), 👾 босс из ошибок раунда, каждый 4-й раунд — контрольная.</li>
+  <li><b>Таймер</b>: 15 минут работы и 5 минут отдыха, первый раунд дня — 7 минут, чтобы легко начать. Серия дней с заморозкой: пропустил день — серия не сгорает.</li>
+  <li><b>Как 5-летнему</b>: после ошибки 1 строка своими словами = +15 ⭐ (скопированное не считается). Заметка всплывёт при следующей встрече и попадёт в «Мой конспект».</li>
+</ul><p class="st-cloud">Опора: Dunlosky и др., 2013; Weinstein, Madan, Sumeracki, 2018; про пробные вопросы и ошибки — Pan & Carpenter, 2023; про гиперкоррекцию — Butterfield & Metcalfe, 2001; про серии — Silverman & Barasch, 2023.</p></div></details>`; }
+function panelHTML(){
+  const s=S.set; const seg=(name,opts,cur)=>`<span class="st-seg" data-set="${name}">${opts.map(([v,l])=>`<button data-v="${v}" class="${String(cur)===String(v)?'on':''}">${l}</button>`).join('')}</span>`;
+  const all=!s.topics.length;
+  return `<div class="st-row"><b>⏱ Таймер</b>${seg('timer',[['10/3','10/3'],['15/5','15/5 ★'],['17/8','17/8'],['25/5','25/5']],s.work+'/'+s.rest)}<small>работа/отдых, мин</small></div>
+    <div class="st-row"><b>📚 Темы</b><span class="st-chips"><button data-tp="all" class="${all?'on':''}">все</button>${TOPIC_IDS.map(t=>`<button data-tp="${t}" class="${s.topics.includes(t)?'on':''}">${t.slice(1)}</button>`).join('')}</span></div>
+    <div class="st-row"><b>💻 Лабы</b>${seg('labs',[['0','нет — только тесты'],['1','иногда']],s.labs?1:0)}<small>РК2 — 12%, экзаменационные тесты — 40%</small></div>
+    <div class="st-row"><b>📅 Экзамен</b><input type="date" data-a="date" value="${esc(s.examDate||'')}"><small>посчитаю, сколько в день</small></div>
+    <div class="st-row"><b>📝</b><button class="btn" data-a="konspekt">Мой конспект</button><button class="btn" data-a="close">Готово</button></div>`;
+}
+UI.cloudBadge=()=>{ const el=SEC&&SEC.querySelector('[data-cloud]'); if(el) el.textContent=Cloud.ok?'☁ прогресс и заметки сохраняются в твоём аккаунте':'💾 прогресс и заметки сохраняются в этом браузере'; };
+UI.refresh=()=>{ if(SEC&&!SESS&&SEC.querySelector('.st-home')&&SEC.querySelector('.st-panel[hidden]')) home(); };
 function onHomeClick(e){
   const b=e.target.closest('button,input'); if(!b) return;
+  const P=SEC.querySelector('.st-panel');
   const seg=b.closest('[data-set]');
   if(seg&&b.dataset.v!=null){ const k=seg.dataset.set, v=b.dataset.v;
-    if(k==='size') S.set.size=+v; else if(k==='timer'){ const [w,r]=v.split('/').map(Number); S.set.work=w; S.set.rest=r; } else S.set[k]=v;
-    persist(); home(); return; }
-  if(b.dataset.tp){ const t=b.dataset.tp, a=S.set.topics; const i=a.indexOf(t); if(i<0) a.push(t); else a.splice(i,1); persist(); home(); return; }
-  if(b.dataset.a==='recall'){ S.set.recall=b.checked; persist(); return; }
-  const tp=e.target.closest('[data-topic]'); if(tp){ topicPage(tp.dataset.topic); return; }
+    if(k==='timer'){ const [w,r]=v.split('/').map(Number); S.set.work=w; S.set.rest=r; } else if(k==='labs') S.set.labs=v==='1';
+    persist(); P.innerHTML=panelHTML(); SEC.querySelector('.st-sub').innerHTML=nextRoundInfo(); return; }
+  if(b.dataset.tp){ const t=b.dataset.tp, a=S.set.topics; if(t==='all') a.length=0; else { const i=a.indexOf(t); if(i<0) a.push(t); else a.splice(i,1); if(a.length===15) a.length=0; } persist(); P.innerHTML=panelHTML(); return; }
   switch(b.dataset.a){
-    case 'go': startSession({}); break;
-    case 'due': { const db=build(); startSession({items:shuffle(Object.values(db.items).filter(it=>isDue(it.key)&&okKind(it,S.set.kind))),title:'Повторение'}); break; }
-    case 'sherlock': sherlock(); break;
+    case 'go': startRound(); break;
+    case 'set': P.hidden=!P.hidden; if(!P.hidden){ P.innerHTML=panelHTML(); const d=P.querySelector('[data-a="date"]'); } break;
+    case 'close': P.hidden=true; home(); break;
     case 'konspekt': konspekt(); break;
-    case 'mistakes': mistakes(); break;
-    case 'exam': exam(); break;
   }
 }
+function onHomeChange(e){ const d=e.target.closest('[data-a="date"]'); if(d&&SEC.querySelector('.st-home')){ S.set.examDate=d.value; persist(); } }
 
-/* ---------- страница темы: шаги ---------- */
-function topicPage(t){
-  stopTimer(); SESS=null; const T=build().topics[t];
-  SEC.innerHTML=`<div class="read st-wrap"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><button class="btn pri" data-a="all">▶ Пройти тему по шагам</button></div>
-    <div class="topic-head"><div class="eyebrow">Тема ${T.n} · ${T.tests} тестовых вопросов · готово ${Math.round(topicReady(T)*100)}%</div><h1>${esc(T.title)}</h1></div>
-    <p>Тема разбита на шаги. Каждый шаг — 3–6 задач вокруг одного кусочка лекции. Выбери шаг или пройди по порядку.</p>
-    <div class="st-tn st-kon"><div class="tn"><label><b>✍ Тема ${T.n} своими словами</b> <small>(как объяснил бы 5-летнему — заполни, когда пройдёшь шаги)</small></label><textarea data-note="topic-${t}" placeholder="Например: «Форма — это окно программы. На неё кладут кнопки…»">${esc(noteOf('topic-'+t))}</textarea></div></div>
-    ${T.steps.map((sp,i)=>{ const n=sp.items.length, seen=sp.items.filter(it=>st(it.key)).length, m=sp.items.reduce((a,it)=>a+mastery(it.key),0)/n;
-      return `<div class="st-card" style="padding:10px 14px"><div class="st-meta"><span class="st-tag${seen===n?' new':''}">Шаг ${i+1}</span>${sp.items.filter(x=>x.type==='test').length} тест. · ${sp.items.filter(x=>x.type==='lab').length} лаб · пройдено ${seen}/${n}</div>
-        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between"><b>${esc(sp.title)}</b><button class="btn" data-step="${i}">${seen===n?'Повторить':'▶ Решать'}</button></div><div class="st-bar"><i style="width:${Math.round(m*100)}%"></i></div></div>`; }).join('')}
-  </div>`;
-  SEC.onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
-    if(b.dataset.a==='home'){ SEC.onclick=onHomeClick; home(); return; }
-    if(b.dataset.a==='all'){ const its=T.steps.flatMap(sp=>sp.items).filter(it=>!st(it.key)||isDue(it.key)); startSession({items:its.length?its:T.steps.flatMap(sp=>sp.items),title:'Тема '+T.n,size:S.set.size}); return; }
-    if(b.dataset.step!=null){ const sp=T.steps[+b.dataset.step]; startSession({items:sp.items,title:`Тема ${T.n} · шаг ${+b.dataset.step+1}`,size:99}); } };
-  bindNotes(SEC); scrollTop();
+/* ---------- раунд ---------- */
+function examPick(N){ const db=build(); const tps=scopeTopics(); const all=tps.flatMap(t=>db.topics[t]?db.topics[t].items.filter(x=>x.type==='test'):[]); const out=[];
+  for(const t of tps){ const T=db.topics[t]; if(!T) continue; const ts=T.items.filter(x=>x.type==='test'); const k=Math.round(N*ts.length/Math.max(1,all.length)); out.push(...shuffle(ts).slice(0,k)); }
+  return shuffle(out).slice(0,N); }
+function startRound(){
+  useFreeze(); closeOver(); clearInterval(FLASH); if(TITLE0) document.title=TITLE0;
+  const seen=Object.keys(S.items).length, first=!S.days[today()];
+  const exam=(S.rounds+1)%4===0&&seen>=30;
+  const mins=first?Math.min(7,S.set.work):S.set.work;
+  SESS={n:S.rounds+1,exam,mins,q:exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,xp:0,log:[],errs:[],combo:0,best:0,dbl:0,since:0,
+        light:null,lightDone:false,boss:null,timeUp:false,start:now(),ready0:examReady(),lv0:level(S.xp||0).L,queue:[]};
+  if(!SESS.q.length){ toast('В выбранных темах нет вопросов — проверь «Настроить»'); SESS=null; return; }
+  phase='work'; T0=now(); PLEN=exam?36e5:mins*60000; startTick();
+  next();
 }
-
-/* ---------- сессия ---------- */
-function startSession(o){
-  const q=buildQueue(o);
-  if(!q.length){ alertBox('Здесь пока нечего решать: всё пройдено и до повторения ещё рано. Выбери другие темы или «Пробный экзамен».'); return; }
-  SESS={q,i:0,title:o.title||'Сессия',exam:!!o.exam,log:[],requeued:new Set(),start:now()};
-  startTimer(); card();
+function next(){
+  if(!SESS) return; const C=SESS.cur; if(C){ clearTimeout(C.auto); clearInterval(C.lt); noteXP(C); }
+  if(SESS.queue.length){ const f=SESS.queue.shift(); return f(); }      // уровень, сундук
+  if(SESS.boss) return bossNext();
+  if(SESS.exam){ if(SESS.qi>=SESS.q.length) return roundEnd(); const it=SESS.q[SESS.qi++]; return card(it,'mcq','exam'); }
+  if(SESS.timeUp&&!SESS.light) return startBoss();
+  if(!SESS.lightDone&&SESS.cards>=6&&!SESS.light){ SESS.lightDone=true;
+    const pool=Object.values(build().items).filter(it=>it.type==='test'&&st(it.key)&&scopeTopics().includes(it.topic));
+    if(pool.length>=5){ SESS.light={list:shuffle(pool).slice(0,5),i:0,ok:0}; return lightIntro(); } }
+  if(SESS.light){ const L=SESS.light; if(L.i<L.list.length) return card(L.list[L.i++],'tf','light');
+    SESS.light=null; const bonus=L.ok===5?40:L.ok*5; if(bonus) addXP(bonus); toast(`⚡ Молния: ${L.ok}/5${L.ok===5?' — идеально! +40 ⭐':bonus?' · +'+bonus+' ⭐':''}`);
+    if(SESS.timeUp) return startBoss(); }
+  if(SESS.qi>=SESS.q.length){ const rest=new Set(SESS.q.slice(SESS.qi)); SESS.q=SESS.q.concat(buildQueue(30).filter(x=>!rest.has(x))); }
+  const it=SESS.q[SESS.qi++]; if(!it) return startBoss();
+  card(it,chooseFmt(it),'normal');
 }
-function alertBox(msg){ const p=document.createElement('div'); p.className='toast'; p.textContent=msg; document.body.appendChild(p); setTimeout(()=>p.remove(),3500); }
-function topBar(){ const it=SESS.q[SESS.i]; const T=build().topics[it.topic]; const n=SESS.q.length;
-  return `<div class="st-top"><button class="btn" data-a="quit" title="Выйти на главный экран">✕</button><div class="pg"><b>${esc(SESS.title)}</b> · ${SESS.i+1} / ${n}<div class="st-bar"><i style="width:${Math.round(SESS.i/n*100)}%"></i></div><small>Тема ${T.n}: ${esc(T.title)}</small></div><span class="st-pill" data-timer>${timerText()}</span></div>`; }
-function card(){
-  if(!SESS) return;
-  if(SESS.i>=SESS.q.length){ finish(); return; }
-  const it=SESS.q[SESS.i];
-  SESS.cur={it,help:0,used:new Set(),answered:false,chunkIdx:0};
-  const s=st(it.key); const tag=!s?'<span class="st-tag new">новое</span>':isDue(it.key)?'<span class="st-tag rev">повтор</span>':'<span class="st-tag">ещё раз</span>';
-  const T=build().topics[it.topic]; const sp=T.steps[it.step];
-  const old=noteOf(it.key);
-  SEC.innerHTML=`<div class="read st-wrap">${topBar()}<div class="st-card">
-    <div class="st-meta">${tag}<span>${it.type==='test'?'✅ Тест':'💻 Лаба'} · шаг ${it.step+1}: ${esc(sp?sp.title:'')}</span>${s?`<span>· было: ${s.ok} верно, ${s.bad} ошибок</span>`:''}</div>
-    ${old?`<details class="st-oldnote"${SESS.exam?'':''}><summary><b>📌 Твоя заметка с прошлого раза</b> (открой, если нужна)</summary><div style="white-space:pre-wrap;margin-top:4px">${esc(old)}</div></details>`:''}
-    <div class="st-body"></div>
-    <div class="st-after"></div>
-  </div></div>`;
+function requeue(it){ if(!SESS||SESS.exam||SESS.boss) return; if(SESS.q.slice(SESS.qi,SESS.qi+6).includes(it)) return; SESS.q.splice(Math.min(SESS.q.length,SESS.qi+3),0,it); }
+function topBar(){
+  const lv=level(S.xp||0);
+  return `<div class="st-top"><button class="btn" data-a="quit" title="Закончить раунд">✕</button><span class="st-pill${SESS.timeUp?' up':''}" data-timer>${timerText()}</span>
+    <span class="st-combo" data-combo>${SESS.combo>=2?'🔥×'+SESS.combo:''}</span><span class="st-xp" data-xp>⭐ +${SESS.xp}</span>
+    <div class="st-tlv">ур. ${lv.L} · ${lv.rank}<div class="st-bar"><i data-lvbar style="width:${Math.round(lv.cur/lv.need*100)}%"></i></div></div></div>`; }
+function helpSteps(it,fm){ if(it.type==='lab') return ['first','lec'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
+  return fm==='mcq'?['half','lec','ans']:fm==='type'?['opts','lec','ans']:['lec','ans']; }
+const HELP_LBL={half:'убрать 2 неверных',lec:'кусочек лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
+function helpBtn(){ const C=SESS.cur; const hs=C.hs; if(C.hi>=hs.length) return ''; return `💡 Помощь: ${HELP_LBL[hs[C.hi]]} <small>(${C.hi+1}/${hs.length})</small>`; }
+function card(it,fm,ctx){
+  SESS.cur={it,fm,ctx,help:0,hi:0,hs:helpSteps(it,fm),answered:false,t0:now(),bet:false,chunkIdx:0};
+  if(ctx==='normal'||ctx==='exam') SESS.cards++;
+  const C=SESS.cur, s=st(it.key), T=build().topics[it.topic];
+  C.canBet=ctx==='normal'&&fm==='mcq'&&!!s&&SESS.cards%5===3;
+  const FM={mcq:'выбери ответ',tf:'верно или нет?',type:'впиши сам',lab:'лаба'};
+  let tag;
+  if(ctx==='boss') tag=`<span class="st-tag boss">👾 Босс</span><span class="st-hp">${'❤'.repeat(SESS.boss.q.length)}${'🖤'.repeat(SESS.boss.max-SESS.boss.q.length)}</span>`;
+  else if(ctx==='light') tag=`<span class="st-tag rev">⚡ Молния ${SESS.light.i}/5</span>`;
+  else if(ctx==='exam') tag=`<span class="st-tag">🎓 Контрольная ${SESS.qi}/${SESS.q.length}</span>`;
+  else tag=!s?'<span class="st-tag new">новое</span>':isDue(it.key)?'<span class="st-tag rev">повтор</span>':'<span class="st-tag">ещё раз</span>';
+  const old=ctx!=='exam'&&ctx!=='light'?noteOf(it.key):'';
+  SEC.innerHTML=`<div class="read st-wrap">${topBar()}<div class="st-card ${ctx}">
+    <div class="st-meta">${tag}<span>${FM[fm]} · тема ${T.n}</span>${C.canBet?'<span class="st-tag rev">🎰 можно ставку</span>':''}</div>
+    ${old?`<details class="st-old"><summary>📌 Твоя заметка с прошлого раза</summary><div style="white-space:pre-wrap;margin-top:4px">${esc(old)}</div></details>`:''}
+    <div class="st-body"></div><div class="st-helps"></div><div class="st-after"></div></div></div>`;
   const body=SEC.querySelector('.st-body');
-  if(it.type==='test') testCard(it,body); else labCard(it,body);
+  if(fm==='lab') labBody(it,body); else if(fm==='tf') tfBody(it,body); else if(fm==='type') typeBody(it,body); else mcqBody(it,body);
   SEC.onclick=onCardClick; scrollTop();
+  if(ctx==='light'){ const bar=SEC.querySelector('.st-lt i'); const L=10000, t0=now(); C.lt=setInterval(()=>{ const p=1-(now()-t0)/L; if(bar) bar.style.width=Math.max(0,p*100)+'%'; if(p<=0){ clearInterval(C.lt); answer(false,{timeout:true}); } },100); }
+  if(fm==='type') setTimeout(()=>{ const i=SEC.querySelector('.st-type input'); if(i) i.focus({preventScroll:true}); },30);
 }
-function testCard(it,body){
-  const q=it.q; const opts=shuffle(q.a.map((a,i)=>({a,ok:i===0})));
-  SESS.cur.opts=opts;
-  const recall=S.set.recall&&!SESS.exam;
-  body.innerHTML=`<div class="st-q">${fmt(q.q)}</div>
-    ${recall?`<div class="st-recall"><p class="st-cloud">Сначала попробуй вспомнить ответ сам (можно сказать вслух или записать), потом открой варианты.</p><button class="btn" data-a="showopts">Показать варианты</button></div>`:''}
-    <div class="st-opts2"${recall?' hidden':''}>${opts.map((o,i)=>`<button class="st-opt" data-o="${i}"><kbd>${i+1}</kbd><span>${fmtInline(o.a)}</span></button>`).join('')}</div>
-    ${SESS.exam?'':`<div class="st-ladder"><button class="btn" data-h="hint">💡 Подсказка</button><button class="btn" data-h="lec">📖 Кусочек лекции</button><button class="btn" data-h="ans">👁 Ответ</button><a class="btn" data-h="google" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(q.q.replace(/```[\s\S]*?```/g,' ').slice(0,300))}">🔎 Google</a></div>`}
-    <div class="st-helps"></div>`;
-}
-function labCard(it,body){
-  const t=it.t, lab=it.lab; const id=t.id;
-  let w='';
+function tools(){ const C=SESS.cur; if(C.ctx==='exam'||C.ctx==='light') return '';
+  return `<div class="st-tools">${C.canBet?'<button class="st-bet" data-a="bet">🎰 Ставлю ×3 — уверен! <small>(ошибка −20)</small></button>':''}<button class="btn" data-a="help">${helpBtn()}</button></div>`; }
+function mcqBody(it,body){ const q=it.q; const C=SESS.cur; C.opts=shuffle(q.a.map((a,i)=>({a,ok:i===0})));
+  body.innerHTML=`<div class="st-q">${fmt(q.q)}</div><div class="st-os">${C.opts.map((o,i)=>`<button class="st-opt" data-o="${i}"><kbd>${i+1}</kbd><span>${fmtInline(o.a)}</span></button>`).join('')}</div>${tools()}`; }
+function tfBody(it,body){ const q=it.q, C=SESS.cur; const t=q.a.length<2||Math.random()<.5; C.tfTrue=t; C.claim=t?q.a[0]:pick(q.a.slice(1));
+  body.innerHTML=`<div class="st-q">${fmt(q.q)}</div>${C.ctx==='light'?'<div class="st-lt"><i></i></div>':''}<div class="st-claim">Ответ: <b>${fmtInline(C.claim)}</b></div>
+    <div class="st-tf"><button class="st-opt" data-tf="1"><kbd>1</kbd>✔ Верно</button><button class="st-opt" data-tf="0"><kbd>2</kbd>✖ Неверно</button></div>${tools()}`; }
+function typeBody(it,body){ const q=it.q;
+  body.innerHTML=`<div class="st-q">${fmt(q.q)}</div><div class="st-type"><input autocomplete="off" spellcheck="false" placeholder="впиши ответ (${plain(q.a[0]).length} симв.)"><button class="btn pri" data-a="check">Проверить ↵</button></div>${tools()}`;
+  body.querySelector('input').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); checkType(); } }); }
+const nrm=s=>plain(s).toLowerCase().replace(/[\s();.,'"«»:;!]/g,'').replace(/ё/g,'е');
+function lev(a,b){ const m=a.length,n=b.length; if(Math.abs(m-n)>1) return 9; const d=Array.from({length:m+1},(_,i)=>[i]); for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+function checkType(){ const C=SESS.cur; if(C.answered) return; const inp=SEC.querySelector('.st-type input'); const v=nrm(inp.value), a=nrm(C.it.q.a[0]);
+  if(!v){ inp.focus(); return; }
+  const ok=v===a||(a.length>=6&&lev(v,a)<=1); inp.disabled=true; inp.classList.add(ok?'right':'wrong'); answer(ok,{typed:inp.value}); }
+function labBody(it,body){
+  const t=it.t, lab=it.lab, id=t.id; let w='';
   if(t.vcl) w=`<div class="vclw" data-id="${esc(id)}" data-title="${esc(t.wtitle||t.name)}"><script type="application/json" data-role="vcl">${JSON.stringify(t.vcl).replace(/</g,'\\u003c')}<\/script></div>`;
   else if(t.ref||t.start){ w=`<div class="cppw" data-id="${esc(id)}" data-cmp="${t.cmp||'exact'}" data-title="${esc(t.wtitle||(t.name+' — напиши программу'))}">`;
     if(t.ref) w+=`<script type="text/x-cpp" data-role="ref">\n${String(t.ref).replace(/^\n+/,'').replace(/\s+$/,'')}\n<\/script>`;
@@ -422,211 +496,228 @@ function labCard(it,body){
     for(const [nm,txt] of (t.ins||[])) w+=`<script type="text/plain" data-role="in" data-name="${esc(nm)}">${txt}<\/script>`;
     w+='</div>'; }
   body.innerHTML=`<div class="st-meta"><span>${esc(textOf(lab.title||''))}${it.dop?' · доп. лаба':''}</span></div>
-    <div class="lab-task"><span class="tl">${esc(t.name)}</span>${t.text||''}</div>
-    <div class="st-lab">${w||'<p class="st-cloud">Это задание делается в настоящем C++Builder — прочитай условие и разбор.</p>'}</div>
-    <div class="st-ladder"><button class="btn" data-h="hint">💡 Первый шаг</button><button class="btn" data-h="lec">📖 Кусочек лекции</button>${t.steps?'<button class="btn" data-h="steps">🧩 Разбор по шагам</button>':''}${(t.ref||t.vcl&&t.vcl.ref)?'<button class="btn" data-h="ref">👁 Эталон</button>':''}<a class="btn" target="_blank" rel="noopener" data-h="google" href="https://www.google.com/search?q=${encodeURIComponent('C++ Builder '+textOf(t.text||t.name).slice(0,200))}">🔎 Google</a></div>
-    <div class="st-helps"></div>
-    <div class="st-conf"><b>Как прошло?</b><button class="btn" data-lab="self">✔ Решил сам</button><button class="btn" data-lab="help">〰 С подсказкой</button><button class="btn" data-lab="no">✖ Не решил</button></div>`;
+    <div class="lab-task"><span class="tl">${esc(t.name)}</span>${t.text||''}</div><div class="st-lab">${w}</div>${tools()}
+    <div class="st-nav"><button class="btn" data-lab="no">Пропустить</button><button class="btn" data-lab="self">✔ Сделал</button></div>`;
   CPP.initTasks&&CPP.initTasks(body); CPP.initVcl&&CPP.initVcl(body);
   const wd=body.querySelector('.cppw,.vclw');
-  if(wd&&G.MutationObserver){ const mo=new MutationObserver(()=>{ if(wd.classList.contains('solved')&&SESS&&SESS.cur&&SESS.cur.it===it&&!SESS.cur.answered){ mo.disconnect(); labDone(SESS.cur.help?'help':'self',true); } }); mo.observe(wd,{attributes:true,attributeFilter:['class']}); }
+  if(wd&&G.MutationObserver){ const mo=new MutationObserver(()=>{ if(wd.classList.contains('solved')&&SESS&&SESS.cur&&SESS.cur.it===it&&!SESS.cur.answered){ mo.disconnect(); answer(true,{auto:true}); } }); mo.observe(wd,{attributes:true,attributeFilter:['class']}); }
 }
 function addHelp(kind,html,cls){ const h=SEC.querySelector('.st-helps'); const box=document.createElement('div'); box.className='st-help'+(cls?' '+cls:''); box.dataset.kind=kind; box.innerHTML=html; h.appendChild(box); return box; }
+const gq=it=>it.type==='test'?it.q.q.replace(/```[\s\S]*?```/g,' ').slice(0,300):'C++ Builder '+textOf(it.t.text||it.t.name).slice(0,200);
+const googleA=it=>`<a class="btn" target="_blank" rel="noopener" href="https://www.google.com/search?q=${encodeURIComponent(gq(it))}">🔎 Google</a>`;
 function lecChunkHTML(it,idx){
-  const db=build(); const ids=it.chunks; if(!ids.length) return '<div class="h">📖 Кусочек лекции</div><p>Подходящего кусочка не нашлось — открой лекцию темы.</p>';
+  const db=build(); const ids=it.chunks; if(!ids.length) return '<div class="h">📖 Кусочек лекции</div><p>Подходящего кусочка не нашлось.</p>';
   const c=db.chunkById.get(ids[idx%ids.length]);
-  return `<div class="h">📖 Кусочек лекции · ${esc(c.head)}${ids.length>1?`<button data-a="morelec">ещё кусочек (${idx%ids.length+1}/${ids.length})</button>`:''}<button data-a="openlec">вся лекция</button></div><div class="lc">${c.html}</div>`;
+  return `<div class="h">📖 Лекция · ${esc(c.head)}${ids.length>1?`<button data-a="morelec">ещё (${idx%ids.length+1}/${ids.length})</button>`:''}<button data-a="openlec">вся лекция</button></div><div class="lc">${c.html}</div>`; }
+function useHelp(){
+  const C=SESS.cur, it=C.it; if(C.answered||C.hi>=C.hs.length) return; const h=C.hs[C.hi++];
+  if(h==='half'){ C.help=Math.max(C.help,1); const wrong=C.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0); shuffle(wrong).slice(0,Math.min(2,wrong.length-1)).forEach(i=>{ const b=SEC.querySelector(`[data-o="${i}"]`); if(b){ b.classList.add('gone'); b.disabled=true; } }); }
+  if(h==='opts'){ C.help=Math.max(C.help,1); C.fm='mcq'; C.hs=['lec','ans']; C.hi=0; const body=SEC.querySelector('.st-body'); mcqBody(it,body); C.t0=now(); return; }
+  if(h==='lec'){ C.help=Math.max(C.help,2); addHelp('lec',lecChunkHTML(it,0)); }
+  if(h==='ans'){ C.help=3; answer(false,{shown:true}); return; }
+  if(h==='first'){ C.help=Math.max(C.help,1); addHelp('hint',`<div class="h">💡 Первый шаг</div>${it.t.steps?firstStep(it.t.steps):'<p>Что дано и что нужно вывести? Начни с переменных и ввода.</p>'}`); }
+  if(h==='steps'){ C.help=3; addHelp('steps',`<div class="h">🧩 Разбор по шагам</div><div class="solve">${it.t.steps}</div>`); }
+  if(h==='ref'){ C.help=3; const code=it.t.ref||(it.t.vcl&&it.t.vcl.ref&&(it.t.vcl.ref.unit||it.t.vcl.ref.code))||''; addHelp('ref',`<div class="h">👁 Эталон ${googleA(it)}</div><pre class="cpp-code">${CPP.highlight?CPP.highlight(String(code).replace(/^\n+|\s+$/g,'')):esc(code)}</pre>`,'ans'); }
+  const b=SEC.querySelector('[data-a="help"]'); if(b){ const t=helpBtn(); if(t) b.innerHTML=t; else b.remove(); }
 }
-function useHelp(h){
-  const C=SESS.cur, it=C.it; if(h==='google'){ C.help=Math.max(C.help,3); return; }
-  if(C.used.has(h)&&h!=='lec') return; C.used.add(h);
-  const btn=SEC.querySelector(`[data-h="${h}"]`); if(btn) btn.classList.add('used');
-  if(it.type==='test'){
-    if(h==='hint'){ C.help=Math.max(C.help,1); const wrong=C.opts.map((o,i)=>o.ok?-1:i).filter(i=>i>=0); shuffle(wrong).slice(0,Math.max(0,wrong.length-1>=2?2:wrong.length-1)).forEach(i=>{ const b=SEC.querySelector(`[data-o="${i}"]`); if(b){ b.classList.add('gone'); b.disabled=true; } });
-      addHelp('hint','<div class="h">💡 Подсказка</div><p>Убрал два неверных варианта. Подумай ещё раз.</p>'); }
-    if(h==='lec'){ C.help=Math.max(C.help,2); const ex=SEC.querySelector('.st-help[data-kind="lec"]'); if(ex){ ex.scrollIntoView({block:'nearest'}); return; } addHelp('lec',lecChunkHTML(it,0)); }
-    if(h==='ans'){ C.help=3; revealTest(-1); }
-  } else {
-    const t=it.t;
-    if(h==='hint'){ C.help=Math.max(C.help,1); const first=t.steps?firstStep(t.steps):''; addHelp('hint',`<div class="h">💡 Первый шаг</div>${first||'<p>Перечитай условие: что дано и что нужно вывести. Начни с объявления переменных и ввода.</p>'}`); }
-    if(h==='lec'){ C.help=Math.max(C.help,2); if(!SEC.querySelector('.st-help[data-kind="lec"]')) addHelp('lec',lecChunkHTML(it,0)); }
-    if(h==='steps'){ C.help=3; addHelp('steps',`<div class="h">🧩 Разбор по шагам</div><div class="solve">${t.steps}</div>`); }
-    if(h==='ref'){ C.help=3; const code=t.ref||(t.vcl&&t.vcl.ref&&(t.vcl.ref.unit||t.vcl.ref.code))||''; addHelp('ref',`<div class="h">👁 Эталон</div><pre class="cpp-code">${CPP.highlight?CPP.highlight(String(code).replace(/^\n+|\s+$/g,'')):esc(code)}</pre>`,'ans'); }
-  }
-}
-function firstStep(html){ const d=document.createElement('div'); d.innerHTML=html; const kids=[...d.children]; const out=[]; let hcount=0;
-  for(const k of kids){ if(/^H[2-5]$/.test(k.tagName)){ hcount++; if(hcount>2) break; } out.push(k.outerHTML); if(out.join('').length>900) break; }
-  return out.join(''); }
-function revealTest(picked){
-  const C=SESS.cur; if(C.answered) return; C.answered=true;
-  const it=C.it, q=it.q; const ok=picked>=0&&C.opts[picked].ok;
-  SEC.querySelectorAll('.st-opt').forEach((b,i)=>{ b.disabled=true; if(C.opts[i].ok) b.classList.add('right'); else if(i===picked) b.classList.add('wrong'); });
-  const op=SEC.querySelector('.st-opts2'); if(op) op.hidden=false; SEC.querySelector('.st-recall')?.remove();
-  C.ok=ok;
-  const after=SEC.querySelector('.st-after');
-  let h=`<div class="st-res ${ok?'ok':'bad'}">${picked<0?'Ответ показан':ok?(C.help?'✔ Верно (с помощью)':'✔ Верно!'):'✖ Неверно'}</div>`;
-  if(q.e||!SESS.exam) h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p>${fmtInline(q.a[0])}</p>${q.e?`<p class="st-cloud" style="color:inherit">${fmtInline(q.e)}</p>`:''}</div>`;
-  if(!SESS.exam&&!SEC.querySelector('.st-help[data-kind="lec"]')&&(!ok||C.help)) h+=`<div class="st-help" data-kind="lec">${lecChunkHTML(it,0)}</div>`;
-  if(ok&&!C.help&&!SESS.exam) h+=`<div class="st-conf"><b>Честно:</b><button class="btn on" data-conf="knew">💪 Знал</button><button class="btn" data-conf="guess">🎲 Угадал</button></div>`;
-  if(!SESS.exam) h+=noteBox(it,!ok||C.help>=2);
-  h+=`<div class="st-nav"><span class="st-cloud">${ok&&!C.help?'Вернётся через '+BOX_DAYS[Math.min(5,((st(it.key)||{}).b||0)+1)]+' дн.':'Вернётся через 3 карточки и завтра'}</span><button class="btn pri" data-a="next">Дальше → <kbd>Enter</kbd></button></div>`;
-  after.innerHTML=h; bindNotes(after);
-  C.conf='knew';
-  grade(it,ok,C.help,'knew');
-  SESS.log.push({it,ok,help:C.help});
-  if(!ok||C.help>=2) requeue(it);
-}
-function noteBox(it,push){ const v=noteOf(it.key);
-  return `<div class="st-note${v?' old':''}"><label>✍ ${push?'Объясни себе своими словами, как 5-летнему':'Заметка себе на будущее'} <small>— сохранится и попадёт в «Мой конспект»; при следующей встрече всплывёт</small></label><textarea data-note="${it.key}" placeholder="${push?'Например: «Caption — надпись на кнопке, а Text — то, что человек печатает в Edit»':'Что запомнить, на чём легко ошибиться…'}">${esc(v)}</textarea></div>`; }
-function requeue(it){ if(SESS.exam||SESS.requeued.has(it.key)) return; SESS.requeued.add(it.key); SESS.q.splice(Math.min(SESS.q.length,SESS.i+4),0,it); }
-function labDone(kind,auto){
-  const C=SESS.cur; if(C.answered) return; C.answered=true; const it=C.it;
-  const ok=kind!=='no', help=kind==='self'?(C.help?Math.min(C.help,1):0):kind==='help'?Math.max(1,C.help):3;
-  grade(it,ok,help,'knew'); SESS.log.push({it,ok,help}); if(!ok||help>=2) requeue(it);
-  SEC.querySelectorAll('[data-lab]').forEach(b=>b.disabled=true);
-  const after=SEC.querySelector('.st-after');
-  after.innerHTML=`<div class="st-res ${ok?'ok':'bad'}">${auto?'✔ Автопроверка пройдена! ':''}${ok?(help?'Решено с помощью — вернётся скоро':'Отлично, решено самостоятельно'):'Не страшно — вернётся через несколько карточек и завтра'}</div>${noteBox(it,!ok||help>=2)}<div class="st-nav"><span></span><button class="btn pri" data-a="next">Дальше →</button></div>`;
-  bindNotes(after);
-}
-function onCardClick(e){
-  const b=e.target.closest('button,a'); if(!b||!SESS) return;
-  if(b.dataset.a==='quit'){ if(SESS.log.length) finish(); else { SEC.onclick=onHomeClick; home(); } return; }
-  if(b.dataset.a==='next'){ SESS.i++; card(); return; }
-  if(b.dataset.a==='showopts'){ SEC.querySelector('.st-opts2').hidden=false; SEC.querySelector('.st-recall').remove(); return; }
-  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); SESS.cur.chunkIdx++; box.innerHTML=lecChunkHTML(SESS.cur.it,SESS.cur.chunkIdx); return; }
-  if(b.dataset.a==='openlec'){ const t=SESS.cur.it.topic; const btn=document.querySelector(`.tabs [data-t="${t}"]`); if(btn){ btn.click(); setTimeout(()=>{ const d=document.getElementById(t+'-lecture'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth'}); } },120); } return; }
-  if(b.dataset.o!=null){ if(SESS.cur.answered) return; revealTest(+b.dataset.o); return; }
-  if(b.dataset.h){ useHelp(b.dataset.h); return; }
-  if(b.dataset.lab){ labDone(b.dataset.lab,false); return; }
-  if(b.dataset.conf){ const it=SESS.cur.it; SEC.querySelectorAll('[data-conf]').forEach(x=>x.classList.toggle('on',x===b));
-    if(b.dataset.conf!==SESS.cur.conf){ SESS.cur.conf=b.dataset.conf; const s=S.items[it.key];
-      if(b.dataset.conf==='guess'){ s.b=1; s.due=now()+DAY-3600e3; requeue(it); } else { s.b=Math.min(5,(s.b||0)+1); s.due=now()+BOX_DAYS[s.b]*DAY-3600e3; } persist(); } }
-}
-function keys(e){
-  if(!SEC||SEC.hidden||!SESS||e.target.closest('input,textarea,select,.cppw,.vclw')) return;
-  if(SESS.brk) return;
-  const C=SESS.cur; if(!C) return;
-  if(/^[1-9]$/.test(e.key)&&C.it.type==='test'&&!C.answered){ const b=SEC.querySelector(`[data-o="${+e.key-1}"]`); if(b&&!b.disabled&&!b.closest('[hidden]')){ e.preventDefault(); b.click(); } return; }
-  if(e.key==='Enter'&&C.answered){ e.preventDefault(); SESS.i++; card(); }
-}
-function bindNotes(root){ root.querySelectorAll('textarea[data-note]').forEach(ta=>ta.addEventListener('input',()=>setNote(ta.dataset.note,ta.value))); }
+function firstStep(html){ const d=document.createElement('div'); d.innerHTML=html; const out=[]; let hc=0;
+  for(const k of [...d.children]){ if(/^H[2-5]$/.test(k.tagName)){ hc++; if(hc>2) break; } out.push(k.outerHTML); if(out.join('').length>900) break; } return out.join(''); }
+// подозрительно быстро для нового вопроса — человек не мог успеть прочитать
+function fastLimit(C){ const it=C.it; let t=it.q.q; if(C.fm==='mcq') t+=it.q.a.join(' '); else if(C.fm==='tf') t+=C.claim; return Math.min(3500,700+t.replace(/```[\s\S]*?```/g,m=>m.slice(0,80)).length*12); }
 
-/* ---------- итог ---------- */
-function finish(){
-  stopTimer(); const L=SESS.log; const ok=L.filter(x=>x.ok&&!x.help).length, hl=L.filter(x=>x.ok&&x.help).length, bad=L.filter(x=>!x.ok).length;
-  const byT={}; L.forEach(x=>{ const k=x.it.topic; byT[k]=byT[k]||{ok:0,n:0}; byT[k].n++; if(x.ok&&!x.help) byT[k].ok++; });
-  const mins=Math.max(1,Math.round((now()-SESS.start)/60000));
-  const weak=Object.entries(byT).filter(([,v])=>v.ok/v.n<.7).map(([k])=>k);
-  const exam=SESS.exam;
-  SEC.innerHTML=`<div class="read st-wrap st-done"><div class="topic-head"><div class="eyebrow">${esc(SESS.title)} · ${mins} мин</div><h1>${exam?'Результат экзамена':'Готово! 🎉'}</h1></div>
-    <div class="st-hero"><div class="st-kpi"><b>${ok}</b><span>сам и верно</span></div><div class="st-kpi"><b>${hl}</b><span>с помощью</span></div><div class="st-kpi"><b>${bad}</b><span>ошибок</span></div><div class="st-kpi"><b>${Math.round(examReady()*100)}%</b><span>готовность к тестам</span></div></div>
-    ${exam?`<p><b>Оценка:</b> ${Math.round(ok/Math.max(1,L.length)*100)}% верных.</p>`:''}
-    <div class="tw"><table><tr><th>Тема</th><th>Верно сам</th></tr>${Object.entries(byT).sort((a,b)=>+a[0].slice(1)-+b[0].slice(1)).map(([k,v])=>`<tr><td>${build().topics[k].n}. ${esc(build().topics[k].title)}</td><td>${v.ok} / ${v.n}</td></tr>`).join('')}</table></div>
-    ${weak.length?`<p>Слабые места: ${weak.map(k=>'тема '+build().topics[k].n).join(', ')}. Открой их на «Карте тем» и пройди по шагам.</p>`:''}
-    ${bad||hl?`<p>Ошибки и вопросы «с помощью» вернутся завтра — это нормально, так и запоминается.</p>`:''}
-    <p>Теперь <b>перерыв</b>. Потом можно ещё один круг — или запиши в «Мой конспект», что сегодня понял.</p>
-    <div class="st-nav"><button class="btn" data-a="home">На главную</button><button class="btn pri" data-a="go">▶ Ещё круг</button></div></div>`;
-  SESS=null; SEC.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; SEC.onclick=onHomeClick; if(b.dataset.a==='go') startSession({}); else home(); };
+function answer(ok,info){
+  info=info||{}; const C=SESS.cur; if(!C||C.answered) return; C.answered=true; clearInterval(C.lt);
+  const it=C.it, dt=now()-C.t0, s0=st(it.key);
+  const fast=ok&&C.help===0&&C.ctx!=='light'&&C.fm!=='type'&&C.fm!=='lab'&&(!s0||(s0.b||0)<2)&&dt<fastLimit(C);
+  const help=C.fm==='lab'?(ok?(info.auto?Math.min(C.help,1):Math.max(1,Math.min(C.help,2))):3):C.help;
+  grade(it,ok,help,{fmt:C.fm,fast});
+  let xp=0;
+  if(ok&&help===0){ SESS.combo++; SESS.best=Math.max(SESS.best,SESS.combo); xp=10+Math.min(SESS.combo,10)+(C.fm==='type'?10:0)+(C.ctx==='boss'?5:0)+(C.fm==='lab'?30:0); if(C.bet) xp*=3; if(SESS.dbl>0){ xp*=2; SESS.dbl--; } if(fast) xp=Math.round(xp/2); }
+  else if(ok){ SESS.combo=0; xp=C.fm==='lab'?10:4; }
+  else { SESS.combo=0; xp=C.bet?-20:1; }
+  addXP(xp);
+  SESS.log.push({it,ok,help,ctx:C.ctx}); if(ok&&!help) SESS.ok++; else if(!ok) SESS.bad++;
+  if(C.ctx==='light'&&ok) SESS.light.ok++;
+  if(C.ctx==='boss'){ const B=SESS.boss; B.q.shift(); if(!ok){ if(!B.retry.has(it.key)){ B.retry.add(it.key); B.q.push(it); } else B.lost++; } }
+  else if(!ok||help>=2){ if(C.ctx!=='exam'&&!SESS.errs.includes(it)) SESS.errs.push(it); requeue(it); }
+  // разметка
+  if(C.opts) SEC.querySelectorAll('[data-o]').forEach((b,i)=>{ b.disabled=true; if(C.opts[i].ok) b.classList.add('right'); else if(i===info.picked) b.classList.add('wrong'); });
+  if(C.fm==='tf') SEC.querySelectorAll('[data-tf]').forEach(b=>{ b.disabled=true; const v=b.dataset.tf==='1'; if(v===C.tfTrue) b.classList.add('right'); else if(info.tf!=null&&v===info.tf) b.classList.add('wrong'); });
+  SEC.querySelectorAll('[data-lab],[data-a="bet"]').forEach(b=>b.disabled=true);
+  const hb=SEC.querySelector('[data-a="help"]'); if(hb) hb.remove();
+  const after=SEC.querySelector('.st-after'); let h='';
+  const comboEl=SEC.querySelector('[data-combo]'); if(comboEl){ comboEl.textContent=SESS.combo>=2?'🔥×'+SESS.combo:''; if(SESS.combo>=2){ comboEl.classList.remove('hot'); void comboEl.offsetWidth; comboEl.classList.add('hot'); } }
+  const lab=C.fm==='lab';
+  if(ok){ h+=`<div class="st-res ok">✔ ${C.bet?'🎰 Ставка сыграла! ':''}${info.auto?'Автопроверка пройдена! ':''}${pick(PRAISE)} <span style="color:var(--fix)">+${xp} ⭐</span>${help?'<small>с подсказкой — вернётся скоро</small>':''}${fast?'<small>⚡ Слишком быстро для нового вопроса — засчитал наполовину и проверю ещё раз в другом виде</small>':''}${C.fm==='type'?'<small>✍ вписал сам — это самая честная проверка</small>':''}</div>`; }
+  else h+=`<div class="st-res bad">${info.shown?'👁 Ответ показан':info.timeout?'⏰ Время вышло':lab?'Пропущено':'✖ Мимо'}${C.bet?' · −20 ⭐':''}<small>${C.ctx==='boss'?'Босс отбился — этот вопрос ещё вернётся в бою':C.ctx==='exam'?'':'Вернётся через 3 карточки и завтра — так и запоминается'}</small></div>`;
+  if(C.bet&&!ok) h+=`<div class="st-help hc"><div class="h">🎯 Ты был уверен — это ловушка</div><p>Уверенные ошибки исправляются и запоминаются лучше всего, если прямо сейчас понять почему. Прочитай ответ ниже.</p></div>`;
+  if(!lab&&(!ok||C.fm==='tf'&&!C.tfTrue||info.typed!=null||it.q.e)&&C.ctx!=='light'){
+    h+=`<div class="st-help ans"><div class="h">✔ Правильный ответ</div><p>${fmtInline(it.q.a[0])}</p>${it.q.e?`<p class="st-cloud" style="color:inherit">${fmtInline(it.q.e)}</p>`:''}</div>`; }
+  else if(C.ctx==='light'&&!ok) h+=`<div class="st-help ans"><div class="h">✔ Ответ</div><p>${fmtInline(it.q.a[0])}</p></div>`;
+  const stay=!ok||help>=2;
+  if(stay&&C.ctx!=='exam'&&C.ctx!=='light'){
+    if(!lab&&!SEC.querySelector('.st-help[data-kind="lec"]')) h+=`<div class="st-help" data-kind="lec">${lecChunkHTML(it,0)}</div>`;
+    h+=`<div class="st-tools">${googleA(it)}</div>`;
+    const v=noteOf(it.key);
+    h+=`<div class="st-note"><label>✍ Объясни себе как 5-летнему — одна строка ${S.nx[it.key]?'':'<span class="st-xpb">+15 ⭐</span>'}</label><textarea data-note="${it.key}" placeholder="Например: «Caption — надпись на кнопке, а Text — то, что печатают в Edit»">${esc(v)}</textarea></div>`;
+  }
+  const auto=!stay||C.ctx==='light'||C.ctx==='exam';
+  const ms=C.ctx==='light'?(ok?700:1800):C.ctx==='exam'?(ok?700:1600):(it.q&&it.q.e||info.typed!=null||fast?2600:1300);
+  h+=`<div class="st-nav"><span class="st-cloud">${auto?'нажми на карточку, чтобы задержаться':''}</span><button class="btn pri" data-a="next">Дальше → <kbd>Enter</kbd></button></div>${auto?`<div class="st-auto" style="--d:${ms}ms"><i></i></div>`:''}`;
+  after.innerHTML=h; bindNotes(after);
+  if(auto) C.auto=setTimeout(next,ms);
+  if(ok&&help===0&&C.ctx!=='exam') maybeChest();
+}
+function holdAuto(){ const C=SESS&&SESS.cur; if(C&&C.auto){ clearTimeout(C.auto); C.auto=null; const a=SEC.querySelector('.st-auto'); if(a) a.remove(); const s=SEC.querySelector('.st-nav .st-cloud'); if(s) s.textContent=''; } }
+function noteXP(C){ if(!C||!C.answered||C.noted) return; C.noted=true; const ta=SEC&&SEC.querySelector(`textarea[data-note="${C.it.key}"]`); if(!ta) return; const v=ta.value.trim().toLowerCase(); if(v.length<12||S.nx[C.it.key]) return;
+  const ans=C.it.type==='test'?(plain(C.it.q.a[0])+' '+(C.it.q.e||'')).toLowerCase():'';
+  if(ta.dataset.pasted||(ans&&ans.includes(v))){ toast('Скопированное не засчитываю — своими словами 😉'); return; }
+  S.nx[C.it.key]=1; addXP(15); toast('✍ +15 ⭐ за заметку своими словами'); }
+function bindNotes(root){ root.querySelectorAll('textarea[data-note]').forEach(ta=>{ ta.addEventListener('input',()=>setNote(ta.dataset.note,ta.value)); ta.addEventListener('paste',()=>{ ta.dataset.pasted='1'; }); ta.addEventListener('focus',holdAuto); }); }
+
+/* ---------- опыт, сундуки, уровень ---------- */
+function addXP(n){ if(!n) return; const L0=level(S.xp||0).L; S.xp=Math.max(0,(S.xp||0)+n); if(SESS) SESS.xp+=n; persist();
+  const x=SEC&&SEC.querySelector('[data-xp]'); if(x){ x.textContent='⭐ +'+SESS.xp; const r=x.getBoundingClientRect(); const f=document.createElement('div'); f.className='st-float'; f.textContent=(n>0?'+':'')+n; f.style.left=r.left+'px'; f.style.top=(r.top+4)+'px'; if(n<0) f.style.color='var(--bad)'; document.body.appendChild(f); setTimeout(()=>f.remove(),1000); }
+  const lv=level(S.xp); const bar=SEC&&SEC.querySelector('[data-lvbar]'); if(bar) bar.style.width=Math.round(lv.cur/lv.need*100)+'%';
+  if(lv.L>L0&&SESS) SESS.queue.push(()=>over('🏆',`Уровень ${lv.L}!`,`Новый ранг: <b>${lv.rank}</b>. ${lv.L%3===0?'Бонус: ❄ заморозка серии.':''}`,'Дальше →',()=>{ if(lv.L%3===0) S.freeze=Math.min(3,(S.freeze||0)+1); persist(); next(); })); }
+function maybeChest(){ SESS.since++; const p=.07+Math.min(SESS.combo,10)*.012; if(Math.random()<p||SESS.since>=12){ SESS.since=0; SESS.queue.push(chest); } }
+function chest(){
+  over('🎁','Сундук!','Случайная награда за правильные ответы подряд','Открыть',()=>{
+    const r=Math.random(); let em,t,d;
+    if(r<.45){ const n=20+Math.floor(Math.random()*41); addXP(n); em='⭐'; t=`+${n} опыта`; d='Неплохо!'; }
+    else if(r<.7){ SESS.dbl+=5; em='✖2'; t='Двойной опыт'; d='на следующие 5 верных ответов'; }
+    else if(r<.88&&(S.freeze||0)<3){ S.freeze=(S.freeze||0)+1; persist(); em='❄'; t='Заморозка серии'; d='пропустишь день — серия не сгорит'; }
+    else { addXP(150); em='💎'; t='ДЖЕКПОТ +150'; d='Вот это удача!'; }
+    over(em,t,d,'Забрать →',next);
+  },true);
+}
+function over(em,title,txt,btn,fn,wob){ closeOver(); const o=document.createElement('div'); o.className='st-over';
+  o.innerHTML=`<div><div class="em${wob?' wob':''}">${em}</div><h2>${title}</h2><p>${txt}</p><button class="btn pri" style="font-size:16px;padding:10px 26px">${btn} <kbd>Enter</kbd></button></div>`;
+  o.querySelector('button').onclick=()=>{ closeOver(); fn(); }; document.body.appendChild(o); OVER=o; setTimeout(()=>o.querySelector('button').focus({preventScroll:true}),50); }
+function closeOver(){ if(OVER){ OVER.remove(); OVER=null; } }
+
+/* ---------- молния и босс ---------- */
+function lightIntro(){ over('⚡','Молния!','5 вопросов «верно или нет», по 10 секунд на каждый. Все 5 верно — +40 ⭐','Погнали',next); }
+function startBoss(){
+  const errs=SESS.errs.filter(x=>x.type==='test').slice(-5);
+  if(!errs.length||SESS.exam){ if(!SESS.exam) addXP(30); return roundEnd(); }
+  SESS.boss={q:shuffle(errs),max:errs.length,retry:new Set(),lost:0};
+  over('👾','Босс раунда!',`Баг-монстр собран из твоих ошибок за раунд: ${errs.length} ❤. Ответь на каждый правильно — и он повержен (+50 ⭐).`,'В бой',next,true);
+}
+function bossNext(){ const B=SESS.boss; if(B.q.length) return card(B.q[0],B.retry.has(B.q[0].key)?'mcq':chooseFmt(B.q[0])==='type'?'type':'mcq','boss');
+  const win=!B.lost; SESS.boss=null; SESS.bossWin=win; if(win) addXP(50); roundEnd(); }
+
+/* ---------- конец раунда и перерыв ---------- */
+function roundEnd(quit){
+  const R=SESS; stopTick(); closeOver();
+  if(R.cur){ clearTimeout(R.cur.auto); clearInterval(R.cur.lt); noteXP(R.cur); }
+  const counted=R.log.length>=3;
+  if(counted){ S.rounds++; S.rd=S.rd||{}; S.rd[today()]=(S.rd[today()]||0)+1; persist(); }
+  const n=R.log.filter(x=>x.ctx!=='boss'&&x.ctx!=='light').length, ok=R.ok, bad=R.bad;
+  const ready=Math.round(examReady()*100), d=ready-Math.round(R.ready0*100);
+  const lv=level(S.xp||0);
+  const examRes=R.exam?Math.round(R.log.filter(x=>x.ok&&!x.help).length/Math.max(1,R.log.length)*100):null;
+  const head=R.exam?(examRes>=85?['🏆','Контрольная: '+examRes+'%','Отличный результат — на экзамене так же!']:examRes>=60?['💪','Контрольная: '+examRes+'%','Хорошо. Ошибки вернутся в следующих раундах.']:['🧱','Контрольная: '+examRes+'%','Нормально для начала — каждый раунд закрывает дыры.'])
+    :quit&&!counted?['👋','Раунд прерван','Ничего страшного — продолжим, когда захочешь.']
+    :R.bossWin===true?['🏆','Раунд '+R.n+' пройден! Босс повержен','Все ошибки раунда исправлены.']
+    :R.bossWin===false?['🛡','Раунд '+R.n+' пройден','Босс ушёл, но его вопросы вернутся завтра.']
+    :['🌟','Раунд '+R.n+' — без ошибок!','Босса нет: ты чистый. +30 ⭐'];
+  const recall=R.log.filter(x=>x.it.type==='test'&&x.ok).slice(-1)[0];
+  const teaseQ=buildQueue(1)[0];
+  SESSEND={teaseQ};
+  SEC.innerHTML=`<div class="read st-wrap"><div class="st-big"><div class="em">${head[0]}</div><h1>${head[1]}</h1><p>${head[2]}</p></div>
+    <div class="st-stats"><div><b>${ok}</b><span>сам и верно</span></div><div><b>${bad}</b><span>ошибок</span></div><div><b>🔥${R.best}</b><span>лучшее комбо</span></div><div><b>+${R.xp}</b><span>⭐ опыта</span></div></div>
+    <p style="text-align:center">Готовность к экзамену: <b>${ready}%</b>${d>0?` <span style="color:var(--ok)">(+${d}%)</span>`:''} · ур. ${lv.L} ${lv.rank} · 🔥 ${streak()} дн.</p>
+    ${counted&&!quit?`<div class="st-brk"><div class="eyebrow">☕ Перерыв</div><div class="t" data-timer>${fmtLeft(S.set.rest*60000)}</div>
+      <p>Встань, пройдись, попей воды. Телефон не трогай — мозг сейчас раскладывает выученное по полкам.</p>
+      ${recall?`<p class="st-cloud">По желанию: вспомни без подглядывания ответ на «${esc(String(recall.it.q.q).replace(/```[\s\S]*?```/g,'…').slice(0,100))}…»</p>`:''}</div>`:''}
+    ${teaseQ&&teaseQ.type==='test'?`<p class="st-tease">Следующий вопрос уже ждёт: <span>${esc(String(teaseQ.q.q).replace(/```[\s\S]*?```/g,'…').slice(0,70))}</span></p>`:''}
+    <div class="st-nav"><button class="btn" data-a="home">Хватит на сегодня</button><button class="btn pri" data-a="go">▶ ${counted&&!quit?'Следующий раунд':'Продолжить'}</button></div></div>`;
+  SESS=null;
+  SEC.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; if(b.dataset.a==='go'){ document.title=TITLE0||document.title; startRound(); } else if(b.dataset.a==='home') home(); };
+  if(counted&&!quit){ phase='rest'; T0=now(); PLEN=S.set.rest*60000; startTick(); }
   scrollTop();
 }
+let SESSEND=null;
 
-/* ---------- таймер 17/8 ---------- */
-let T0=0, phase='work';
-function startTimer(){ if(TIMER) return; T0=now(); phase='work'; TIMER=setInterval(tick,1000); }
-function stopTimer(){ clearInterval(TIMER); TIMER=null; }
-function left(){ const len=(phase==='work'?S.set.work:S.set.rest)*60000; return Math.max(0,len-(now()-T0)); }
-function timerText(){ const l=left(); const m=Math.floor(l/60000), s=Math.floor(l/1000)%60; return (phase==='work'?'⏱ ':'☕ ')+m+':'+String(s).padStart(2,'0'); }
+/* ---------- таймер ---------- */
+function startTick(){ stopTick(); TIMER=setInterval(tick,500); }
+function stopTick(){ clearInterval(TIMER); TIMER=null; }
+const left=()=>Math.max(0,PLEN-(now()-T0));
+const fmtLeft=l=>Math.floor(l/60000)+':'+String(Math.floor(l/1000)%60).padStart(2,'0');
+function timerText(){ if(!SESS) return ''; if(SESS.exam) return '🎓 '+SESS.qi+'/'+SESS.q.length; if(SESS.boss) return '👾 босс'; if(SESS.timeUp) return '⏰ последний'; return '⏱ '+fmtLeft(left()); }
 function tick(){
-  const el=SEC&&SEC.querySelector('[data-timer]'); if(el){ el.textContent=timerText(); el.classList.toggle('rest',phase==='rest'); }
-  if(left()>0) return;
-  if(phase==='work'){ phase='rest'; T0=now(); if(SESS) showBreak(); }
-  else { phase='work'; T0=now(); if(SESS&&SESS.brk){ SESS.brk=false; card(); } }
-}
-function showBreak(){
-  SESS.brk=true; const last=SESS.log.slice(-6).filter(x=>x.it.type==='test');
-  SEC.innerHTML=`<div class="read st-wrap"><div class="st-card st-break"><div class="eyebrow">Перерыв · ${S.set.rest} минут</div><div class="big" data-timer>${timerText()}</div>
-    <p>Встань, пройдись, попей воды, посмотри в окно. Телефон лучше не трогать — мозг в это время раскладывает выученное по полкам.</p>
-    ${last.length?`<p class="st-cloud">Пока отдыхаешь, вспомни без подглядывания: о чём был вопрос «${esc(String(last[last.length-1].it.q.q).replace(/```[\s\S]*?```/g,'…').slice(0,110))}…» и какой там ответ?</p>`:''}
-    <div class="st-nav" style="justify-content:center"><button class="btn" data-a="skipbrk">Пропустить перерыв</button></div></div></div>`;
-  SEC.onclick=e=>{ const b=e.target.closest('[data-a="skipbrk"]'); if(b){ phase='work'; T0=now(); SESS.brk=false; SEC.onclick=onCardClick; card(); } };
+  const el=SEC&&SEC.querySelector('[data-timer]');
+  if(phase==='work'&&SESS){ if(!SESS.exam&&!SESS.timeUp&&left()<=0){ SESS.timeUp=true; if(el) el.classList.add('up'); } if(el) el.textContent=timerText(); return; }
+  if(phase==='rest'){ if(el) el.textContent=fmtLeft(left());
+    if(left()<=0){ phase='idle'; stopTick(); if(el) el.textContent='✅ Пора!'; const g=SEC.querySelector('[data-a="go"]'); if(g) g.classList.add('st-go2');
+      if(!TITLE0) TITLE0=document.title; let k=0; clearInterval(FLASH); const fl=FLASH=setInterval(()=>{ document.title=k++%2?'⏰ Перерыв окончен!':TITLE0; if(k>12||SESS){ clearInterval(fl); document.title=TITLE0; } },1000); } }
 }
 
-/* ---------- Шерлок ---------- */
-function sherlock(){
-  stopTimer(); const db=build(); const tps=scopeTopics();
-  let list=shuffle(tps.flatMap(t=>db.topics[t]?db.topics[t].chunks.filter(c=>!c.umkd&&c.text.length>120):[]));
-  let i=0; const picked=[];
-  const draw=()=>{
-    if(i>=list.length) i=0;
-    const c=list[i], T=db.topics[c.topic];
-    const qn=Object.values(db.items).filter(it=>(it.home===c.id||it.chunks[0]===c.id)).length;
-    SEC.innerHTML=`<div class="read st-wrap"><div class="st-top"><button class="btn" data-a="home">✕</button><div class="pg"><b>🔍 Шерлок</b> · ${i+1} / ${list.length}<small> · зацепило: ${picked.length}</small></div><button class="btn pri" data-a="quiz"${picked.length?'':' disabled'}>▶ Решать зацепившее</button></div>
-      <p class="st-cloud">Листай быстро. Не читай всё подряд — ищи то, что удивило, непонятно или интересно. Жми «Зацепило», и по этому кусочку будут вопросы.</p>
-      <div class="st-card st-sher"><div class="h">Тема ${T.n} · ${esc(c.head)}</div><div class="bd">${c.html}</div></div>
-      <div class="st-nav"><button class="btn" data-a="more">Читать полностью</button><span class="st-cloud">${qn?qn+' задач по этому кусочку':'вопросов по кусочку нет'}</span><span style="display:flex;gap:6px"><button class="btn" data-a="hook">🔍 Зацепило</button><button class="btn pri" data-a="nxt">Дальше → <kbd>пробел</kbd></button></span></div></div>`;
-  };
-  draw(); scrollTop();
-  SEC.onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
-    if(b.dataset.a==='home'){ SEC.onclick=onHomeClick; sherKeys=null; home(); return; }
-    if(b.dataset.a==='nxt'){ i++; draw(); return; }
-    if(b.dataset.a==='more'){ SEC.querySelector('.st-sher .bd').classList.add('open'); return; }
-    if(b.dataset.a==='hook'){ if(!picked.includes(list[i])) picked.push(list[i]); i++; draw(); return; }
-    if(b.dataset.a==='quiz'){ const its=Object.values(db.items).filter(it=>picked.some(c=>it.home===c.id||it.chunks[0]===c.id)&&okKind(it,S.set.kind==='labs'?'labs':'mix')); sherKeys=null; SEC.onclick=null; startSession({items:shuffle(its),title:'Шерлок: зацепившее',size:30}); } };
-  sherKeys=e=>{ if(e.key===' '&&!e.target.closest('input,textarea,button')){ e.preventDefault(); i++; draw(); } };
+/* ---------- клики и клавиши в карточке ---------- */
+function onCardClick(e){
+  if(!SESS) return; const b=e.target.closest('button,a');
+  if(!b){ if(e.target.closest('.st-card')) holdAuto(); return; }
+  const C=SESS.cur;
+  if(b.dataset.a==='quit'){ roundEnd(true); return; }
+  if(b.dataset.a==='next'){ next(); return; }
+  if(b.dataset.a==='help'){ useHelp(); return; }
+  if(b.dataset.a==='check'){ checkType(); return; }
+  if(b.dataset.a==='bet'){ if(C.answered) return; C.bet=!C.bet; b.classList.toggle('on',C.bet); return; }
+  if(b.dataset.a==='morelec'){ const box=b.closest('.st-help'); C.chunkIdx++; box.innerHTML=lecChunkHTML(C.it,C.chunkIdx); holdAuto(); return; }
+  if(b.dataset.a==='openlec'){ const t=C.it.topic; const btn=document.querySelector(`.tabs [data-t="${t}"]`); holdAuto(); if(btn){ btn.click(); setTimeout(()=>{ const d=document.getElementById(t+'-lecture'); if(d){ d.open=true; d.scrollIntoView({behavior:'smooth'}); } },120); } return; }
+  if(b.dataset.o!=null){ if(C.answered) return; const i=+b.dataset.o; answer(C.opts[i].ok,{picked:i}); return; }
+  if(b.dataset.tf!=null){ if(C.answered) return; const v=b.dataset.tf==='1'; answer(v===C.tfTrue,{tf:v}); return; }
+  if(b.dataset.lab){ if(b.dataset.lab==='self') answer(true,{}); else answer(false,{}); return; }
+  if(b.closest('.st-help,.st-tools')) holdAuto();
 }
-let sherKeys=null;
+function keys(e){
+  if(!SEC||SEC.hidden) return;
+  if(OVER){ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); OVER.querySelector('button').click(); } return; }
+  if(e.target.closest('input,textarea,select,.cppw,.vclw')) return;
+  if(!SESS){ if(e.key==='Enter'){ const g=SEC.querySelector('[data-a="go"]'); if(g&&(SEC.querySelector('.st-big')||document.activeElement===document.body)){ e.preventDefault(); g.click(); } } return; }
+  const C=SESS.cur; if(!C) return;
+  if(!C.answered){
+    if(C.fm==='tf'){ if(e.key==='1'||e.key==='ArrowLeft'){ e.preventDefault(); SEC.querySelector('[data-tf="1"]').click(); } else if(e.key==='2'||e.key==='ArrowRight'){ e.preventDefault(); SEC.querySelector('[data-tf="0"]').click(); } }
+    else if(/^[1-9]$/.test(e.key)&&C.opts){ const b=SEC.querySelector(`[data-o="${+e.key-1}"]`); if(b&&!b.disabled){ e.preventDefault(); b.click(); } }
+    if(e.key==='h'||e.key==='р'){ useHelp(); }
+    return; }
+  if(e.key==='Enter'){ e.preventDefault(); next(); }
+}
 
 /* ---------- Мой конспект ---------- */
 function konspekt(){
-  stopTimer(); const db=build(); const q=s=>String(s).replace(/```[\s\S]*?```/g,'[код]');
-  let h=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><span style="display:flex;gap:6px"><button class="btn" data-a="export">⬇ Скачать конспект (.txt)</button></span></div>
-    <div class="topic-head"><div class="eyebrow">все твои объяснения своими словами</div><h1>📝 Мой конспект</h1></div>
-    <p>Перед экзаменом читай это, а не лекции: тут то, что ты сам понял и сформулировал. Заметки можно править прямо здесь.</p>
+  stopTick(); const db=build(); const q=s=>String(s).replace(/```[\s\S]*?```/g,'[код]');
+  let h=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><button class="btn" data-a="export">⬇ Скачать (.txt)</button></div>
+    <div class="topic-head"><div class="eyebrow">всё, что ты объяснил своими словами</div><h1>📝 Мой конспект</h1></div>
+    <p>Перед экзаменом читай это, а не лекции. Заметки можно править прямо здесь.</p>
     <input class="st-search" placeholder="Поиск по заметкам…" style="width:100%;font:15px var(--f-body);padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--ink)">`;
   let any=false;
-  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue;
-    const its=T.items.filter(it=>noteOf(it.key)); const tn=noteOf('topic-'+t);
-    if(!its.length&&!tn) continue; any=true;
-    h+=`<h3>Тема ${T.n}. ${esc(T.title)}</h3><div class="tn"><b>Тема своими словами</b><textarea data-note="topic-${t}" placeholder="Объясни тему целиком, как 5-летнему">${esc(tn)}</textarea></div>`;
-    T.steps.forEach((sp,si)=>{ const xs=sp.items.filter(it=>noteOf(it.key)); if(!xs.length) return;
-      h+=`<p class="st-cloud" style="margin:.8em 0 .2em"><b>Шаг ${si+1}: ${esc(sp.title)}</b></p>`;
-      for(const it of xs) h+=`<div class="it" data-k="${it.key}"><div class="q">${it.type==='test'?esc(q(it.q.q)).slice(0,400):'💻 '+esc(it.t.name)}</div>${it.type==='test'?`<div class="a">✔ ${esc(it.q.a[0])}</div>`:''}<textarea data-note="${it.key}">${esc(noteOf(it.key))}</textarea></div>`; });
-  }
-  if(!any) h+=`<p><i>Пока пусто. Заметки появляются, когда ты пишешь их на карточках во время учёбы («Объясни своими словами»).</i></p>`;
-  h+=`<details class="lab-orig"><summary>Добавить объяснение темы, по которой ещё нет заметок</summary><div class="body">${TOPIC_IDS.filter(t=>db.topics[t]&&!noteOf('topic-'+t)).map(t=>`<div class="tn"><b>Тема ${db.topics[t].n}. ${esc(db.topics[t].title)}</b><textarea data-note="topic-${t}"></textarea></div>`).join('')}</div></details></div>`;
-  SEC.innerHTML=h; bindNotes(SEC); scrollTop();
+  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const its=T.items.filter(it=>noteOf(it.key)); if(!its.length) continue; any=true;
+    h+=`<h3>Тема ${T.n}. ${esc(T.title)}</h3>`;
+    for(const it of its) h+=`<div class="it"><div class="q">${it.type==='test'?esc(q(it.q.q)).slice(0,400):'💻 '+esc(it.t.name)}</div>${it.type==='test'?`<div class="a">✔ ${esc(it.q.a[0])}</div>`:''}<textarea data-note="${it.key}">${esc(noteOf(it.key))}</textarea></div>`; }
+  if(!any) h+=`<p><i>Пока пусто. Заметки появляются, когда после ошибки пишешь строчку «как 5-летнему».</i></p>`;
+  h+='</div>'; SEC.innerHTML=h; bindNotes(SEC); scrollTop();
   SEC.querySelector('.st-search').addEventListener('input',e=>{ const v=e.target.value.toLowerCase(); SEC.querySelectorAll('.it').forEach(x=>{ x.hidden=v&&!x.textContent.toLowerCase().includes(v)&&!x.querySelector('textarea').value.toLowerCase().includes(v); }); });
   SEC.onclick=async e=>{ const b=e.target.closest('button'); if(!b) return;
-    if(b.dataset.a==='home'){ SEC.onclick=onHomeClick; home(); return; }
+    if(b.dataset.a==='home'){ home(); return; }
     if(b.dataset.a==='export'){ const txt=exportText(); const name='Мой конспект C++.txt';
       try{ const dl=G.claude&&G.claude.use?await G.claude.use('downloads'):null; if(dl){ await dl.save({filename:name,data:txt}); return; } }catch(err){ if(err&&err.code&&err.code!=='unavailable') return; }
       const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); } };
 }
 function exportText(){ const db=build(); const L=['МОЙ КОНСПЕКТ ПО C++',''];
-  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const its=T.items.filter(it=>noteOf(it.key)); const tn=noteOf('topic-'+t); if(!its.length&&!tn) continue;
-    L.push('=== Тема '+T.n+'. '+T.title+' ==='); if(tn) L.push('Своими словами: '+tn,'');
+  for(const t of TOPIC_IDS){ const T=db.topics[t]; if(!T) continue; const its=T.items.filter(it=>noteOf(it.key)); if(!its.length) continue;
+    L.push('=== Тема '+T.n+'. '+T.title+' ===');
     for(const it of its){ if(it.type==='test') L.push('Вопрос: '+String(it.q.q).replace(/```[\s\S]*?```/g,'[код]'),'Ответ: '+it.q.a[0]); else L.push('Лаба: '+it.t.name); L.push('Моя заметка: '+noteOf(it.key),''); } }
   return L.join('\n'); }
 
-/* ---------- ошибки и экзамен ---------- */
-function mistakes(){
-  const db=build(); const its=Object.values(db.items).filter(it=>{ const s=st(it.key); return s&&(s.bad>0||s.b<=1); }).sort((a,b)=>(st(b.key).bad-st(a.key).bad));
-  if(!its.length){ alertBox('Ошибок пока нет — сначала порешай!'); return; }
-  startSession({items:its,title:'Мои ошибки',size:Math.min(30,its.length)});
-}
-function exam(){
-  const db=build(); const all=Object.values(db.items).filter(it=>it.type==='test'); const N=40; const out=[];
-  for(const T of Object.values(db.topics)){ const ts=T.items.filter(x=>x.type==='test'); const k=Math.round(N*ts.length/all.length); out.push(...shuffle(ts).slice(0,Math.max(k,ts.length?1:0))); }
-  startSession({items:shuffle(out).slice(0,N),title:'Пробный экзамен',size:N,exam:true});
-}
-
 /* ---------- вход ---------- */
 function init(sec){
-  SEC=sec; css();
+  SEC=sec; css(); if(!TITLE0) TITLE0=document.title;
   if(!S){ loadLocal(); Cloud.init(); }
-  if(!sec.dataset.ready){ sec.dataset.ready='1'; document.addEventListener('keydown',e=>{ if(SEC.hidden) return; if(sherKeys) sherKeys(e); else keys(e); }); }
-  if(!SESS){ SEC.onclick=onHomeClick; home(); }
+  if(!sec.dataset.ready){ sec.dataset.ready='1'; document.addEventListener('keydown',keys); sec.addEventListener('change',onHomeChange); }
+  if(!SESS&&phase!=='rest') home();
 }
 CPP.initStudy=function(sec){ if(sec&&sec.id==='c17') init(sec); };
-CPP.STUDY_TEST={build,buildQueue,grade,examReady,state:()=>S};
+CPP.STUDY_TEST={build,buildQueue,grade,examReady,level,chooseFmt,typable,state:()=>S,sess:()=>SESS};
 })(typeof window!=='undefined'?window:globalThis);

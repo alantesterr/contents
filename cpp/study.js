@@ -207,23 +207,38 @@ function level(xp){ let L=1, need=250, acc=0; while(xp>=acc+need){ acc+=need; L+
 
 /* ================= очередь ================= */
 function scopeTopics(){ const t=S.set.topics; return t&&t.length?ORDER_8020.filter(x=>t.includes(x)):ORDER_8020.slice(); }
-function okItem(it){ return it.type==='test'||(S.set.labs&&it.type==='lab'&&(it.t.ref||it.t.vcl||it.t.start)); }
-function buildQueue(size){
+// режим: 'tests' — только тесты, 'mix' — 50 на 50, 'labs' — только лабы
+const MODE=()=>S.set.mode||(S.set.labs?'mix':'tests');
+const okLab=it=>it.type==='lab'&&!!(it.t.ref||it.t.vcl||it.t.start);
+function okItem(it){ return it.type==='test'||okLab(it); }
+function testQueue(size){
   const db=build(); const tps=scopeTopics();
-  const pool=tps.flatMap(t=>db.topics[t]?db.topics[t].items:[]).filter(okItem);
+  const pool=tps.flatMap(t=>db.topics[t]?db.topics[t].items:[]).filter(it=>it.type==='test');
   const due=shuffle(pool.filter(it=>isDue(it.key))).sort((a,b)=>st(a.key).b-st(b.key).b);
   // новые: две первые незаконченные темы по важности (80/20) идут вперемешку, внутри темы — шаг за шагом
-  const per=[]; for(const t of tps){ const T=db.topics[t]; if(!T) continue; const f=T.steps.flatMap(sp=>sp.items).filter(it=>!st(it.key)&&okItem(it)&&it.type==='test'); if(f.length) per.push(f); if(per.length>=2) break; }
+  const per=[]; for(const t of tps){ const T=db.topics[t]; if(!T) continue; const f=T.steps.flatMap(sp=>sp.items).filter(it=>!st(it.key)&&it.type==='test'); if(f.length) per.push(f); if(per.length>=2) break; }
   const fresh=[]; for(let i=0;fresh.length<size&&per.some(f=>i<f.length);i++) for(const f of per) if(f[i]) fresh.push(f[i]);
-  const labs=S.set.labs?shuffle(pool.filter(it=>it.type==='lab'&&(!st(it.key)||isDue(it.key)))):[];
-  const nDue=Math.min(due.length,Math.ceil(size*.4)); const di=due.filter(x=>x.type==='test').slice(0,nDue);
-  const q=[]; let a=0,b=0,l=0;
+  const nDue=Math.min(due.length,Math.ceil(size*.4)); const di=due.slice(0,nDue);
+  const q=[]; let a=0,b=0;
   while(q.length<size&&(a<fresh.length||b<di.length)){
-    if(b<di.length) q.push(di[b++]);                     // начинаем с повтора — это легче, разгон
-    if(a<fresh.length) q.push(fresh[a++]); if(a<fresh.length) q.push(fresh[a++]);
-    if(labs[l]&&q.length%7>=5) q.push(labs[l++]); }
-  if(q.length<size){ const rest=pool.filter(it=>it.type==='test'&&st(it.key)&&!q.includes(it)).sort((x,y)=>st(x.key).b-st(y.key).b||st(x.key).due-st(y.key).due); for(const it of rest){ if(q.length>=size) break; q.push(it); } }
-  if(q.length<size){ for(const it of shuffle(pool.filter(x=>x.type==='test'&&!q.includes(x)))){ if(q.length>=size) break; q.push(it); } }
+    if(b<di.length) q.push(di[b++]);
+    if(a<fresh.length) q.push(fresh[a++]); if(a<fresh.length) q.push(fresh[a++]); }
+  if(q.length<size){ const rest=pool.filter(it=>st(it.key)&&!q.includes(it)).sort((x,y)=>st(x.key).b-st(y.key).b||st(x.key).due-st(y.key).due); for(const it of rest){ if(q.length>=size) break; q.push(it); } }
+  if(q.length<size){ for(const it of shuffle(pool.filter(x=>!q.includes(x)))){ if(q.length>=size) break; q.push(it); } }
+  return q.slice(0,size); }
+// лабы: сначала нерешённые по порядку тем (1→15), потом пора повторить, потом остальные
+function labQueue(size){
+  const db=build(); const tps=scopeTopics().slice().sort((a,b)=>+a.slice(1)-+b.slice(1));
+  const pool=tps.flatMap(t=>db.topics[t]?db.topics[t].items:[]).filter(okLab);
+  const q=[...pool.filter(it=>!st(it.key)||!st(it.key).ok), ...pool.filter(it=>st(it.key)&&st(it.key).ok&&isDue(it.key)), ...pool.filter(it=>st(it.key)&&st(it.key).ok&&!isDue(it.key))];
+  return [...new Set(q)].slice(0,size); }
+function buildQueue(size){
+  const m=MODE();
+  if(m==='labs') return labQueue(size);
+  if(m==='tests') return testQueue(size);
+  const t=testQueue(Math.ceil(size/2)), l=labQueue(Math.ceil(size/2)), q=[];
+  for(let i=0;i<Math.max(t.length,l.length);i++){ if(t[i]) q.push(t[i]); if(l[i]) q.push(l[i]); }
+  return q.slice(0,size);
   return q;
 }
 // вид карточки: новое — выбор; дальше — тот вид, в котором ещё не отвечал верно
@@ -363,6 +378,10 @@ const CSS=`
 .st-cloud{font-size:12.5px;color:var(--muted)}
 .st-lab .cppw,.st-lab .vclw{margin:10px 0}
 .st-cnt{font-size:13px;color:var(--muted);margin-left:auto}
+.st-mode{display:flex;width:fit-content;max-width:100%;flex-wrap:wrap;justify-content:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;margin:0 auto 14px}
+.st-mode button{font:600 14px var(--f-body);border:0;background:var(--surface);color:var(--ink);padding:9px 16px;cursor:pointer}
+.st-mode button+button{border-left:1px solid var(--line)}
+.st-mode button.on{background:var(--accent);color:var(--surface)}
 .st-bar3{gap:8px}
 .st-prog{text-align:left;margin:22px 0 6px}
 .st-prog h2{font-size:18px;margin:.2em 0}
@@ -460,7 +479,7 @@ const rdToday=()=>(S.rd&&S.rd[today()])||0;
 function daysToExam(){ if(!S.set.examDate) return null; const d=Math.ceil((new Date(S.set.examDate+'T09:00')-now())/DAY); return d>=0?d:null; }
 function nextRoundInfo(){
   const seen=Object.keys(S.items).length;
-  if((S.rounds+1)%4===0&&seen>=30) return '🎓 Следующий раунд — контрольная: 15 вопросов как на экзамене, без подсказок';
+  if(MODE()!=='labs'&&(S.rounds+1)%4===0&&seen>=30) return '🎓 Следующий раунд — контрольная: 15 вопросов как на экзамене, без подсказок';
   const w=!S.days[today()]?Math.min(7,S.set.work):S.set.work;
   return `Раунд ${w} мин${!S.days[today()]?' (разгон дня — коротко)':''} → 🔁 повтор ошибок → ☕ перерыв ${S.set.rest} мин`;
 }
@@ -479,6 +498,7 @@ function home(){
         <small>🔥 ${streak()} дн. подряд</small>
         <small>сегодня раундов: ${rdToday()}${rdToday()?' ✅':''}${dueN?` · ждут повторения: ${dueN}`:''}${goal}</small></div>
     </div>
+    <div class="st-mode" data-set="mode">${[['tests','✅ Только тесты'],['mix','🔀 50 на 50'],['labs','💻 Только лабы']].map(([v,l])=>`<button data-v="${v}" class="${MODE()===v?'on':''}">${l}</button>`).join('')}</div>
     <button class="st-start" data-a="go">▶ НАЧАТЬ</button>
     <div class="st-sub">${nextRoundInfo()}</div>
     <button class="st-setb" data-a="set">⚙ Настроить</button>
@@ -528,7 +548,6 @@ function panelHTML(){
   const all=!s.topics.length;
   return `<div class="st-row"><b>⏱ Таймер</b>${seg('timer',[['10/3','10/3'],['15/5','15/5 ★'],['17/8','17/8'],['25/5','25/5']],s.work+'/'+s.rest)}<small>работа/отдых, мин</small></div>
     <div class="st-row"><b>📚 Темы</b><span class="st-chips"><button data-tp="all" class="${all?'on':''}">все</button>${TOPIC_IDS.map(t=>`<button data-tp="${t}" class="${s.topics.includes(t)?'on':''}">${t.slice(1)}</button>`).join('')}</span></div>
-    <div class="st-row"><b>💻 Лабы</b>${seg('labs',[['0','нет — только тесты'],['1','иногда']],s.labs?1:0)}<small>РК2 — 12%, экзаменационные тесты — 40%</small></div>
     <div class="st-row"><b>📅 Экзамен</b><input type="date" data-a="date" value="${esc(s.examDate||'')}"><small>посчитаю, сколько в день</small></div>
     <div class="st-row"><b>📝</b><button class="btn" data-a="konspekt">📝 Мой конспект</button><button class="btn" data-a="close">Готово</button></div>`;
 }
@@ -539,7 +558,7 @@ function onHomeClick(e){
   const P=SEC.querySelector('.st-panel');
   const seg=b.closest('[data-set]');
   if(seg&&b.dataset.v!=null){ const k=seg.dataset.set, v=b.dataset.v;
-    if(k==='timer'){ const [w,r]=v.split('/').map(Number); S.set.work=w; S.set.rest=r; } else if(k==='labs') S.set.labs=v==='1';
+    if(k==='timer'){ const [w,r]=v.split('/').map(Number); S.set.work=w; S.set.rest=r; } else if(k==='labs') S.set.labs=v==='1'; else if(k==='mode'){ S.set.mode=v; persist(); home(); return; }
     persist(); P.innerHTML=panelHTML(); SEC.querySelector('.st-sub').innerHTML=nextRoundInfo(); return; }
   if(b.dataset.tp){ const t=b.dataset.tp, a=S.set.topics; if(t==='all') a.length=0; else { const i=a.indexOf(t); if(i<0) a.push(t); else a.splice(i,1); if(a.length===15) a.length=0; } persist(); P.innerHTML=panelHTML(); return; }
   const tp=e.target.closest('[data-tpo]'); if(tp){ topicPage(tp.dataset.tpo); return; }
@@ -561,7 +580,7 @@ function startRound(o){
   o=o||{};
   useFreeze(); closeOver(); clearInterval(FLASH); if(TITLE0) document.title=TITLE0;
   const seen=Object.keys(S.items).length, first=!S.days[today()];
-  const exam=!o.items&&(S.rounds+1)%4===0&&seen>=30;
+  const exam=!o.items&&MODE()!=='labs'&&(S.rounds+1)%4===0&&seen>=30;
   const mins=first?Math.min(7,S.set.work):S.set.work;
   SESS={n:S.rounds+1,exam,mins,custom:!!o.items,title:o.title||'',q:o.items?o.items.slice():exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,log:[],errs:[],boss:null,timeUp:false,start:now(),ready0:examReady(),queue:[]};
   if(!SESS.q.length){ toast('В выбранных темах нет вопросов — проверь «Настроить»'); SESS=null; return; }

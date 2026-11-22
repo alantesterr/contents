@@ -683,6 +683,7 @@ td .fr{font:italic 15px "Times New Roman",serif}
     </div>
     <div class="tabs" role="tablist">
       <span class="tabl">Тема</span>
+      <button role="tab" id="tab-c17" aria-selected="false" data-t="c17" title="Учиться кусочками: задачи и тесты с подсказками, повторение, мой конспект" hidden>🎯 Учиться</button>
       <button role="tab" id="tab-c1" aria-selected="false" data-t="c1" title="C++ · Тема 1. Алгоритм, синтаксис C++, типы данных" hidden>1</button>
       <button role="tab" id="tab-c2" aria-selected="false" data-t="c2" title="C++ · Тема 2. Операции и выражения, библиотеки, указатели" hidden>2</button>
       <button role="tab" id="tab-c3" aria-selected="false" data-t="c3" title="C++ · Тема 3. if, switch, goto, цикл for" hidden>3</button>
@@ -2922,6 +2923,7 @@ end start</pre>
 <section id="c14" class="topic" hidden></section>
 <section id="c15" class="topic" hidden></section>
 <section id="c16" class="topic" hidden></section>
+<section id="c17" class="topic" hidden></section>
 <!-- ===================================================== ТЕМА 10 -->
 <section id="t10" class="topic" hidden>
 <div class="read">
@@ -3639,6 +3641,7 @@ DDR4-3200:             8 Б × 1600 М × 2 = 25 600 МБ/с</pre>
 <script src="cpp/topics/c13.js"></script>
 <script src="cpp/topics/c14.js"></script>
 <script src="cpp/topics/c15.js"></script>
+<script src="cpp/study.js"></script>
 <script src="cpp/cpp-boot.js"></script>
 <script src="arch/arch-circuits.js"></script>
 <script src="arch/arch-tests.js"></script>
@@ -4618,7 +4621,7 @@ t9:{ base:[
 ]}};
 
 /* ======================= Темы 1–7: инструменты ======================= */
-const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13','t14','t15','t16','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16'];
+const TOPICS=['t1','t2','t3','t4','t5','t6','t7','t8','t9','t10','t11','t12','t13','t14','t15','t16','c1','c2','c3','c4','c5','c6','c7','c8','c9','c10','c11','c12','c13','c14','c15','c16','c17'];
 Object.assign(DEFAULT_TESTS, window.CPP_TESTS||{});
 TOPICS.forEach(k=>{ if(!DEFAULT_TESTS[k]) DEFAULT_TESTS[k]={base:[],pool:[]}; });
 // вопрос с кодом: ```cpp … ``` — блок, `…` — в строке
@@ -5824,7 +5827,7 @@ function showTopic(t){
   document.querySelectorAll('.subj button').forEach(b=>b.setAttribute('aria-selected',b.dataset.s===s?'true':'false'));
   document.getElementById('brandName').textContent=SUBJ[s].name; document.getElementById('brandSub').textContent=SUBJ[s].sub;
   document.title=SUBJ[s].title;
-  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); }
+  if(s==="cpp"&&window.CPP&&CPP.initTasks){ const sec=document.getElementById(t); CPP.initGroups(sec); CPP.initTasks(sec); if(CPP.initVcl) CPP.initVcl(sec); if(CPP.initIDE) CPP.initIDE(sec); if(CPP.initStudy) CPP.initStudy(sec); }
   if(t==='t16'&&window.ARCH&&ARCH.initTab) ARCH.initTab();
   try{ localStorage.setItem('last-'+s,t); }catch(_){}
 }
@@ -5852,6 +5855,5 @@ if(h && !TOPICS.includes(h)){ const el=document.getElementById(h); if(el){ const
 </script>
 <script src="arch/arch-layout.js"></script>
 <script src="arch/ewb-studio.js"></script>
-<script src="arch/ewb-guide.js"></script>
 <script src="arch/arch-tools.js"></script>
 </body></html>

@@ -363,6 +363,25 @@ const CSS=`
 .st-cloud{font-size:12.5px;color:var(--muted)}
 .st-lab .cppw,.st-lab .vclw{margin:10px 0}
 .st-cnt{font-size:13px;color:var(--muted);margin-left:auto}
+.st-bar3{gap:8px}
+.st-prog{text-align:left;margin:22px 0 6px}
+.st-prog h2{font-size:18px;margin:.2em 0}
+.st-prow{display:grid;grid-template-columns:28px minmax(0,1fr) minmax(0,230px);gap:10px;align-items:center;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 12px;margin:6px 0;cursor:pointer;color:var(--ink);font:14px var(--f-body)}
+.st-prow:hover{border-color:var(--accent)}
+.st-prow .n{font:700 15px var(--f-display);color:var(--accent)}
+.st-prow .tt{font-weight:600;line-height:1.3}
+.st-prow .pc{display:flex;flex-direction:column;gap:4px;font-size:12px;color:var(--muted)}
+.pb{display:block;height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:2px}
+.pb i{display:block;height:100%;background:var(--ok)}
+.st-tpbars{display:grid;gap:8px;margin:8px 0 12px;max-width:420px}
+.st-ilist{display:grid;gap:6px;margin:6px 0 14px}
+.st-irow{text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer;color:var(--ink);font:14.5px var(--f-body)}
+.st-irow:hover{border-color:var(--accent)}
+.st-irow small{color:var(--muted)}
+.st-kon h2.kt-h{margin:1.4em 0 .4em;font-size:20px}
+.basics-block{border-color:color-mix(in srgb,var(--ok) 45%,var(--line))}
+.basics-block>summary{color:var(--ok)}
+@media (max-width:640px){.st-prow{grid-template-columns:24px minmax(0,1fr)}.st-prow .pc{grid-column:2}}
 .st-why{font-size:15px;line-height:1.55;margin-top:6px;white-space:pre-line}
 details.st-help>summary.h{list-style:none}
 .st-help .lc{max-height:340px;overflow:auto}
@@ -465,9 +484,37 @@ function home(){
     <button class="st-setb" data-a="set">⚙ Настроить</button>
     <div class="st-panel" hidden></div>
     <p class="st-cloud" data-cloud></p>
+    ${progressHTML()}
     ${howHTML()}
   </div></div>`;
   UI.cloudBadge(); SEC.onclick=onHomeClick;
+}
+// прогресс по темам: решено = хоть раз ответил верно (тест) / сделал (лаба)
+const solved=it=>{ const s=st(it.key); return !!(s&&s.ok>0); };
+function topicStats(t){ const T=build().topics[t]; const ts=T.items.filter(x=>x.type==='test'), ls=T.items.filter(x=>x.type==='lab');
+  return {T,ts,ls,td:ts.filter(solved).length,ld:ls.filter(solved).length}; }
+const pbar=(a,b)=>`<span class="pb"><i style="width:${b?Math.round(a/b*100):0}%"></i></span>`;
+function progressHTML(){ return `<div class="st-prog"><h2>Прогресс по темам</h2><p class="st-cloud">Нажми на тему — увидишь, что ещё не решено.</p>
+  ${TOPIC_IDS.filter(t=>build().topics[t]).map(t=>{ const x=topicStats(t);
+    return `<button class="st-prow" data-tpo="${t}"><span class="n">${x.T.n}</span><span class="tt">${esc(x.T.title)}</span>
+      <span class="pc">${x.ts.length?`<span>тесты ${x.td}/${x.ts.length}${pbar(x.td,x.ts.length)}</span>`:''}${x.ls.length?`<span>лабы ${x.ld}/${x.ls.length}${pbar(x.ld,x.ls.length)}</span>`:''}</span></button>`; }).join('')}</div>`; }
+const enOnly=s=>{ const t=String(s).split('```')[0]; const b=(G.biSplit&&G.biSplit(t)); return (b?b[0]:t).replace(/\s+/g,' ').trim(); };
+function topicPage(t){
+  stopTick(); const x=topicStats(t), T=x.T;
+  const nt=x.ts.filter(i=>!solved(i)), nl=x.ls.filter(i=>!solved(i));
+  const row=it=>`<button class="st-irow" data-item="${it.key}">${it.type==='test'?esc(enOnly(it.q.q)).slice(0,140):'💻 '+esc(it.t.name)+' <small>· '+esc(textOf(it.lab.title||'')).slice(0,60)+'</small>'}</button>`;
+  SEC.innerHTML=`<div class="read st-wrap"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button></div>
+    <div class="topic-head"><div class="eyebrow">Тема ${T.n}</div><h1>${esc(T.title)}</h1></div>
+    <div class="st-tpbars">${x.ts.length?`<div>Тесты: <b>${x.td} из ${x.ts.length}</b>${pbar(x.td,x.ts.length)}</div>`:''}${x.ls.length?`<div>Лабы: <b>${x.ld} из ${x.ls.length}</b>${pbar(x.ld,x.ls.length)}</div>`:''}</div>
+    <div class="st-tools">${nt.length?`<button class="btn pri" data-go="t">▶ Решать нерешённые тесты (${nt.length})</button>`:''}${nl.length?`<button class="btn pri" data-go="l">▶ Решать нерешённые лабы (${nl.length})</button>`:''}</div>
+    ${nt.length?`<h3>Ещё не решены — тесты (${nt.length})</h3><div class="st-ilist">${nt.map(row).join('')}</div>`:x.ts.length?'<p>✅ Все тесты темы решены.</p>':''}
+    ${nl.length?`<h3>Ещё не решены — лабы (${nl.length})</h3><div class="st-ilist">${nl.map(row).join('')}</div>`:x.ls.length?'<p>✅ Все лабы темы сделаны.</p>':''}
+    ${x.td+x.ld?`<details class="kd"><summary>Уже решено (${x.td+x.ld})</summary><div class="st-ilist">${x.ts.concat(x.ls).filter(solved).map(row).join('')}</div></details>`:''}</div>`;
+  scrollTop();
+  SEC.onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
+    if(b.dataset.a==='home'){ home(); return; }
+    if(b.dataset.go){ const its=b.dataset.go==='t'?nt:nl; startRound({items:its,title:'Тема '+T.n}); return; }
+    if(b.dataset.item){ const it=build().items[b.dataset.item]; const rest=(it.type==='test'?nt:nl).filter(i=>i!==it); startRound({items:[it,...rest],title:'Тема '+T.n}); } };
 }
 function howHTML(){ return `<details class="st-how lab-orig"><summary>Как это устроено</summary><div class="body"><ul>
   <li><b>Сразу вопрос.</b> Не знаешь — 💡 покажет кусок лекции, где искать (слова из вопроса подсвечены), потом ответ.</li>
@@ -483,7 +530,7 @@ function panelHTML(){
     <div class="st-row"><b>📚 Темы</b><span class="st-chips"><button data-tp="all" class="${all?'on':''}">все</button>${TOPIC_IDS.map(t=>`<button data-tp="${t}" class="${s.topics.includes(t)?'on':''}">${t.slice(1)}</button>`).join('')}</span></div>
     <div class="st-row"><b>💻 Лабы</b>${seg('labs',[['0','нет — только тесты'],['1','иногда']],s.labs?1:0)}<small>РК2 — 12%, экзаменационные тесты — 40%</small></div>
     <div class="st-row"><b>📅 Экзамен</b><input type="date" data-a="date" value="${esc(s.examDate||'')}"><small>посчитаю, сколько в день</small></div>
-    <div class="st-row"><b>📝</b><button class="btn" data-a="konspekt">📘 Конспект (УМКД, тесты, лабы)</button><button class="btn" data-a="close">Готово</button></div>`;
+    <div class="st-row"><b>📝</b><button class="btn" data-a="konspekt">📝 Мой конспект</button><button class="btn" data-a="close">Готово</button></div>`;
 }
 UI.cloudBadge=()=>{ const el=SEC&&SEC.querySelector('[data-cloud]'); if(el) el.textContent=Cloud.ok?'☁ прогресс и заметки сохраняются в твоём аккаунте':'💾 прогресс и заметки сохраняются в этом браузере'; };
 UI.refresh=()=>{ if(SEC&&!SESS&&SEC.querySelector('.st-home')&&SEC.querySelector('.st-panel[hidden]')) home(); };
@@ -495,6 +542,7 @@ function onHomeClick(e){
     if(k==='timer'){ const [w,r]=v.split('/').map(Number); S.set.work=w; S.set.rest=r; } else if(k==='labs') S.set.labs=v==='1';
     persist(); P.innerHTML=panelHTML(); SEC.querySelector('.st-sub').innerHTML=nextRoundInfo(); return; }
   if(b.dataset.tp){ const t=b.dataset.tp, a=S.set.topics; if(t==='all') a.length=0; else { const i=a.indexOf(t); if(i<0) a.push(t); else a.splice(i,1); if(a.length===15) a.length=0; } persist(); P.innerHTML=panelHTML(); return; }
+  const tp=e.target.closest('[data-tpo]'); if(tp){ topicPage(tp.dataset.tpo); return; }
   switch(b.dataset.a){
     case 'go': startRound(); break;
     case 'set': P.hidden=!P.hidden; if(!P.hidden){ P.innerHTML=panelHTML(); const d=P.querySelector('[data-a="date"]'); } break;
@@ -509,12 +557,13 @@ function onHomeChange(e){ const d=e.target.closest('[data-a="date"]'); if(d&&SEC
 function examPick(N){ const db=build(); const tps=scopeTopics(); const all=tps.flatMap(t=>db.topics[t]?db.topics[t].items.filter(x=>x.type==='test'):[]); const out=[];
   for(const t of tps){ const T=db.topics[t]; if(!T) continue; const ts=T.items.filter(x=>x.type==='test'); const k=Math.round(N*ts.length/Math.max(1,all.length)); out.push(...shuffle(ts).slice(0,k)); }
   return shuffle(out).slice(0,N); }
-function startRound(){
+function startRound(o){
+  o=o||{};
   useFreeze(); closeOver(); clearInterval(FLASH); if(TITLE0) document.title=TITLE0;
   const seen=Object.keys(S.items).length, first=!S.days[today()];
-  const exam=(S.rounds+1)%4===0&&seen>=30;
+  const exam=!o.items&&(S.rounds+1)%4===0&&seen>=30;
   const mins=first?Math.min(7,S.set.work):S.set.work;
-  SESS={n:S.rounds+1,exam,mins,q:exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,log:[],errs:[],boss:null,timeUp:false,start:now(),ready0:examReady(),queue:[]};
+  SESS={n:S.rounds+1,exam,mins,custom:!!o.items,title:o.title||'',q:o.items?o.items.slice():exam?examPick(15):buildQueue(40),qi:0,cards:0,ok:0,bad:0,log:[],errs:[],boss:null,timeUp:false,start:now(),ready0:examReady(),queue:[]};
   if(!SESS.q.length){ toast('В выбранных темах нет вопросов — проверь «Настроить»'); SESS=null; return; }
   phase='work'; T0=now(); PLEN=exam?36e5:mins*60000; startTick();
   next();
@@ -525,6 +574,7 @@ function next(){
   if(SESS.boss) return bossNext();
   if(SESS.exam){ if(SESS.qi>=SESS.q.length) return roundEnd(); const it=SESS.q[SESS.qi++]; return card(it,'mcq','exam'); }
   if(SESS.timeUp) return startBoss();
+  if(SESS.custom&&SESS.qi>=SESS.q.length) return startBoss();
   if(SESS.qi>=SESS.q.length){ const rest=new Set(SESS.q.slice(SESS.qi)); SESS.q=SESS.q.concat(buildQueue(30).filter(x=>!rest.has(x))); }
   const it=SESS.q[SESS.qi++]; if(!it) return startBoss();
   card(it,chooseFmt(it),'normal');
@@ -533,10 +583,12 @@ function requeue(it){ if(!SESS||SESS.exam||SESS.boss) return; if(SESS.q.slice(SE
 function topBar(){
   return `<div class="st-top"><button class="btn" data-a="quit" title="Закончить раунд">✕</button><span class="st-pill${SESS.timeUp?' up':''}" data-timer>${timerText()}</span>
     <span class="st-cnt">вопрос ${SESS.cards}${SESS.ok+SESS.bad?` · верно ${SESS.ok} из ${SESS.ok+SESS.bad}`:''}</span></div>`; }
-function helpSteps(it,fm){ if(it.type==='lab') return ['first','lec'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
-  return fm==='type'?['opts','lec','ans']:['lec','ans']; }
+function helpSteps(it,fm){ if(it.type==='lab') return ['first'].concat(it.t.steps?['steps']:[]).concat((it.t.ref||it.t.vcl&&it.t.vcl.ref)?['ref']:[]);
+  return fm==='type'?['opts','hint','ans']:['hint','ans']; }
 const HELP_LBL={kon:'кусок конспекта',lec:'кусок лекции',ans:'показать ответ',opts:'показать варианты',first:'первый шаг',steps:'разбор по шагам',ref:'эталон'};
-function helpBtn(){ const C=SESS.cur; const hs=C.hs; if(C.hi>=hs.length) return ''; return `💡 Помощь: ${HELP_LBL[hs[C.hi]]} <small>(${C.hi+1}/${hs.length})</small>`; }
+const HELP_BTN={hint:'💡 Подсказка',ans:'👁 Показать ответ',opts:'💡 Показать варианты',first:'💡 Подсказка',steps:'🧩 Разбор по шагам',ref:'👁 Эталон',lec:'💡 Подсказка',kon:'💡 Подсказка'};
+function helpBtn(){ const C=SESS.cur; const hs=C.hs; if(C.hi>=hs.length) return ''; return HELP_BTN[hs[C.hi]]||'💡 Подсказка'; }
+const lecIdOf=it=>ownChunks(it)[0]||it.chunks[0]||'';
 function card(it,fm,ctx){
   SESS.cur={it,fm,ctx,help:0,hi:0,hs:helpSteps(it,fm),answered:false,t0:now(),bet:false,chunkIdx:0};
   if(ctx==='normal'||ctx==='exam') SESS.cards++;
@@ -559,8 +611,8 @@ function card(it,fm,ctx){
   if(ctx==='light'){ const bar=SEC.querySelector('.st-lt i'); const L=10000, t0=now(); C.lt=setInterval(()=>{ const p=1-(now()-t0)/L; if(bar) bar.style.width=Math.max(0,p*100)+'%'; if(p<=0){ clearInterval(C.lt); answer(false,{timeout:true}); } },100); }
   if(fm==='type') setTimeout(()=>{ const i=SEC.querySelector('.st-type input'); if(i) i.focus({preventScroll:true}); },30);
 }
-function tools(){ const C=SESS.cur; if(C.ctx==='exam'||C.ctx==='light') return '';
-  return `<div class="st-tools"><button class="btn" data-a="help">${helpBtn()}</button></div>`; }
+function tools(){ const C=SESS.cur; if(C.ctx==='exam'||C.ctx==='light') return ''; const it=C.it, lid=lecIdOf(it);
+  return `<div class="st-tools st-bar3"><button class="btn" data-a="help">${helpBtn()}</button>${lid?`<button class="btn" data-a="openat" data-c="${lid}">📖 Лекция: эта часть</button>`:''}${googleA(it)}</div>`; }
 function mcqBody(it,body){ const q=it.q; const C=SESS.cur; C.opts=shuffle(q.a.map((a,i)=>({a,ok:i===0})));
   body.innerHTML=`<div class="st-q">${fmt(q.q)}</div><div class="st-os">${C.opts.map((o,i)=>`<button class="st-opt" data-o="${i}"><kbd>${i+1}</kbd><span>${fmtInline(o.a)}</span></button>`).join('')}</div>${tools()}`; }
 function tfBody(it,body){ const q=it.q, C=SESS.cur; const t=q.a.length<2||Math.random()<.5; C.tfTrue=t; C.claim=t?q.a[0]:pick(q.a.slice(1));
@@ -658,13 +710,21 @@ function konPieceHTML(it,mode){
     <div class="lc">${markTerms(s.x||(s.orig?'<p>'+s.orig+'</p>':''),terms,cls)}</div>
     ${srcs.length?`<details class="kd"${mode==='a'?' open':''}><summary>📍 Откуда взято: лекция ${T.n} — ${srcs.map(c=>'«'+esc(stepT(c.head))+'»').join(', ')}</summary>${srcs.map(c=>`<div class="lc"><div class="lh">${esc(c.head)}</div>${markTerms(c.html,terms,cls)}</div>`).join('')}<button class="btn sm" data-a="openlec">открыть всю лекцию</button></details>`:''}`; }
 const whyOf=it=>it.type==='test'?((CPP.WHY||{})[it.key]||it.q.e||''):'';
+// подсказка: простое объяснение пункта (конспект УМКД), для тем 7–15 — «с нуля», и кусок лекции
+function hintHTML(it){ konBuild(); const s=it.sec, n=+it.topic.slice(1); let h='';
+  const terms=it.type==='test'?termsOf(it.q.q,'q'):[];
+  if(s&&(s.x||s.orig)) h+=`<div class="h">💡 Подсказка · ${secLabel(s)}</div><div class="lc">${markTerms(s.x||'<p>'+s.orig+'</p>',terms,'mk-q')}</div>`;
+  if(n>=7&&CPP.BASICS&&CPP.BASICS[it.topic]) h+=`<details class="kd"><summary>🐣 Тема ${n} с нуля — если вообще непонятно</summary><div class="lc">${CPP.BASICS[it.topic]}</div></details>`;
+  if(lecIdOf(it)) h+=`<details class="kd"><summary>📖 Кусок лекции — слова из вопроса подсвечены</summary>${lecPieceHTML(it,0,'q')}</details>`;
+  return h||lecPieceHTML(it,0,'q'); }
 function useHelp(){
   const C=SESS.cur, it=C.it; if(C.answered||C.hi>=C.hs.length) return; const h=C.hs[C.hi++];
   if(h==='opts'){ C.help=Math.max(C.help,1); C.fm='mcq'; C.hs=['lec','ans']; C.hi=0; const body=SEC.querySelector('.st-body'); mcqBody(it,body); C.t0=now(); return; }
   if(h==='lec'){ C.help=Math.max(C.help,2); C.lecMode='q'; C.chunkIdx=0; addHelp('lec',lecPieceHTML(it,0,'q')); }
+  if(h==='hint'){ C.help=Math.max(C.help,2); addHelp('hint',hintHTML(it)); }
   if(h==='kon'){ C.help=Math.max(C.help,2); C.lecMode='q'; addHelp('lec',konPieceHTML(it,'q')); }
   if(h==='ans'){ C.help=3; answer(false,{shown:true}); return; }
-  if(h==='first'){ C.help=Math.max(C.help,1); addHelp('hint',`<div class="h">💡 Первый шаг</div>${it.t.steps?firstStep(it.t.steps):'<p>Что дано и что нужно вывести? Начни с переменных и ввода.</p>'}`); }
+  if(h==='first'){ C.help=Math.max(C.help,1); const n=+it.topic.slice(1); addHelp('hint',`<div class="h">💡 Первый шаг</div>${it.t.steps?firstStep(it.t.steps):'<p>Что дано и что нужно вывести? Начни с переменных и ввода.</p>'}${n>=7&&CPP.BASICS&&CPP.BASICS[it.topic]?`<details class="kd"><summary>🐣 Тема ${n} с нуля — если вообще непонятно</summary><div class="lc">${CPP.BASICS[it.topic]}</div></details>`:''}`); }
   if(h==='steps'){ C.help=3; addHelp('steps',`<div class="h">🧩 Разбор по шагам</div><div class="solve">${it.t.steps}</div>`); }
   if(h==='ref'){ C.help=3; const code=it.t.ref||(it.t.vcl&&it.t.vcl.ref&&(it.t.vcl.ref.unit||it.t.vcl.ref.code))||''; addHelp('ref',`<div class="h">👁 Эталон ${googleA(it)}</div><pre class="cpp-code">${CPP.highlight?CPP.highlight(String(code).replace(/^\n+|\s+$/g,'')):esc(code)}</pre>`,'ans'); }
   const b=SEC.querySelector('[data-a="help"]'); if(b){ const t=helpBtn(); if(t) b.innerHTML=t; else b.remove(); }
@@ -815,29 +875,20 @@ const qText=s=>String(s).replace(/```[\s\S]*?```/g,'[код]');
 const labCode=t=>String(t.ref||(t.vcl&&t.vcl.ref&&(t.vcl.ref.unit||t.vcl.ref.code))||'').replace(/^\n+|\s+$/g,'');
 const hl=c=>CPP.highlight?CPP.highlight(c):esc(c);
 function secLabel(s){ return s.extra?'➕ '+esc(s.title):s.umkd?`УМКД ${s.i+1}. ${esc(s.title)}`:`${s.i+1}. ${esc(s.title)}`; }
-function noteSlot(it){ const v=noteOf(it.key);
-  return v?`<div class="lb">✍ Мой конспект</div><textarea data-note="${it.key}">${esc(v)}</textarea>`:`<button class="btn sm" data-a="addnote" data-k="${it.key}">✍ Объяснить своими словами</button>`; }
+const hasNote=it=>!!noteOf(it.key).trim();
+function noteSlot(it){ return `<div class="lb">✍ Мой конспект</div><textarea data-note="${it.key}">${esc(noteOf(it.key))}</textarea>`; }
 function konItemHTML(it){
-  if(it.type==='test'){ const why=whyOf(it), s=st(it.key);
-    return `<div class="ki${s&&s.b>=3?' done':''}" id="ki-${it.key}"><div class="q">❓ ${fmt(it.q.q)}</div><div class="hid"><div class="a">✔ ${fmtInline(it.q.a[0])}</div>${why?`<div class="w">🧠 ${fmtInline(why)}</div>`:''}${noteSlot(it)}</div></div>`; }
+  if(it.type==='test'){ const why=whyOf(it);
+    return `<div class="ki" id="ki-${it.key}"><div class="q">${fmt(it.q.q)}</div>${noteSlot(it)}<div class="a">✔ ${fmtInline(it.q.a[0])}</div>${why?`<details class="kd"><summary>🧠 почему так</summary><div class="w">${fmtInline(why)}</div></details>`:''}</div>`; }
   const t=it.t, code=labCode(t);
-  return `<div class="ki lab" id="ki-${it.key}"><div class="q">💻 ${esc(t.name)} <small>· ${esc(textOf(it.lab.title||'')).slice(0,70)}</small></div>
-    <details class="kd"><summary>условие</summary><div class="lab-task">${t.text||''}</div></details>
-    <div class="hid">${t.steps?`<details class="kd"><summary>🧩 Разбор — как решать и почему</summary><div class="solve">${t.steps}</div></details>`:''}${code?`<details class="kd"><summary>👁 Эталонное решение</summary><pre class="cpp-code">${hl(code)}</pre></details>`:''}${noteSlot(it)}</div></div>`; }
-function konSectionHTML(s,T){
-  const tests=s.items.filter(x=>x.type==='test'), labs=s.items.filter(x=>x.type==='lab');
-  return `<section class="ks" id="ks-${s.id}"><h3>${secLabel(s)}</h3>
-    <div class="kx">${s.x||(s.orig?`<p>${s.orig}</p>`:'<p><i>Нет вопросов и лаб по этому пункту — просто прочитай ответ УМКД.</i></p>')}</div>
-    ${s.x&&s.orig?`<details class="kd"><summary>📄 Ответ по УМКД (оригинал)</summary><p>${s.orig}</p></details>`:''}
-    ${s.src.length?`<details class="kd"><summary>📍 Откуда взято: лекция ${T.n} — ${s.src.map(c=>'«'+esc(stepT(c.head))+'»').join(', ')}</summary>${s.src.map(c=>`<div class="lc"><div class="lh">${esc(c.head)}</div>${c.html}</div>`).join('')}</details>`:''}
-    ${tests.length?`<div class="kh">❓ Вопросы теста по этому пункту — ${tests.length}</div>${tests.map(konItemHTML).join('')}`:''}
-    ${labs.length?`<div class="kh">💻 Лабы по этому пункту — ${labs.length}</div>${labs.map(konItemHTML).join('')}`:''}</section>`; }
-function konTopicHTML(t){ const K=konBuild(), T=build().topics[t], secs=K[t];
-  const tests=T.items.filter(x=>x.type==='test'), done=tests.filter(x=>mastery(x.key)>=1).length, tn=noteOf('topic-'+t);
-  return `<div class="kt-head"><div class="eyebrow">Тема ${T.n} · ${secs.filter(s=>s.umkd).length} вопросов УМКД · ${tests.length} тестов · ${T.items.length-tests.length} лаб · выучено ${done}/${tests.length}</div><h2>${esc(T.title)}</h2>
-    <nav class="ktoc">${secs.map(s=>`<a href="#ks-${s.id}" data-ks="${s.id}">${s.extra?'➕':s.umkd?'УМКД '+(s.i+1):s.i+1}${s.items.length?` <small>${s.items.length}</small>`:''}</a>`).join('')}</nav>
-    <div class="ki"><div class="lb">✍ Тема ${T.n} своими словами</div><textarea data-note="topic-${t}" placeholder="Объясни всю тему как 5-летнему, 3–5 строк">${esc(tn)}</textarea></div></div>
-    ${secs.map(s=>konSectionHTML(s,T)).join('')}`; }
+  return `<div class="ki lab" id="ki-${it.key}"><div class="q">💻 ${esc(t.name)} <small>· ${esc(textOf(it.lab.title||'')).slice(0,70)}</small></div>${noteSlot(it)}
+    ${t.steps?`<details class="kd"><summary>🧩 Разбор</summary><div class="solve">${t.steps}</div></details>`:''}${code?`<details class="kd"><summary>👁 Эталон</summary><pre class="cpp-code">${hl(code)}</pre></details>`:''}</div>`; }
+function konTopicHTML(t){ const K=konBuild(), T=build().topics[t], secs=K[t], tn=noteOf('topic-'+t);
+  let h=`<h2 class="kt-h" id="kt-${t}">Тема ${T.n}. ${esc(T.title)}</h2>`;
+  if(tn.trim()) h+=`<div class="ki"><div class="lb">✍ Тема своими словами</div><textarea data-note="topic-${t}">${esc(tn)}</textarea></div>`;
+  for(const s of secs){ const its=s.items.filter(hasNote); if(!its.length) continue; h+=`<section class="ks" id="ks-${s.id}"><h3>${secLabel(s)}</h3>${its.map(konItemHTML).join('')}</section>`; }
+  return h; }
+const topicHasNotes=t=>{ const T=build().topics[t]; return !!(T&&(T.items.some(hasNote)||noteOf('topic-'+t).trim())); };
 function konFocus(root,key,secId){
   const el=key?root.querySelector('[id="ki-'+key+'"]'):null, sec=secId?root.querySelector('[id="ks-'+secId+'"]'):null;
   const tgt=el||sec; if(!tgt) return;
@@ -854,26 +905,22 @@ function konClicks(root,e){
   if(b.dataset.ks){ e.preventDefault(); const sec=root.querySelector('[id="ks-'+b.dataset.ks+'"]'); if(sec) sec.scrollIntoView({block:'start'}); return true; }
   return false; }
 let KON_T=null;
-function konspekt(topic,focusKey){
-  stopTick(); const K=konBuild(); KON_T=topic||KON_T||'c1';
-  SEC.innerHTML=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button><span style="display:flex;gap:6px;flex-wrap:wrap"><button class="btn" data-a="quiz">🔁 Проверь себя</button><button class="btn" data-a="export">⬇ Скачать (.txt)</button></span></div>
-    <div class="topic-head"><div class="eyebrow">по вопросам УМКД · все тесты и лабы · твои заметки</div><h1>📘 Конспект</h1></div>
-    <p>Каждая тема идёт по вопросам УМКД. В каждом пункте: короткое объяснение, откуда взято в лекции, ответы на все тесты и лабы этого пункта с объяснением «почему так» и твои заметки.</p>
-    <p class="st-cloud">«🔁 Проверь себя» прячет ответы: прочитай вопрос, вспомни сам, нажми на карточку — сверь.</p>
-    <nav class="ktopics">${TOPIC_IDS.filter(t=>K[t]).map(t=>`<button data-kt="${t}" class="${t===KON_T?'on':''}">${t.slice(1)}</button>`).join('')}</nav>
-    <input class="st-search" placeholder="Поиск по теме: вопрос, ответ, заметка…">
-    <div class="kbody">${konTopicHTML(KON_T)}</div></div>`;
+function konspekt(){
+  stopTick(); konBuild(); const tps=TOPIC_IDS.filter(topicHasNotes);
+  const cnt=t=>build().topics[t].items.filter(hasNote).length;
+  SEC.innerHTML=`<div class="read st-wrap st-kon"><div class="st-nav" style="margin-top:14px"><button class="btn" data-a="home">← Назад</button>${tps.length?'<button class="btn" data-a="export">⬇ Скачать (.txt)</button>':''}</div>
+    <div class="topic-head"><h1>📝 Мой конспект</h1></div>
+    <p class="st-cloud">Сюда попадает только то, что ты сам написал в поле «✍ Запиши своими словами» под вопросом. Рядом — сам вопрос и правильный ответ.</p>
+    ${tps.length?`<nav class="ktoc">${tps.map(t=>`<a href="#kt-${t}" data-kt="${t}">Тема ${t.slice(1)} <small>${cnt(t)}</small></a>`).join('')}</nav><input class="st-search" placeholder="Поиск по моим заметкам…">${tps.map(konTopicHTML).join('')}`
+      :'<p><i>Пока пусто. Реши вопрос и напиши хоть пару слов в поле «✍ Запиши своими словами» — заметка появится здесь.</i></p>'}</div>`;
   bindNotes(SEC); scrollTop();
-  const kon=SEC.querySelector('.st-kon');
-  SEC.querySelector('.st-search').addEventListener('input',e=>{ const v=e.target.value.toLowerCase().trim(); SEC.querySelectorAll('.ki[id]').forEach(x=>{ const ta=x.querySelector('textarea'); x.hidden=!!v&&!x.textContent.toLowerCase().includes(v)&&!(ta&&ta.value.toLowerCase().includes(v)); }); SEC.querySelectorAll('.ks').forEach(sc=>{ sc.classList.toggle('dim',!!v&&!sc.querySelector('.ki[id]:not([hidden])')&&!sc.textContent.toLowerCase().includes(v)); }); });
-  if(focusKey) konFocus(SEC,focusKey,K[KON_T].find(s=>s.items.some(i=>i.key===focusKey))?.id);
-  SEC.onclick=async e=>{ if(konClicks(SEC,e)) return; const b=e.target.closest('button'); if(!b) return;
-    if(b.dataset.kt){ konspekt(b.dataset.kt); return; }
+  const sr=SEC.querySelector('.st-search'); if(sr) sr.addEventListener('input',e=>{ const v=e.target.value.toLowerCase().trim(); SEC.querySelectorAll('.ki[id]').forEach(x=>{ const ta=x.querySelector('textarea'); x.hidden=!!v&&!x.textContent.toLowerCase().includes(v)&&!(ta&&ta.value.toLowerCase().includes(v)); }); });
+  SEC.onclick=async e=>{ const a=e.target.closest('[data-kt]'); if(a){ e.preventDefault(); const h=SEC.querySelector('#kt-'+a.dataset.kt); if(h) h.scrollIntoView({block:'start'}); return; }
+    const b=e.target.closest('button'); if(!b) return;
     if(b.dataset.a==='home'){ home(); return; }
-    if(b.dataset.a==='quiz'){ kon.classList.toggle('quiz'); SEC.querySelectorAll('.ki.open').forEach(x=>x.classList.remove('open')); b.classList.toggle('on',kon.classList.contains('quiz')); return; }
-    if(b.dataset.a==='export'){ const txt=exportText(); const name='Конспект C++ (УМКД, тесты, лабы).txt';
+    if(b.dataset.a==='export'){ const txt=exportText(); const name='Мой конспект C++.txt';
       try{ const dl=G.claude&&G.claude.use?await G.claude.use('downloads'):null; if(dl){ await dl.save({filename:name,data:txt}); return; } }catch(err){ if(err&&err.code&&err.code!=='unavailable') return; }
-      const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); } };
+      const l=document.createElement('a'); l.href=URL.createObjectURL(new Blob([txt],{type:'text/plain'})); l.download=name; document.body.appendChild(l); l.click(); setTimeout(()=>{ URL.revokeObjectURL(l.href); l.remove(); },500); } };
 }
 // боковая панель конспекта поверх карточки: «откуда взято» — раздел и сам вопрос подсвечены; закрыл — вернулся к вопросу
 let DRAWER=null;
@@ -886,22 +933,21 @@ function openKonDrawer(it){
   d.addEventListener('click',e=>{ if(e.target===d||e.target.closest('[data-a="dclose"]')){ closeKonDrawer(); return; } konClicks(db,e); });
   konFocus(db,it.key,s.id); }
 function closeKonDrawer(){ if(DRAWER){ DRAWER.remove(); DRAWER=null; document.body.classList.remove('st-noscroll'); } }
-function exportText(){ const K=konBuild(), db=build(); const L=['КОНСПЕКТ ПО C++ — по вопросам УМКД, с ответами на все тесты и лабы',''];
-  for(const t of TOPIC_IDS){ const T=db.topics[t], secs=K[t]; if(!T||!secs) continue;
-    L.push('','==================== Тема '+T.n+'. '+T.title+' ====================');
-    const tn=noteOf('topic-'+t); if(tn) L.push('Тема своими словами: '+tn);
-    for(const s of secs){ L.push('',(s.extra?'Доп.: ':s.umkd?'УМКД '+(s.i+1)+'. ':(s.i+1)+'. ')+s.title);
-      const tx=textOf(s.x||s.orig||''); if(tx) L.push(tx);
-      if(s.src.length) L.push('Откуда: лекция '+T.n+' — '+s.src.map(c=>stepT(c.head)).join('; '));
-      for(const it of s.items){ if(it.type==='test'){ L.push('  ❓ '+qText(it.q.q).replace(/\s+/g,' ')); L.push('  ✔ '+it.q.a[0]); const w=whyOf(it); if(w) L.push('  🧠 '+w.replace(/\n/g,' ')); }
-        else { L.push('  💻 Лаба: '+it.t.name+' — '+textOf(it.t.text||'').slice(0,200)); }
-        const n=noteOf(it.key); if(n) L.push('  ✍ Мой конспект: '+n); } } }
+function exportText(){ const K=konBuild(), db=build(); const L=['МОЙ КОНСПЕКТ ПО C++ (только мои заметки)',''];
+  for(const t of TOPIC_IDS){ if(!topicHasNotes(t)) continue; const T=db.topics[t];
+    L.push('','=== Тема '+T.n+'. '+T.title+' ==='); const tn=noteOf('topic-'+t); if(tn.trim()) L.push('Тема своими словами: '+tn);
+    for(const s of K[t]){ const its=s.items.filter(hasNote); if(!its.length) continue; L.push('','-- '+(s.extra?'':s.umkd?'УМКД '+(s.i+1)+'. ':'')+s.title);
+      for(const it of its){ L.push(it.type==='test'?'  Вопрос: '+qText(it.q.q).replace(/\s+/g,' '):'  Лаба: '+it.t.name); L.push('  Мой конспект: '+noteOf(it.key)); if(it.type==='test') L.push('  Ответ: '+it.q.a[0]); L.push(''); } } }
   return L.join('\n'); }
 
 /* ---------- лекции: блок «Вопросы теста по этой лекции — ответ и почему так» (добавляется после лекции, саму лекцию не меняет) ---------- */
 function initWhy(sec){
-  if(!sec||!/^c([1-9]|1[0-5])$/.test(sec.id)||sec.querySelector('.why-block')) return;
+  if(!sec||!/^c([1-9]|1[0-5])$/.test(sec.id)) return;
   const lec=sec.querySelector('details.lec'); if(!lec) return;
+  const n=+sec.id.slice(1);
+  if(n>=7&&CPP.BASICS&&CPP.BASICS[sec.id]&&!sec.querySelector('.basics-block')){ css();
+    lec.insertAdjacentHTML('beforebegin',`<details class="lab-orig basics-block" open><summary>🐣 Тема ${n} с нуля — простыми словами, если ООП и C++Builder впервые</summary><div class="body">${CPP.BASICS[sec.id]}</div></details>`); }
+  if(sec.querySelector('.why-block')) return;
   css(); let T; try{ T=build().topics[sec.id]; }catch(e){ return; } if(!T||!T.tests) return;
   let h=`<details class="lab-orig why-block"><summary>🧠 Вопросы теста по этой лекции — ответ и почему так (${T.tests})</summary><div class="body">
     <p class="st-cloud">Вопросы идут по порядку лекции, шаг за шагом. Сначала подумай сам, потом открой вопрос — увидишь ответ и простое объяснение.</p>`;

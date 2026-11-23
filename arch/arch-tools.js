@@ -36,6 +36,31 @@ function cacheSim(root){
     tw.innerHTML=`<table><tr><th>#</th><th>адрес</th><th>блок</th><th>набор</th><th>тег</th><th>результат</th><th>вытеснен тег</th><th>кэш после (наборы)</th></tr>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.a}</td><td>${r.blk}</td><td>${r.set}</td><td>${r.tag}</td><td class="${r.res}">${r.res==='hit'?'попадание':'промах'}</td><td>${r.ev==null?'':r.ev}</td><td style="text-align:left">${r.snap.map((l,k)=>k+':['+l.join(',')+']').join(' ')}</td></tr>`).join('')}</table>`; }
   root.addEventListener('input',run); root.addEventListener('change',run); run(); }
 
+/* ---------- Тема 10: адрес → Tag / набор / смещение (лекция № 10, раздел 13) + многоуровневый AMAT ---------- */
+function cacheAddr(root){
+  root.innerHTML=`<div class="wt">Калькулятор: где в кэше лежит адрес</div>
+    <div class="row-in"><label>Объём кэша, КиБ<input type="number" class="ca-c" value="32" min="1"></label><label>Линия, байт<select class="ca-l"><option>16</option><option>32</option><option selected>64</option><option>128</option></select></label>
+      <label>Ассоциативность<select class="ca-w"><option value="1">1-way (прямое)</option><option>2</option><option>4</option><option selected>8</option><option>16</option><option value="0">полностью ассоц.</option></select></label>
+      <label>Бит адреса<input type="number" class="ca-b" value="16" min="8" max="48"></label><label>Адрес (hex)<input class="ca-a" value="1234"></label></div>
+    <div class="calc-out ca-o"></div>
+    <div class="wt" style="margin-top:14px">Многоуровневый AMAT (лекция № 10, 14.3)</div>
+    <div class="row-in"><label>T₁, нс<input type="number" class="am-t1" value="1" step="0.1"></label><label>M₁<input type="number" class="am-m1" value="0.10" step="0.01"></label><label>T₂, нс<input type="number" class="am-t2" value="4" step="0.1"></label><label>M₂<input type="number" class="am-m2" value="0.20" step="0.01"></label><label>T₃, нс<input type="number" class="am-t3" value="12" step="0.1"></label><label>M₃<input type="number" class="am-m3" value="0.25" step="0.01"></label><label>T_RAM, нс<input type="number" class="am-tr" value="80"></label></div>
+    <div class="calc-out am-o"></div>`;
+  const q=s=>$(root,s), lg=x=>Math.log2(x);
+  function upd(){ const C=(+q('.ca-c').value||1)*1024, L=+q('.ca-l').value, w=+q('.ca-w').value, B=+q('.ca-b').value||16, a=parseHex(q('.ca-a').value);
+    const lines=C/L, ways=w===0?lines:w, sets=lines/ways, ob=lg(L), ib=lg(sets), tb=B-ob-ib, o=q('.ca-o');
+    if(!Number.isInteger(sets)||!Number.isInteger(ib)){ o.innerHTML='<span class="bad">Число наборов должно быть степенью двойки — проверь параметры.</span>'; }
+    else if(isNaN(a)||a>=Math.pow(2,B)){ o.innerHTML=`<span class="bad">Адрес — hex, меньше 2^${B}.</span>`; }
+    else { const blk=Math.floor(a/L), off=a%L, set=sets?blk%sets:0, tag=Math.floor(blk/sets), bits=(a>>>0).toString(2).padStart(B,'0');
+      o.innerHTML=`Шаг 1. Линий = ${C} / ${L} = <b>${lines}</b>; наборов = ${lines} / ${ways} = <b>${sets}</b>.<br>
+        Шаг 2. Offset = log₂${L} = ${ob} бит, Index = log₂${sets} = ${ib} бит, Tag = ${B} − ${ob} − ${ib} = <b>${tb}</b> бит.<br>
+        Шаг 3. 0x${H(a)} = ${a}. Блок = ⌊${a} / ${L}⌋ = <b>${blk}</b>, смещение = ${a} mod ${L} = <b>${off}</b>; набор = ${blk} mod ${sets} = <b>${set}</b>; Tag = ⌊${blk} / ${sets}⌋ = <b>${tag}</b>.<br>
+        Шаг 4. Биты: <span class="hx-p">${bits.slice(0,tb)||'—'}</span> | ${bits.slice(tb,tb+ib)||'—'} | <span class="hx-o">${bits.slice(tb+ib)}</span> &nbsp;(Tag | Index | Offset)<br>
+        В наборе ${set} сравниваются метки ${ways} линий: совпала метка ${tag} у действительной линии — попадание, нет — промах.`; }
+    const v=c=>+q(c).value||0, l3=v('.am-t3')+v('.am-m3')*v('.am-tr'), l2=v('.am-t2')+v('.am-m2')*l3, am=v('.am-t1')+v('.am-m1')*l2;
+    q('.am-o').innerHTML=`Считаем изнутри: T₃ + M₃·T_RAM = ${v('.am-t3')} + ${v('.am-m3')}×${v('.am-tr')} = ${l3.toFixed(2)} нс → T₂ + M₂·(…) = ${v('.am-t2')} + ${v('.am-m2')}×${l3.toFixed(2)} = ${l2.toFixed(2)} нс → AMAT = ${v('.am-t1')} + ${v('.am-m1')}×${l2.toFixed(2)} = <b>${am.toFixed(2)} нс</b>.`; }
+  root.addEventListener('input',upd); root.addEventListener('change',upd); upd(); }
+
 /* ---------- Тема 11: пропускная способность памяти ---------- */
 function ramCalc(root){
   root.innerHTML=`<div class="wt">Калькулятор: пропускная способность оперативной памяти</div>
@@ -132,6 +157,6 @@ function irqSim(root){
     const n=parseHex(q('.iv-n').value); q('.iv-o').innerHTML=isNaN(n)||n>255?'Номер — 00…FF (hex).':`Вектор ${H(n,2)}h лежит по адресу ${H(n,2)}h × 4 = <b>0000:${H(n*4,4)}h</b> (байты ${H(n*4,4)}h…${H(n*4+3,4)}h): сначала 2 байта <b>смещения</b> (IP), потом 2 байта <b>сегмента</b> (CS) обработчика. Вся таблица: 256 × 4 = 1024 байта = первый килобайт памяти.${n>=8&&n<=15?` В IBM PC это IRQ${n-8} (${NAMES[n-8]||''}).`:''}`; }
   root.addEventListener('input',upd); root.addEventListener('change',upd); upd(); }
 
-const TOOLS={cacheSim,ramCalc,segCalc,hammingCalc,busCalc,irqSim};
+const TOOLS={cacheAddr,cacheSim,ramCalc,segCalc,hammingCalc,busCalc,irqSim};
 Object.entries(TOOLS).forEach(([id,f])=>{ document.querySelectorAll(`.widget[id^="${id}"]`).forEach(el=>{ try{ f(el); }catch(e){ console.error(el.id,e); } }); });
 })();

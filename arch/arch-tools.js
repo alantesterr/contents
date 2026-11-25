@@ -61,6 +61,22 @@ function cacheAddr(root){
     q('.am-o').innerHTML=`Считаем изнутри: T₃ + M₃·T_RAM = ${v('.am-t3')} + ${v('.am-m3')}×${v('.am-tr')} = ${l3.toFixed(2)} нс → T₂ + M₂·(…) = ${v('.am-t2')} + ${v('.am-m2')}×${l3.toFixed(2)} = ${l2.toFixed(2)} нс → AMAT = ${v('.am-t1')} + ${v('.am-m1')}×${l2.toFixed(2)} = <b>${am.toFixed(2)} нс</b>.`; }
   root.addEventListener('input',upd); root.addEventListener('change',upd); upd(); }
 
+/* ---------- Тема 10: AMAT с переводом единиц (практическая работа AMAT) ---------- */
+function amatUnits(root){
+  const UN={'с':1e9,'мс':1e6,'мкс':1e3,'нс':1,'пс':1e-3}, opts=sel=>Object.keys(UN).map(u=>`<option${u===sel?' selected':''}>${u}</option>`).join('');
+  root.innerHTML=`<div class="wt">Калькулятор AMAT с единицами</div>
+    <div class="row-in"><label>Hit Time<input class="au-ht" value="2"></label><label>ед.<select class="au-hu">${opts('мкс')}</select></label>
+      <label>Дано<select class="au-k"><option value="hit">Hit Rate, %</option><option value="miss">Miss Rate, %</option></select></label><label>%<input class="au-r" value="90"></label>
+      <label>Miss Penalty<input class="au-mp" value="500"></label><label>ед.<select class="au-mu">${opts('нс')}</select></label></div>
+    <div class="calc-out au-o"></div>`;
+  const q=s=>$(root,s), n=s=>parseFloat(String(q(s).value).replace(/\s/g,'').replace(',','.')), f=x=>(+x.toFixed(6)).toLocaleString('ru-RU',{maximumFractionDigits:6});
+  function upd(){ const ht=n('.au-ht'), mp=n('.au-mp'), r=n('.au-r'), hu=q('.au-hu').value, mu=q('.au-mu').value, hit=q('.au-k').value==='hit';
+    if([ht,mp,r].some(isNaN)){ q('.au-o').textContent='Впиши числа (можно с запятой).'; return; }
+    const H1=ht*UN[hu], M1=mp*UN[mu], m=hit?1-r/100:r/100, A=H1+m*M1;
+    q('.au-o').innerHTML=`Шаг 1. Hit Time = ${f(ht)} ${hu}${hu==='нс'?'':` = ${f(H1)} нс`}.<br>Шаг 2. Miss Penalty = ${f(mp)} ${mu}${mu==='нс'?'':` = ${f(M1)} нс`}.<br>
+      Шаг 3. Miss Rate = ${hit?`1 − ${f(r)} / 100`:`${f(r)} / 100`} = <b>${f(m)}</b>.<br>Шаг 4. AMAT = ${f(H1)} + ${f(m)} × ${f(M1)} = ${f(H1)} + ${f(m*M1)} = <b>${f(A)} нс</b>.`; }
+  root.addEventListener('input',upd); root.addEventListener('change',upd); upd(); }
+
 /* ---------- Тема 11: пропускная способность памяти ---------- */
 function ramCalc(root){
   root.innerHTML=`<div class="wt">Калькулятор: пропускная способность оперативной памяти</div>
@@ -157,6 +173,6 @@ function irqSim(root){
     const n=parseHex(q('.iv-n').value); q('.iv-o').innerHTML=isNaN(n)||n>255?'Номер — 00…FF (hex).':`Вектор ${H(n,2)}h лежит по адресу ${H(n,2)}h × 4 = <b>0000:${H(n*4,4)}h</b> (байты ${H(n*4,4)}h…${H(n*4+3,4)}h): сначала 2 байта <b>смещения</b> (IP), потом 2 байта <b>сегмента</b> (CS) обработчика. Вся таблица: 256 × 4 = 1024 байта = первый килобайт памяти.${n>=8&&n<=15?` В IBM PC это IRQ${n-8} (${NAMES[n-8]||''}).`:''}`; }
   root.addEventListener('input',upd); root.addEventListener('change',upd); upd(); }
 
-const TOOLS={cacheAddr,cacheSim,ramCalc,segCalc,hammingCalc,busCalc,irqSim};
+const TOOLS={cacheAddr,amatUnits,cacheSim,ramCalc,segCalc,hammingCalc,busCalc,irqSim};
 Object.entries(TOOLS).forEach(([id,f])=>{ document.querySelectorAll(`.widget[id^="${id}"]`).forEach(el=>{ try{ f(el); }catch(e){ console.error(el.id,e); } }); });
 })();

@@ -3989,6 +3989,7 @@ DDR4-3200:             8 Б × 1600 М × 2 = 25 600 МБ/с</pre>
 <script src="cpp/vcl-ui.js"></script>
 <script src="cpp/bcb-ide.js"></script>
 <script src="cpp/cpp-tests-base.js"></script>
+<script src="cpp/cpp-tests-exam.js"></script>
 <script src="cpp/cpp-tests-pool.js"></script>
 <script src="cpp/cpp-tests-oop.js"></script>
 <script src="cpp/cpp-topics.js"></script>
@@ -5931,7 +5932,7 @@ function saveTests(key,data){ ED.tests[key]=data; store.setTests(key,data); rend
 function plainQ(s){ return String(s).replace(/```(?:cpp)?\n?/g,'\n').replace(/`/g,'').replace(/\n{2,}/g,'\n').trim(); }
 function renderCarousel(root,key,T){
   // C++: вопросы базы тоже в случайном порядке (новый порядок при каждой загрузке)
-  const BN=T.baseName||'Из базы'; const seq=[...shuffle(T.base).map(it=>({it,src:BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
+  const BN=T.baseName||'Из базы'; const seq=[...shuffle(T.base).map(it=>({it,src:it.src==='exam2022'?'Экзамен 2022 (54 вопроса)':BN})),...shuffle(T.pool).map(it=>({it,src:'Дополнительный'}))];
   if(!seq.length){ root.innerHTML='<p style="color:var(--muted)">Тестов к этой теме пока нет.</p>'; return; }
   const st=seq.map(()=>null); let cur=0, ok=0, all=0;
   root.innerHTML=`<div class="tcar" tabindex="0" aria-label="Тесты: стрелки влево и вправо листают вопросы">
